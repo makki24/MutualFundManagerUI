@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { User } from '../models/user.model';
+import { User, CreateUserRequest, UpdateUserRequest, UserStats } from '../models/user.model';
 import { Investment } from '../models/portfolio.model';
 import { InvestmentSummary } from '../models/dashboard.model';
+import { ApiResponse } from '../models/api-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,24 +14,37 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.API_URL}/users`);
+  getUsers(activeOnly?: boolean, role?: string, search?: string): Observable<ApiResponse<User[]>> {
+    let params = new HttpParams();
+    if (activeOnly !== undefined) params = params.set('activeOnly', activeOnly.toString());
+    if (role) params = params.set('role', role);
+    if (search) params = params.set('search', search);
+
+    return this.http.get<ApiResponse<User[]>>(`${this.API_URL}/users`, { params });
   }
 
-  createUser(user: Partial<User>): Observable<User> {
-    return this.http.post<User>(`${this.API_URL}/users`, user);
+  getUser(id: number): Observable<ApiResponse<User>> {
+    return this.http.get<ApiResponse<User>>(`${this.API_URL}/users/${id}`);
   }
 
-  updateUser(id: number, user: Partial<User>): Observable<User> {
-    return this.http.put<User>(`${this.API_URL}/users/${id}`, user);
+  createUser(user: CreateUserRequest): Observable<ApiResponse<User>> {
+    return this.http.post<ApiResponse<User>>(`${this.API_URL}/users`, user);
   }
 
-  activateUser(id: number): Observable<any> {
-    return this.http.patch(`${this.API_URL}/users/${id}/activate`, {});
+  updateUser(id: number, user: UpdateUserRequest): Observable<ApiResponse<User>> {
+    return this.http.put<ApiResponse<User>>(`${this.API_URL}/users/${id}`, user);
   }
 
-  deactivateUser(id: number): Observable<any> {
-    return this.http.patch(`${this.API_URL}/users/${id}/deactivate`, {});
+  activateUser(id: number): Observable<ApiResponse<void>> {
+    return this.http.patch<ApiResponse<void>>(`${this.API_URL}/users/${id}/activate`, {});
+  }
+
+  deactivateUser(id: number): Observable<ApiResponse<void>> {
+    return this.http.patch<ApiResponse<void>>(`${this.API_URL}/users/${id}/deactivate`, {});
+  }
+
+  getUserStats(): Observable<ApiResponse<UserStats>> {
+    return this.http.get<ApiResponse<UserStats>>(`${this.API_URL}/users/stats`);
   }
 
   getUserInvestments(userId: number): Observable<Investment[]> {

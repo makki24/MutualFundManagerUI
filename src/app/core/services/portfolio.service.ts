@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Portfolio, PortfolioDetails, CreatePortfolioRequest, InvestmentRequest, WithdrawalRequest } from '../models/portfolio.model';
+import { Portfolio, PortfolioDetails, CreatePortfolioRequest, UpdatePortfolioRequest, InvestmentRequest, WithdrawalRequest } from '../models/portfolio.model';
 import { ApiResponse } from '../models/api-response.model';
 
 @Injectable({
@@ -34,6 +34,10 @@ export class PortfolioService {
   createPortfolio(portfolio: any, createdByUserId: number): Observable<ApiResponse<Portfolio>> {
     const params = new HttpParams().set('createdByUserId', createdByUserId.toString());
     return this.http.post<ApiResponse<Portfolio>>(`${this.API_URL}/portfolios`, portfolio, { params });
+  }
+
+  updatePortfolio(id: number, portfolio: UpdatePortfolioRequest): Observable<ApiResponse<Portfolio>> {
+    return this.http.put<ApiResponse<Portfolio>>(`${this.API_URL}/portfolios/${id}`, portfolio);
   }
 
   investInPortfolio(portfolioId: number, userId: number, request: InvestmentRequest): Observable<any> {

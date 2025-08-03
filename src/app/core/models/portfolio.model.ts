@@ -3,12 +3,21 @@ import { User } from './user.model';
 export interface Portfolio {
   id: number;
   name: string;
+  description?: string;
   navValue: number;
   totalAum: number;
   totalUnits: number;
   remainingCash: number;
+  managementFeePercentage?: number;
+  entryLoadPercentage?: number;
+  exitLoadPercentage?: number;
+  brokerageBuyPercentage?: number;
+  brokerageSellPercentage?: number;
+  isActive?: boolean;
   totalInvestors: number;
   totalHoldings: number;
+  totalHoldingsValue?: number;
+  totalPortfolioValue?: number;
   createdBy: {
     id: number;
     username: string;
@@ -50,16 +59,42 @@ export interface Investment {
 
 export interface CreatePortfolioRequest {
   name: string;
+  description: string;
+  initialNavValue: number;
+  initialCash: number;
+  managementFeePercentage: number;
+  entryLoadPercentage: number;
+  exitLoadPercentage: number;
+  brokerageBuyPercentage: number;
+  brokerageSellPercentage: number;
   initialInvestors: {
     userId: number;
-    amount: number;
+    investmentAmount: number;
   }[];
 }
 
+export interface UpdatePortfolioRequest {
+  name?: string;
+  description?: string;
+  managementFeePercentage?: number;
+  entryLoadPercentage?: number;
+  exitLoadPercentage?: number;
+  brokerageBuyPercentage?: number;
+  brokerageSellPercentage?: number;
+}
+
 export interface InvestmentRequest {
-  amount: number;
+  investmentAmount: number;
 }
 
 export interface WithdrawalRequest {
-  units: number;
+  unitsToWithdraw: number;
+}
+
+export interface AddCashRequest {
+  amount: number;
+}
+
+export interface UpdateNavRequest {
+  newNavValue: number;
 }

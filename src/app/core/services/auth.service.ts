@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { User, LoginRequest, LoginResponse, ChangePasswordRequest } from '../models/user.model';
+import { User, LoginRequest, LoginResponse, ChangePasswordRequest, ResetPasswordRequest } from '../models/user.model';
+import {ApiResponse} from '../models/api-response.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8080/api';
+  private readonly API_URL = 'http://localhost:8080';
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'current_user';
 
@@ -16,14 +17,14 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, credentials)
+  login(credentials: LoginRequest): Observable<ApiResponse<LoginResponse>> {
+    return this.http.post<ApiResponse<LoginResponse>>(`${this.API_URL}/auth/login`, credentials)
       .pipe(
         tap(response => {
-          if (response.success) {
-            this.setToken(response.token);
-            this.setCurrentUser(response.user);
-            this.currentUserSubject.next(response.user);
+          if (response.success && response.data) {
+            this.setToken(response.data.token);
+            this.setCurrentUser(response.data.user);
+            this.currentUserSubject.next(response.data.user);
           }
         })
       );
@@ -40,6 +41,10 @@ export class AuthService {
 
   changePassword(request: ChangePasswordRequest): Observable<any> {
     return this.http.post(`${this.API_URL}/auth/change-password`, request);
+  }
+
+  resetPassword(request: ResetPasswordRequest): Observable<any> {
+    return this.http.post(`${this.API_URL}/auth/reset-password`, request);
   }
 
   isAuthenticated(): boolean {

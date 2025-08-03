@@ -6,10 +6,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AdminDashboard } from '../../core/models/dashboard.model';
+import { PortfolioFormDialogComponent } from '../portfolios/portfolio-form-dialog.component';
+import { UserFormDialogComponent } from '../users/user-form-dialog.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -347,6 +350,7 @@ import { AdminDashboard } from '../../core/models/dashboard.model';
 export class AdminDashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   dashboardData: AdminDashboard | null = null;
   isLoading = true;
@@ -371,16 +375,30 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   createPortfolio(): void {
-    this.snackBar.open('Create Portfolio feature coming soon! This will open a form to create a new portfolio.', 'Close', {
-      duration: 5000,
-      panelClass: ['warning-snackbar']
+    const dialogRef = this.dialog.open(PortfolioFormDialogComponent, {
+      width: '800px',
+      data: { mode: 'create' },
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDashboard(); // Refresh dashboard data
+      }
     });
   }
 
   addUser(): void {
-    this.snackBar.open('Add User feature coming soon! This will open a form to create a new user account.', 'Close', {
-      duration: 5000,
-      panelClass: ['warning-snackbar']
+    const dialogRef = this.dialog.open(UserFormDialogComponent, {
+      width: '600px',
+      data: { mode: 'create' },
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDashboard(); // Refresh dashboard data
+      }
     });
   }
 }

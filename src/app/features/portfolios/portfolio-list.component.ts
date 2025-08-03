@@ -370,8 +370,10 @@ export class PortfolioListComponent implements OnInit {
   loadPortfolios(): void {
     this.isLoading = true;
     this.portfolioService.getPortfolios().subscribe({
-      next: (portfolios) => {
-        this.portfolios = portfolios;
+      next: (response) => {
+        if (response.success) {
+          this.portfolios = response.data || [];
+        }
         this.isLoading = false;
       },
       error: (error) => {

@@ -9,11 +9,13 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable, map, shareReplay } from 'rxjs';
 
 import { AuthService } from '../core/services/auth.service';
 import { User } from '../core/models/user.model';
+import { ChangePasswordDialogComponent } from '../features/auth/change-password-dialog.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -209,6 +211,7 @@ export class MainLayoutComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   currentUser: User | null = null;
   isAdmin = false;
@@ -237,8 +240,19 @@ export class MainLayoutComponent implements OnInit {
   }
 
   changePassword(): void {
-    // TODO: Implement change password dialog
-    this.snackBar.open('Change password feature coming soon!', 'Close', { duration: 3000 });
+    if (this.currentUser) {
+      const dialogRef = this.dialog.open(ChangePasswordDialogComponent, {
+        width: '450px',
+        data: { userId: this.currentUser.id },
+        disableClose: true
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          // Password changed successfully
+        }
+      });
+    }
   }
 
   logout(): void {

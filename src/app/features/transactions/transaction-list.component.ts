@@ -394,8 +394,10 @@ export class TransactionListComponent implements OnInit {
 
   loadPortfolios(): void {
     this.portfolioService.getPortfolios().subscribe({
-      next: (portfolios) => {
-        this.portfolios = portfolios;
+      next: (response) => {
+        if (response.success) {
+          this.portfolios = response.data || [];
+        }
       },
       error: (error) => {
         console.error('Failed to load portfolios:', error);

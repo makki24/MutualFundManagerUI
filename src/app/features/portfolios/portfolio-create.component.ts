@@ -43,6 +43,7 @@ interface CreatePortfolioRequest {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -795,7 +796,7 @@ export class PortfolioCreateComponent implements OnInit {
 
   loadUsers(): void {
     this.isLoadingUsers = true;
-    this.userService.getUsers({ activeOnly: true, role: 'USER' }).subscribe({
+    this.userService.getUsers(true, 'USER').subscribe({
       next: (response) => {
         if (response.success) {
           this.availableUsers = response.data || [];
@@ -884,7 +885,7 @@ export class PortfolioCreateComponent implements OnInit {
         this.isCreating = false;
         console.error('Failed to create portfolio:', error);
         this.snackBar.open(
-          error.error?.message || 'Failed to create portfolio. Please try again.',
+          error.error?.error || 'Failed to create portfolio. Please try again.',
           'Close',
           { duration: 5000 }
         );

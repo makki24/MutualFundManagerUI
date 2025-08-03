@@ -323,11 +323,13 @@ export class HoldingsListComponent implements OnInit {
 
   loadPortfolios(): void {
     this.portfolioService.getPortfolios().subscribe({
-      next: (portfolios) => {
-        this.portfolios = portfolios;
-        if (portfolios.length > 0) {
-          this.selectedPortfolioControl.setValue(portfolios[0].id);
-          this.onPortfolioChange();
+      next: (response) => {
+        if (response.success) {
+          this.portfolios = response.data || [];
+          if (this.portfolios.length > 0) {
+            this.selectedPortfolioControl.setValue(this.portfolios[0].id);
+            this.onPortfolioChange();
+          }
         }
       },
       error: (error) => {
