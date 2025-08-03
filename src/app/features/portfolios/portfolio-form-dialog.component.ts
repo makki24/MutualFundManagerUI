@@ -316,8 +316,10 @@ interface DialogData {
                       <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
                       <span>Creating...</span>
                     } @else {
-                      <mat-icon>save</mat-icon>
-                      <span>Create Portfolio</span>
+                      <ng-container>
+                        <mat-icon>save</mat-icon>
+                        <span>Create Portfolio</span>
+                      </ng-container>
                     }
                   </button>
                 </div>
@@ -397,8 +399,10 @@ interface DialogData {
             <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
             <span>Updating...</span>
           } @else {
-            <mat-icon>save</mat-icon>
-            <span>Update Portfolio</span>
+            <ng-container>
+              <mat-icon>save</mat-icon>
+              <span>Update Portfolio</span>
+            </ng-container>
           }
         </button>
       }

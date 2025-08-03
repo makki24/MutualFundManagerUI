@@ -459,8 +459,10 @@ interface CreatePortfolioRequest {
                   <mat-spinner diameter="20"></mat-spinner>
                   <span>Creating...</span>
                 } @else {
-                  <mat-icon>check</mat-icon>
-                  <span>Create Portfolio</span>
+                  <ng-container>
+                    <mat-icon>check</mat-icon>
+                    <span>Create Portfolio</span>
+                  </ng-container>
                 }
               </button>
             </div>

@@ -209,8 +209,10 @@ interface DialogData {
             <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
             <span>{{ data.mode === 'create' ? 'Creating...' : 'Updating...' }}</span>
           } @else {
-            <mat-icon>{{ data.mode === 'create' ? 'person_add' : 'save' }}</mat-icon>
-            <span>{{ data.mode === 'create' ? 'Create User' : 'Update User' }}</span>
+            <ng-container>
+              <mat-icon>{{ data.mode === 'create' ? 'person_add' : 'save' }}</mat-icon>
+              <span>{{ data.mode === 'create' ? 'Create User' : 'Update User' }}</span>
+            </ng-container>
           }
         </button>
       }
