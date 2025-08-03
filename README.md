@@ -1,59 +1,243 @@
-# MutualFundManagerUi
+# Mutual Fund Manager - Angular UI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.4.
+A modern, responsive Angular application for managing mutual fund portfolios, built with Angular 20 and Angular Material.
 
-## Development server
+## 🚀 Features
 
-To start a local development server, run:
+### Authentication & Security
+- **Secure Login** with username/password authentication
+- **Role-based Access Control** (Admin vs User)
+- **JWT Token Management** with automatic logout
+- **Route Guards** protecting sensitive areas
 
+### Admin Features
+- **Portfolio Management**
+  - Create and manage portfolios
+  - Add/remove investors
+  - Monitor portfolio performance
+- **User Management**
+  - Create, edit, and manage users
+  - Activate/deactivate user accounts
+  - View user investment summaries
+- **Holdings Management**
+  - Buy/sell shares
+  - Update stock prices
+  - Add new holdings to portfolios
+- **Comprehensive Dashboard**
+  - Overview of all portfolios and users
+  - Recent transaction monitoring
+  - Quick action buttons
+
+### User Features
+- **Personal Dashboard**
+  - Investment summary with returns
+  - Portfolio performance tracking
+  - Recent transaction count
+- **Portfolio View**
+  - List of invested portfolios
+  - Current NAV and unit values
+  - Performance metrics
+- **Transaction History**
+  - Complete transaction log
+  - Filtering by date and type
+  - Investment and withdrawal tracking
+
+## 🛠️ Technology Stack
+
+- **Angular 20** - Latest Angular framework
+- **Angular Material** - Modern UI components
+- **TypeScript** - Type-safe development
+- **RxJS** - Reactive programming
+- **SCSS** - Enhanced styling
+- **Responsive Design** - Mobile-first approach
+
+## 📋 Prerequisites
+
+- Node.js (v18 or higher)
+- npm (v9 or higher)
+- Angular CLI (v20 or higher)
+
+## 🔧 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd mutual-fund-manager-ui
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+   ```bash
+   npm start
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:4200`
+
+## 🏗️ Build
+
+### Development Build
 ```bash
-ng serve
+npm run build
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### Production Build
 ```bash
-ng generate component component-name
+npm run build --prod
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 🧪 Testing Credentials
 
-```bash
-ng generate --help
+The application is designed to work with the Spring Boot backend. Use these test credentials:
+
+### Admin Access
+- **Username:** `admin`
+- **Password:** `admin123`
+
+### User Access
+- **Username:** `john_doe`
+- **Password:** `password123`
+
+Additional test users:
+- `jane_smith` / `password123`
+- `bob_wilson` / `password123`
+
+## 🔗 Backend Integration
+
+This frontend is designed to work with the Spring Boot Mutual Fund Manager backend:
+
+- **Backend URL:** `http://localhost:8080`
+- **API Base:** `http://localhost:8080/api`
+
+### Key API Endpoints Used:
+- `POST /api/auth/login` - User authentication
+- `GET /api/dashboard/admin` - Admin dashboard data
+- `GET /api/dashboard/user/{id}` - User dashboard data
+- `GET /api/portfolios` - Portfolio list
+- `GET /api/users` - User management
+- `GET /api/transactions/user/{id}` - Transaction history
+
+## 📱 Responsive Design
+
+The application is fully responsive and optimized for:
+- **Desktop** (1200px+) - Full feature set with tables
+- **Tablet** (768px-1199px) - Adapted layouts
+- **Mobile** (320px-767px) - Card-based layouts
+
+## 🎨 UI/UX Features
+
+### Design Elements
+- **Material Design** principles
+- **Professional color scheme** suitable for financial applications
+- **Smooth animations** and transitions
+- **Loading states** for better user experience
+- **Error handling** with user-friendly messages
+
+### Navigation
+- **Sidebar navigation** with role-based menu items
+- **Breadcrumb navigation** for complex workflows
+- **Quick action buttons** for common tasks
+- **User profile menu** with logout option
+
+### Data Visualization
+- **Summary cards** with key metrics
+- **Data tables** with sorting and filtering
+- **Progress indicators** for loading states
+- **Status badges** for transaction types
+
+## 📁 Project Structure
+
+```
+src/app/
+├── core/                    # Core functionality
+│   ├── guards/             # Route guards
+│   ├── interceptors/       # HTTP interceptors
+│   ├── models/            # TypeScript interfaces
+│   └── services/          # Business logic services
+├── features/              # Feature modules
+│   ├── auth/             # Authentication
+│   ├── dashboard/        # Dashboard components
+│   ├── portfolios/       # Portfolio management
+│   ├── users/           # User management
+│   ├── transactions/    # Transaction history
+│   └── holdings/        # Holdings management
+├── layout/              # Layout components
+│   ├── header/         # Application header
+│   ├── sidebar/        # Navigation sidebar
+│   └── main-layout/    # Main layout wrapper
+└── shared/             # Shared components
+    ├── components/     # Reusable components
+    ├── directives/     # Custom directives
+    └── pipes/         # Custom pipes
 ```
 
-## Building
+## 🔒 Security Features
 
-To build the project run:
+- **JWT Token Storage** in localStorage
+- **Automatic Token Refresh** handling
+- **Route Protection** with guards
+- **Role-based Access Control**
+- **CORS Configuration** for backend communication
 
-```bash
-ng build
-```
+## 🚀 Performance Optimizations
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+- **Lazy Loading** for feature modules
+- **OnPush Change Detection** where applicable
+- **Tree Shaking** for smaller bundle sizes
+- **Code Splitting** for optimal loading
+- **Service Workers** ready (can be enabled)
 
-## Running unit tests
+## 🐛 Error Handling
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+- **Global Error Interceptor** for HTTP errors
+- **User-friendly Error Messages** via snackbars
+- **Loading States** to prevent user confusion
+- **Retry Mechanisms** for failed requests
 
-```bash
-ng test
-```
+## 📊 Features Status
 
-## Running end-to-end tests
+### ✅ Completed Features
+- Authentication system
+- Role-based dashboards
+- Portfolio listing
+- User management
+- Transaction history
+- Holdings management
+- Responsive design
+- Error handling
 
-For end-to-end (e2e) testing, run:
+### 🚧 Future Enhancements
+- Real-time price updates
+- Advanced charts and graphs
+- Export functionality
+- Dark/light theme toggle
+- Advanced filtering options
+- Notification system
 
-```bash
-ng e2e
-```
+## 🤝 Contributing
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-## Additional Resources
+## 📄 License
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+This project is licensed under the MIT License.
+
+## 📞 Support
+
+For support and questions:
+- Check the documentation
+- Review the Spring Boot backend integration
+- Ensure all dependencies are properly installed
+- Verify the backend is running on `http://localhost:8080`
+
+---
+
+**Built with ❤️ using Angular 20 and Angular Material**

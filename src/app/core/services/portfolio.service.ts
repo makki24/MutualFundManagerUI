@@ -1,0 +1,74 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Portfolio, PortfolioDetails, CreatePortfolioRequest, InvestmentRequest, WithdrawalRequest } from '../models/portfolio.model';
+import { ApiResponse } from '../models/api-response.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PortfolioService {
+  private readonly API_URL = 'http://localhost:8080/api';
+
+  constructor(private http: HttpClient) {}
+
+  getPortfolios(params?: { activeOnly?: boolean; search?: string; userId?: number }): Observable<ApiResponse<Portfolio[]>> {
+    let httpParams = new HttpParams();
+    if (params?.activeOnly !== undefined) {
+      httpParams = httpParams.set('activeOnly', params.activeOnly.toString());
+    }
+    if (params?.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params?.userId) {
+      httpParams = httpParams.set('userId', params.userId.toString());
+    }
+
+    return this.http.get<ApiResponse<Portfolio[]>>(`${this.API_URL}/portfolios`, { params: httpParams });
+  }
+
+  getPortfolioDetails(id: number): Observable<ApiResponse<PortfolioDetails>> {
+    return this.http.get<ApiResponse<PortfolioDetails>>(`${this.API_URL}/portfolios/${id}`);
+  }
+
+  createPortfolio(portfolio: any, createdByUserId: number): Observable<ApiResponse<Portfolio>> {
+    const params = new HttpParams().set('createdByUserId', createdByUserId.toString());
+    return this.http.post<ApiResponse<Portfolio>>(`${this.API_URL}/portfolios`, portfolio, { params });
+  }
+
+  investInPortfolio(portfolioId: number, userId: number, request: InvestmentRequest): Observable<any> {
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/invest`, request);
+  }
+
+  withdrawFromPortfolio(portfolioId: number, userId: number, request: WithdrawalRequest): Observable<any> {
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/withdraw`, request);
+  }
+
+  updateNav(portfolioId: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/nav/update`, {});
+  }
+
+  calculateFees(portfolioId: number): Observable<any> {
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/fees/calculate`, {});
+  }
+
+  getPortfolioHoldings(portfolioId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/portfolios/${portfolioId}/holdings`);
+  }
+
+  addHolding(portfolioId: number, holding: any): Observable<any> {
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings`, holding);
+  }
+
+  buyShares(portfolioId: number, symbol: string, request: any): Observable<any> {
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/buy`, request);
+  }
+
+  sellShares(portfolioId: number, symbol: string, request: any): Observable<any> {
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/sell`, request);
+  }
+
+  updatePrices(portfolioId: number, prices: any): Observable<any> {
+    return this.http.put(`${this.API_URL}/portfolios/${portfolioId}/holdings/prices`, prices);
+  }
+}
