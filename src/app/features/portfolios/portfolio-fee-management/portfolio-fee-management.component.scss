@@ -1,0 +1,229 @@
+.fee-management-dialog {
+  width: 100%;
+  max-width: 800px;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 0;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dialog-content {
+  padding: 20px 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.active-fee-card,
+.create-fee-card,
+.allocations-card {
+  margin-bottom: 20px;
+}
+
+.active-fee-card mat-card-title,
+.create-fee-card mat-card-title,
+.allocations-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fee-details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fee-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.fee-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fee-info-item .label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fee-info-item .value {
+  font-size: 16px;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.fee-info-item .value.remaining {
+  color: #f44336;
+}
+
+.fee-info-item .value.allocated {
+  color: #4caf50;
+}
+
+.fee-description {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fee-description .label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fee-description p {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.fee-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.fee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.fee-preview {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.fee-preview h4 {
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+  font-size: 16px;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.preview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-item .label {
+  font-size: 14px;
+  color: #666;
+}
+
+.preview-item .value {
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.allocations-table {
+  width: 100%;
+}
+
+.credit-amount {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.debit-amount {
+  color: #f44336;
+  font-weight: 600;
+}
+
+.dialog-actions {
+  padding: 0 24px 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.dialog-actions button {
+  min-width: 120px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.button-spinner {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .dialog-content {
+    padding: 16px 20px;
+  }
+
+  .dialog-header {
+    padding: 16px 20px 0;
+  }
+
+  .dialog-actions {
+    padding: 0 20px 16px;
+    flex-direction: column;
+  }
+
+  .dialog-actions button {
+    width: 100%;
+  }
+
+  .form-row.two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .fee-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -78,8 +78,10 @@ import { ResetPasswordRequest } from '../../core/models/user.model';
           <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
           <span>Resetting...</span>
         } @else {
-          <mat-icon>refresh</mat-icon>
-          <span>Reset Password</span>
+          <ng-container>
+            <mat-icon>refresh</mat-icon>
+            <span>Reset Password</span>
+          </ng-container>
         }
       </button>
     </mat-dialog-actions>

@@ -104,6 +104,18 @@ interface DialogData {
               <label>Created Date</label>
               <span>{{ data.portfolio?.createdAt | date:'medium' }}</span>
             </div>
+            @if (data.portfolio?.currentFeeAmount) {
+              <div class="detail-item">
+                <label>Current Fee Amount</label>
+                <span>{{ data.portfolio?.currentFeeAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+            }
+            @if (data.portfolio?.feeFromDate && data.portfolio?.feeToDate) {
+              <div class="detail-item">
+                <label>Fee Period</label>
+                <span>{{ data.portfolio?.feeFromDate | date:'short' }} - {{ data.portfolio?.feeToDate | date:'short' }}</span>
+              </div>
+            }
           </div>
         </div>
       } @else {
@@ -143,18 +155,10 @@ interface DialogData {
                     }
                   </mat-form-field>
 
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Initial Cash</mat-label>
-                    <input matInput formControlName="initialCash" type="number"
-                           step="0.01" placeholder="100000.00">
-                    <span matTextPrefix>$</span>
-                    @if (basicInfoForm.get('initialCash')?.hasError('required') && basicInfoForm.get('initialCash')?.touched) {
-                      <mat-error>Initial cash is required</mat-error>
-                    }
-                    @if (basicInfoForm.get('initialCash')?.hasError('min') && basicInfoForm.get('initialCash')?.touched) {
-                      <mat-error>Initial cash must be greater than 0</mat-error>
-                    }
-                  </mat-form-field>
+                  <div class="info-note">
+                    <mat-icon>info</mat-icon>
+                    <span>Portfolio will start with $0 cash. Cash will be added from initial investments.</span>
+                  </div>
                 </div>
 
                 <div class="step-actions">
@@ -167,81 +171,7 @@ interface DialogData {
               </form>
             </mat-step>
 
-            <!-- Step 2: Fee Structure -->
-            <mat-step [stepControl]="feeStructureForm" label="Fee Structure">
-              <form [formGroup]="feeStructureForm" class="step-form">
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Management Fee (%)</mat-label>
-                    <input matInput formControlName="managementFeePercentage" type="number"
-                           step="0.01" placeholder="2.00">
-                    <span matTextSuffix>%</span>
-                    @if (feeStructureForm.get('managementFeePercentage')?.hasError('required') && feeStructureForm.get('managementFeePercentage')?.touched) {
-                      <mat-error>Management fee is required</mat-error>
-                    }
-                    @if (feeStructureForm.get('managementFeePercentage')?.hasError('min') && feeStructureForm.get('managementFeePercentage')?.touched) {
-                      <mat-error>Fee must be 0 or greater</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Entry Load (%)</mat-label>
-                    <input matInput formControlName="entryLoadPercentage" type="number"
-                           step="0.01" placeholder="1.00">
-                    <span matTextSuffix>%</span>
-                    @if (feeStructureForm.get('entryLoadPercentage')?.hasError('required') && feeStructureForm.get('entryLoadPercentage')?.touched) {
-                      <mat-error>Entry load is required</mat-error>
-                    }
-                  </mat-form-field>
-                </div>
-
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Exit Load (%)</mat-label>
-                    <input matInput formControlName="exitLoadPercentage" type="number"
-                           step="0.01" placeholder="0.50">
-                    <span matTextSuffix>%</span>
-                    @if (feeStructureForm.get('exitLoadPercentage')?.hasError('required') && feeStructureForm.get('exitLoadPercentage')?.touched) {
-                      <mat-error>Exit load is required</mat-error>
-                    }
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="form-field">
-                    <mat-label>Brokerage Buy (%)</mat-label>
-                    <input matInput formControlName="brokerageBuyPercentage" type="number"
-                           step="0.01" placeholder="0.25">
-                    <span matTextSuffix>%</span>
-                    @if (feeStructureForm.get('brokerageBuyPercentage')?.hasError('required') && feeStructureForm.get('brokerageBuyPercentage')?.touched) {
-                      <mat-error>Brokerage buy is required</mat-error>
-                    }
-                  </mat-form-field>
-                </div>
-
-                <mat-form-field appearance="outline" class="form-field">
-                  <mat-label>Brokerage Sell (%)</mat-label>
-                  <input matInput formControlName="brokerageSellPercentage" type="number"
-                         step="0.01" placeholder="0.25">
-                  <span matTextSuffix>%</span>
-                  @if (feeStructureForm.get('brokerageSellPercentage')?.hasError('required') && feeStructureForm.get('brokerageSellPercentage')?.touched) {
-                    <mat-error>Brokerage sell is required</mat-error>
-                  }
-                </mat-form-field>
-
-                <div class="step-actions">
-                  <button mat-button matStepperPrevious>
-                    <mat-icon>arrow_back</mat-icon>
-                    Back
-                  </button>
-                  <button mat-raised-button color="primary" matStepperNext
-                          [disabled]="feeStructureForm.invalid">
-                    Next
-                    <mat-icon>arrow_forward</mat-icon>
-                  </button>
-                </div>
-              </form>
-            </mat-step>
-
-            <!-- Step 3: Initial Investors -->
+            <!-- Step 2: Initial Investors -->
             <mat-step [stepControl]="investorsForm" label="Initial Investors">
               <form [formGroup]="investorsForm" class="step-form">
                 <div class="investors-header">
@@ -343,41 +273,6 @@ interface DialogData {
               <textarea matInput formControlName="description" rows="3"
                        placeholder="Enter portfolio description"></textarea>
               <mat-icon matSuffix>description</mat-icon>
-            </mat-form-field>
-
-            <h4>Fee Structure</h4>
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Management Fee (%)</mat-label>
-                <input matInput formControlName="managementFeePercentage" type="number" step="0.01">
-                <span matTextSuffix>%</span>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Entry Load (%)</mat-label>
-                <input matInput formControlName="entryLoadPercentage" type="number" step="0.01">
-                <span matTextSuffix>%</span>
-              </mat-form-field>
-            </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Exit Load (%)</mat-label>
-                <input matInput formControlName="exitLoadPercentage" type="number" step="0.01">
-                <span matTextSuffix>%</span>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="form-field">
-                <mat-label>Brokerage Buy (%)</mat-label>
-                <input matInput formControlName="brokerageBuyPercentage" type="number" step="0.01">
-                <span matTextSuffix>%</span>
-              </mat-form-field>
-            </div>
-
-            <mat-form-field appearance="outline" class="form-field">
-              <mat-label>Brokerage Sell (%)</mat-label>
-              <input matInput formControlName="brokerageSellPercentage" type="number" step="0.01">
-              <span matTextSuffix>%</span>
             </mat-form-field>
           </form>
         }
@@ -600,6 +495,23 @@ interface DialogData {
       margin-right: 8px;
     }
 
+    .info-note {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #e8f5e8;
+      border: 1px solid #c8e6c9;
+      border-radius: 8px;
+      color: #2e7d32;
+      font-size: 14px;
+    }
+
+    .info-note mat-icon {
+      color: #4caf50;
+      font-size: 20px;
+    }
+
     @media (max-width: 768px) {
       .dialog-content {
         min-width: 400px;
@@ -642,7 +554,6 @@ export class PortfolioFormDialogComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<PortfolioFormDialogComponent>);
 
   basicInfoForm: FormGroup;
-  feeStructureForm: FormGroup;
   investorsForm: FormGroup;
   editForm: FormGroup;
 
@@ -651,7 +562,6 @@ export class PortfolioFormDialogComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: DialogData) {
     this.basicInfoForm = this.createBasicInfoForm();
-    this.feeStructureForm = this.createFeeStructureForm();
     this.investorsForm = this.createInvestorsForm();
     this.editForm = this.createEditForm();
   }
@@ -668,18 +578,7 @@ export class PortfolioFormDialogComponent implements OnInit {
     return this.fb.group({
       name: ['', [Validators.required]],
       description: [''],
-      initialNavValue: [10.0000, [Validators.required, Validators.min(0.0001)]],
-      initialCash: [100000.00, [Validators.required, Validators.min(0.01)]]
-    });
-  }
-
-  private createFeeStructureForm(): FormGroup {
-    return this.fb.group({
-      managementFeePercentage: [2.00, [Validators.required, Validators.min(0)]],
-      entryLoadPercentage: [1.00, [Validators.required, Validators.min(0)]],
-      exitLoadPercentage: [0.50, [Validators.required, Validators.min(0)]],
-      brokerageBuyPercentage: [0.25, [Validators.required, Validators.min(0)]],
-      brokerageSellPercentage: [0.25, [Validators.required, Validators.min(0)]]
+      initialNavValue: [10.0000, [Validators.required, Validators.min(0.0001)]]
     });
   }
 
@@ -692,12 +591,7 @@ export class PortfolioFormDialogComponent implements OnInit {
   private createEditForm(): FormGroup {
     return this.fb.group({
       name: ['', [Validators.required]],
-      description: [''],
-      managementFeePercentage: [0, [Validators.required, Validators.min(0)]],
-      entryLoadPercentage: [0, [Validators.required, Validators.min(0)]],
-      exitLoadPercentage: [0, [Validators.required, Validators.min(0)]],
-      brokerageBuyPercentage: [0, [Validators.required, Validators.min(0)]],
-      brokerageSellPercentage: [0, [Validators.required, Validators.min(0)]]
+      description: ['']
     });
   }
 
@@ -721,12 +615,7 @@ export class PortfolioFormDialogComponent implements OnInit {
   private populateEditForm(portfolio: Portfolio): void {
     this.editForm.patchValue({
       name: portfolio.name,
-      description: portfolio.description || '',
-      managementFeePercentage: portfolio.managementFeePercentage || 0,
-      entryLoadPercentage: portfolio.entryLoadPercentage || 0,
-      exitLoadPercentage: portfolio.exitLoadPercentage || 0,
-      brokerageBuyPercentage: portfolio.brokerageBuyPercentage || 0,
-      brokerageSellPercentage: portfolio.brokerageSellPercentage || 0
+      description: portfolio.description || ''
     });
   }
 
@@ -744,9 +633,7 @@ export class PortfolioFormDialogComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    return this.basicInfoForm.valid &&
-           this.feeStructureForm.valid &&
-           this.investorsForm.valid;
+    return this.basicInfoForm.valid && this.investorsForm.valid;
   }
 
   editPortfolio(): void {
@@ -778,7 +665,6 @@ export class PortfolioFormDialogComponent implements OnInit {
 
     const request: CreatePortfolioRequest = {
       ...this.basicInfoForm.value,
-      ...this.feeStructureForm.value,
       ...this.investorsForm.value
     };
 

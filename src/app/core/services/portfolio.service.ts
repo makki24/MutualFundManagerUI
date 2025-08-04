@@ -7,7 +7,10 @@ import {
   CreatePortfolioRequest,
   InvestmentRequest,
   WithdrawalRequest,
-  UpdatePortfolioRequest
+  UpdatePortfolioRequest,
+  PortfolioFee,
+  CreatePortfolioFeeRequest,
+  UserFeeAllocation
 } from '../models/portfolio.model';
 import { ApiResponse } from '../models/api-response.model';
 
@@ -81,5 +84,40 @@ export class PortfolioService {
 
   updatePrices(portfolioId: number, prices: any): Observable<any> {
     return this.http.put(`${this.API_URL}/portfolios/${portfolioId}/holdings/prices`, prices);
+  }
+
+  // New Fee Management Methods
+  createPortfolioFee(portfolioId: number, feeRequest: CreatePortfolioFeeRequest, createdByUserId: number): Observable<ApiResponse<PortfolioFee>> {
+    const params = new HttpParams().set('createdByUserId', createdByUserId.toString());
+    return this.http.post<ApiResponse<PortfolioFee>>(`${this.API_URL}/portfolios/${portfolioId}/fees`, feeRequest, { params });
+  }
+
+  getPortfolioFees(portfolioId: number, activeOnly: boolean = false): Observable<ApiResponse<PortfolioFee[]>> {
+    const endpoint = activeOnly ? 'active' : '';
+    return this.http.get<ApiResponse<PortfolioFee[]>>(`${this.API_URL}/portfolios/${portfolioId}/fees${endpoint ? '/' + endpoint : ''}`);
+  }
+
+  getPortfolioFeeById(portfolioId: number, feeId: number): Observable<ApiResponse<PortfolioFee>> {
+    return this.http.get<ApiResponse<PortfolioFee>>(`${this.API_URL}/portfolios/${portfolioId}/fees/${feeId}`);
+  }
+
+  deactivatePortfolioFee(portfolioId: number, feeId: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(`${this.API_URL}/portfolios/${portfolioId}/fees/${feeId}`);
+  }
+
+  getUserFeeAllocations(userId: number): Observable<ApiResponse<UserFeeAllocation[]>> {
+    return this.http.get<ApiResponse<UserFeeAllocation[]>>(`${this.API_URL}/users/${userId}/fee-allocations`);
+  }
+
+  getPortfolioFeeAllocations(portfolioId: number): Observable<ApiResponse<UserFeeAllocation[]>> {
+    return this.http.get<ApiResponse<UserFeeAllocation[]>>(`${this.API_URL}/portfolios/${portfolioId}/fee-allocations`);
+  }
+
+  // Enhanced investment method with fee calculation
+  investInPortfolioWithFees(portfolioId: number, userId: number, investmentAmount: number, adminUserId: number): Observable<any> {
+    const params = new HttpParams()
+      .set('investmentAmount', investmentAmount.toString())
+      .set('adminUserId', adminUserId.toString());
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/invest`, {}, { params });
   }
 }

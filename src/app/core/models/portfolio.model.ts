@@ -8,16 +8,16 @@ export interface Portfolio {
   totalAum: number;
   totalUnits: number;
   remainingCash: number;
-  managementFeePercentage?: number;
-  entryLoadPercentage?: number;
-  exitLoadPercentage?: number;
-  brokerageBuyPercentage?: number;
-  brokerageSellPercentage?: number;
   isActive?: boolean;
   totalInvestors: number;
   totalHoldings: number;
   totalHoldingsValue?: number;
   totalPortfolioValue?: number;
+  // New fee system fields
+  currentFeeAmount?: number | null;
+  remainingFeeAmount?: number | null;
+  feeFromDate?: string | null;
+  feeToDate?: string | null;
   createdBy: {
     id: number;
     username: string;
@@ -51,9 +51,12 @@ export interface Investment {
   investedNav: number;
   totalInvested: number;
   currentValue: number;
-  totalCharges: number;
+  totalCharges: number; // Deprecated - use totalFeesPaid
+  totalFeesPaid: number; // New field name
   totalReturns: number;
   returnPercentage: number;
+  investmentDate?: string;
+  feeAllocations?: UserFeeAllocation[];
   user?: User;
 }
 
@@ -61,12 +64,6 @@ export interface CreatePortfolioRequest {
   name: string;
   description: string;
   initialNavValue: number;
-  initialCash: number;
-  managementFeePercentage: number;
-  entryLoadPercentage: number;
-  exitLoadPercentage: number;
-  brokerageBuyPercentage: number;
-  brokerageSellPercentage: number;
   initialInvestors: {
     userId: number;
     investmentAmount: number;
@@ -76,11 +73,6 @@ export interface CreatePortfolioRequest {
 export interface UpdatePortfolioRequest {
   name?: string;
   description?: string;
-  managementFeePercentage?: number;
-  entryLoadPercentage?: number;
-  exitLoadPercentage?: number;
-  brokerageBuyPercentage?: number;
-  brokerageSellPercentage?: number;
 }
 
 export interface InvestmentRequest {
@@ -97,4 +89,50 @@ export interface AddCashRequest {
 
 export interface UpdateNavRequest {
   newNavValue: number;
+}
+
+// New Fee System Interfaces
+export interface PortfolioFee {
+  id: number;
+  portfolioId: number;
+  portfolioName?: string;
+  feeType: 'MANAGEMENT_FEE' | 'ADMINISTRATIVE_FEE' | 'PERFORMANCE_FEE' | 'OTHER';
+  feeTypeDisplayName?: string;
+  totalFeeAmount: number;
+  remainingFeeAmount: number;
+  fromDate: string;
+  toDate: string;
+  isActive: boolean;
+  description?: string;
+  createdByUserId?: number;
+  createdByUserName?: string;
+  createdAt?: string;
+  totalDays?: number;
+  remainingDays?: number;
+  dailyFeeAmount?: number;
+  allocatedFeeAmount?: number;
+}
+
+export interface CreatePortfolioFeeRequest {
+  feeType: 'MANAGEMENT_FEE' | 'ADMINISTRATIVE_FEE' | 'PERFORMANCE_FEE' | 'OTHER';
+  totalFeeAmount: number;
+  fromDate: string;
+  toDate: string;
+  description?: string;
+}
+
+export interface UserFeeAllocation {
+  id: number;
+  portfolioFeeId: number;
+  userId: number;
+  userName?: string;
+  allocatedAmount: number;
+  unitsDeducted: number;
+  allocationDate: string;
+  remainingDaysAtAllocation: number;
+  totalUsersAtAllocation: number;
+  description: string;
+  feeType?: string;
+  portfolioName?: string;
+  type?: 'DEDUCTION' | 'CREDIT';
 }

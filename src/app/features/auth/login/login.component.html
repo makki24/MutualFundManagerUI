@@ -1,0 +1,82 @@
+<div class="login-container">
+  <div class="login-background">
+    <div class="background-pattern"></div>
+  </div>
+
+  <div class="login-content">
+    <mat-card class="login-card">
+      <div class="card-header">
+        <div class="logo-section">
+          <div class="logo-wrapper">
+            <mat-icon class="logo-icon">account_balance</mat-icon>
+          </div>
+          <div class="brand-info">
+            <h1>Mutual Fund Manager</h1>
+            <p>Professional Portfolio Management</p>
+          </div>
+        </div>
+      </div>
+
+      <mat-card-content class="card-content">
+        <div class="welcome-text">
+          <h2>Welcome Back</h2>
+          <p>Sign in to access your dashboard</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Username or Email</mat-label>
+            <input matInput formControlName="username" type="text" autocomplete="username" placeholder="Enter your username or email">
+            <mat-icon matSuffix class="field-icon">person_outline</mat-icon>
+            @if (loginForm.get('username')?.hasError('required') && loginForm.get('username')?.touched) {
+              <mat-error>Username or email is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Password</mat-label>
+            <input matInput formControlName="password" [type]="hidePassword ? 'password' : 'text'" autocomplete="current-password" placeholder="Enter your password">
+            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button" class="visibility-toggle">
+              <mat-icon class="field-icon">{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
+              <mat-error>Password is required</mat-error>
+            }
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" type="submit" class="login-button"
+                  [disabled]="loginForm.invalid || isLoading">
+            @if (isLoading) {
+              <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+              <span>Signing in...</span>
+            } @else {
+              <ng-container>
+                <mat-icon>login</mat-icon>
+                <span>Sign In</span>
+              </ng-container>
+            }
+          </button>
+        </form>
+      </mat-card-content>
+
+      <mat-card-footer class="card-footer">
+        <div class="test-credentials">
+          <div class="credentials-header">
+            <mat-icon>info_outline</mat-icon>
+            <span>Demo Credentials</span>
+          </div>
+          <div class="credentials-list">
+            <div class="credential-item">
+              <span class="role">Admin:</span>
+              <span class="creds">admin / admin123</span>
+            </div>
+            <div class="credential-item">
+              <span class="role">User:</span>
+              <span class="creds">john_doe / password123</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-footer>
+    </mat-card>
+  </div>
+</div>

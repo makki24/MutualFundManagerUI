@@ -87,8 +87,10 @@ import { ChangePasswordRequest } from '../../core/models/user.model';
           <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
           <span>Changing...</span>
         } @else {
-          <mat-icon>lock</mat-icon>
-          <span>Change Password</span>
+          <ng-container>
+            <mat-icon>lock</mat-icon>
+            <span>Change Password</span>
+          </ng-container>
         }
       </button>
     </mat-dialog-actions>
