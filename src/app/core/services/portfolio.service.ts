@@ -94,7 +94,7 @@ export class PortfolioService {
 
   getPortfolioFees(portfolioId: number, activeOnly: boolean = false): Observable<ApiResponse<PortfolioFee[]>> {
     const endpoint = activeOnly ? 'active' : '';
-    return this.http.get<ApiResponse<PortfolioFee[]>>(`${this.API_URL}/portfolios/${portfolioId}/fees${endpoint ? '/' + endpoint : ''}`);
+    return this.http.get<ApiResponse<PortfolioFee[]>>(`${this.API_URL}/portfolios/${portfolioId}/fees`);
   }
 
   getPortfolioFeeById(portfolioId: number, feeId: number): Observable<ApiResponse<PortfolioFee>> {

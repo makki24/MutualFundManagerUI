@@ -19,6 +19,7 @@ import { PortfolioService } from '../../../../core/services/portfolio.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { User } from '../../../../core/models/user.model';
 import { Investment } from '../../../../core/models/investment.model';
+import { PortfolioFee } from '../../../../core/models/portfolio.model';
 
 export interface AddUserToPortfolioForm {
   userId: number;
@@ -30,7 +31,7 @@ export interface FeeImpactPreview {
   feeAmount: number;
   netInvestment: number;
   unitsAllocated: number;
-  activeFee?: any;
+  activeFee?: PortfolioFee | null;
   currentUserCount: number;
   existingUsersImpact: UserFeeImpact[];
 }
@@ -65,7 +66,7 @@ export interface UserFeeImpact {
       <form [formGroup]="addUserForm" class="add-user-form">
 
         <!-- User Selection with Dropdown -->
-        <mat-form-field appearance="outline" class="full-width mt-16">
+        <mat-form-field appearance="outline" class="full-width user-select-field">
           <mat-label>Select User</mat-label>
           <mat-select formControlName="userId"
                       placeholder="Choose a user to add"
@@ -558,6 +559,8 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
   isSubmitting = false;
   isLoadingUsers = false;
   existingInvestorIds: number[] = [];
+  activeFee: PortfolioFee | null = null;
+  portfolioNavValue = 10; // Default NAV value, should be loaded from portfolio details
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { portfolioId: number }) {
     this.addUserForm = this.fb.group({
@@ -569,6 +572,7 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
 
   ngOnInit() {
     this.loadAvailableUsers();
+    this.loadPortfolioFees();
     this.setupFormValidation();
   }
 
@@ -621,6 +625,23 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     );
   }
 
+  loadPortfolioFees() {
+    // Load active portfolio fees to calculate fee impact
+    this.portfolioService.getPortfolioFees(this.data.portfolioId, true).subscribe({
+      next: (response) => {
+        if (response.success && response.data && response.data.length > 0) {
+          this.activeFee = response.data[0]; // Get the first active fee
+        } else {
+          this.activeFee = null;
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load portfolio fees:', error);
+        this.activeFee = null;
+      }
+    });
+  }
+
   onUserSelected(event: any) {
     const selectedUserId = event.value;
     this.selectedUser = this.availableUsers.find(user => user.id === selectedUserId) || null;
@@ -648,28 +669,47 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
       return;
     }
 
-    // Simplified fee impact calculation for preview
-    this.calculateSimplifiedFeeImpact(investmentAmount);
+    // Calculate fee impact based on actual portfolio fees
+    this.calculateActualFeeImpact(investmentAmount);
   }
 
-  private calculateSimplifiedFeeImpact(investmentAmount: number) {
-    // This is a simplified calculation for demonstration
-    // In reality, you would call the backend API to get accurate fee calculations
-
-    const mockActiveFee = null; // Assume no active fees for now
+  private calculateActualFeeImpact(investmentAmount: number) {
     const currentUserCount = this.existingInvestorIds.length;
-    const feeAmount = 0; // No fees in this simplified version
+    let feeAmount = 0;
+    let existingUsersImpact: UserFeeImpact[] = [];
+
+    // Calculate fee deduction if there's an active fee
+    if (this.activeFee && this.activeFee.remainingFeeAmount > 0) {
+      // Calculate proportional fee based on remaining days and user count
+      const totalUsers = currentUserCount + 1; // Including the new user
+      const dailyFeePerUser = this.activeFee.dailyFeeAmount / totalUsers;
+      feeAmount = dailyFeePerUser * this.activeFee.remainingDays;
+
+      // Calculate credit for existing users (simplified calculation)
+      if (currentUserCount > 0) {
+        const creditPerUser = (this.activeFee.dailyFeeAmount / currentUserCount - dailyFeePerUser) * this.activeFee.remainingDays;
+        if (creditPerUser > 0) {
+          // This would normally come from the backend with actual user names
+          existingUsersImpact = this.existingInvestorIds.map(userId => ({
+            userId,
+            userName: `User ${userId}`, // Placeholder - should get actual names
+            creditAmount: creditPerUser,
+            creditUnits: creditPerUser / this.portfolioNavValue
+          }));
+        }
+      }
+    }
+
     const netInvestment = investmentAmount - feeAmount;
-    const mockNavValue = 10; // Default NAV value
-    const unitsAllocated = netInvestment / mockNavValue;
+    const unitsAllocated = netInvestment / this.portfolioNavValue;
 
     this.feeImpact = {
       feeAmount,
       netInvestment,
       unitsAllocated,
-      activeFee: mockActiveFee,
+      activeFee: this.activeFee,
       currentUserCount,
-      existingUsersImpact: [] // No impact in simplified version
+      existingUsersImpact
     };
 
     this.updateConfirmationRequirement();

@@ -13,6 +13,7 @@ import { PortfolioService } from '../../../../core/services/portfolio.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { User } from '../../../../core/models/user.model';
 import { Investment } from '../../../../core/models/investment.model';
+import { PortfolioFee } from '../../../../core/models/portfolio.model';
 import { ApiResponse } from '../../../../core/models/api-response.model';
 
 describe('AddUserToPortfolioDialogComponent', () => {
@@ -20,6 +21,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
   let fixture: ComponentFixture<AddUserToPortfolioDialogComponent>;
   let mockUserService: jasmine.SpyObj<UserService>;
   let mockInvestmentService: jasmine.SpyObj<InvestmentService>;
+  let mockPortfolioService: jasmine.SpyObj<PortfolioService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockDialogRef: jasmine.SpyObj<MatDialogRef<AddUserToPortfolioDialogComponent>>;
   let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
@@ -36,7 +38,6 @@ describe('AddUserToPortfolioDialogComponent', () => {
       active: true,
       createdAt: '2025-08-03T20:42:06',
       updatedAt: '2025-08-03T20:42:06',
-      // fullName removed - not in User model
     },
     {
       id: 2,
@@ -49,7 +50,6 @@ describe('AddUserToPortfolioDialogComponent', () => {
       active: true,
       createdAt: '2025-08-03T20:42:06',
       updatedAt: '2025-08-03T20:42:06',
-      // fullName removed - not in User model
     }
   ];
 
@@ -69,6 +69,21 @@ describe('AddUserToPortfolioDialogComponent', () => {
     }
   ];
 
+  const mockPortfolioFee: PortfolioFee = {
+    id: 1,
+    portfolioId: 1,
+    totalFeeAmount: 1000,
+    remainingFeeAmount: 800,
+    fromDate: '2024-01-01',
+    toDate: '2024-12-31',
+    isActive: true,
+    description: 'Annual management fee',
+    totalDays: 365,
+    remainingDays: 300,
+    dailyFeeAmount: 2.74,
+    allocatedFeeAmount: 200
+  };
+
   function createApiResponse<T>(data: T, success: boolean = true, message: string = 'Success'): ApiResponse<T> {
     return {
       success,
@@ -82,6 +97,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
   beforeEach(async () => {
     mockUserService = jasmine.createSpyObj('UserService', ['getUsers']);
     mockInvestmentService = jasmine.createSpyObj('InvestmentService', ['getPortfolioInvestments', 'investInPortfolio']);
+    mockPortfolioService = jasmine.createSpyObj('PortfolioService', ['getPortfolioFees']);
     mockAuthService = jasmine.createSpyObj('AuthService', ['getCurrentUser']);
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -93,6 +109,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
         provideHttpClientTesting(),
         { provide: UserService, useValue: mockUserService },
         { provide: InvestmentService, useValue: mockInvestmentService },
+        { provide: PortfolioService, useValue: mockPortfolioService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MatSnackBar, useValue: mockSnackBar },
@@ -102,26 +119,55 @@ describe('AddUserToPortfolioDialogComponent', () => {
 
     fixture = TestBed.createComponent(AddUserToPortfolioDialogComponent);
     component = fixture.componentInstance;
+
+    // Setup default mock responses
+    mockUserService.getUsers.and.returnValue(of(createApiResponse(mockUsers)));
+    mockInvestmentService.getPortfolioInvestments.and.returnValue(of(createApiResponse(mockInvestments)));
+    mockPortfolioService.getPortfolioFees.and.returnValue(of(createApiResponse([])));
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load available users on init', () => {
-    mockUserService.getUsers.and.returnValue(
-      of(createApiResponse(mockUsers))
-    );
-    mockInvestmentService.getPortfolioInvestments.and.returnValue(
-      of(createApiResponse(mockInvestments))
-    );
-
+  it('should load available users and portfolio fees on init', () => {
     component.ngOnInit();
 
     expect(mockUserService.getUsers).toHaveBeenCalledWith(true, 'USER');
     expect(mockInvestmentService.getPortfolioInvestments).toHaveBeenCalledWith(1);
+    expect(mockPortfolioService.getPortfolioFees).toHaveBeenCalledWith(1, true);
     expect(component.allUsers).toEqual(mockUsers);
     expect(component.existingInvestorIds).toEqual([3]);
+  });
+
+  it('should load active portfolio fee', () => {
+    mockPortfolioService.getPortfolioFees.and.returnValue(
+      of(createApiResponse([mockPortfolioFee]))
+    );
+
+    component.loadPortfolioFees();
+
+    expect(component.activeFee).toEqual(mockPortfolioFee);
+  });
+
+  it('should handle no active portfolio fees', () => {
+    mockPortfolioService.getPortfolioFees.and.returnValue(
+      of(createApiResponse([]))
+    );
+
+    component.loadPortfolioFees();
+
+    expect(component.activeFee).toBeNull();
+  });
+
+  it('should handle portfolio fees loading error', () => {
+    mockPortfolioService.getPortfolioFees.and.returnValue(
+      throwError(() => new Error('Failed to load fees'))
+    );
+
+    component.loadPortfolioFees();
+
+    expect(component.activeFee).toBeNull();
   });
 
   it('should handle user loading error', () => {
@@ -197,18 +243,38 @@ describe('AddUserToPortfolioDialogComponent', () => {
     expect(component.feeImpact).toBeNull();
   });
 
-  it('should calculate simplified fee impact', () => {
+  it('should calculate fee impact with no active fees', () => {
     component.addUserForm.patchValue({
       userId: 1,
       investmentAmount: 1000
     });
     component.existingInvestorIds = [3];
+    component.activeFee = null;
 
     component.calculateFeeImpact();
 
     expect(component.feeImpact).toBeTruthy();
+    expect(component.feeImpact?.feeAmount).toBe(0);
     expect(component.feeImpact?.netInvestment).toBe(1000);
     expect(component.feeImpact?.unitsAllocated).toBe(100); // 1000 / 10 (mock NAV)
+    expect(component.feeImpact?.activeFee).toBeNull();
+  });
+
+  it('should calculate fee impact with active fees', () => {
+    component.addUserForm.patchValue({
+      userId: 1,
+      investmentAmount: 1000
+    });
+    component.existingInvestorIds = [3]; // 1 existing user
+    component.activeFee = mockPortfolioFee;
+
+    component.calculateFeeImpact();
+
+    expect(component.feeImpact).toBeTruthy();
+    expect(component.feeImpact?.feeAmount).toBeGreaterThan(0);
+    expect(component.feeImpact?.netInvestment).toBeLessThan(1000);
+    expect(component.feeImpact?.activeFee).toEqual(mockPortfolioFee);
+    expect(component.feeImpact?.existingUsersImpact.length).toBeGreaterThan(0);
   });
 
   it('should not calculate fee impact with invalid input', () => {
@@ -302,6 +368,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
       feeAmount: 100,
       netInvestment: 900,
       unitsAllocated: 90,
+      activeFee: mockPortfolioFee,
       currentUserCount: 1,
       existingUsersImpact: []
     };
@@ -317,6 +384,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
       feeAmount: 0,
       netInvestment: 1000,
       unitsAllocated: 100,
+      activeFee: null,
       currentUserCount: 1,
       existingUsersImpact: []
     };
@@ -325,5 +393,28 @@ describe('AddUserToPortfolioDialogComponent', () => {
 
     const confirmControl = component.addUserForm.get('confirmFeeImpact');
     expect(confirmControl?.value).toBe(true);
+  });
+
+  it('should require confirmation when there are existing users impact', () => {
+    component.feeImpact = {
+      feeAmount: 0,
+      netInvestment: 1000,
+      unitsAllocated: 100,
+      activeFee: null,
+      currentUserCount: 1,
+      existingUsersImpact: [
+        {
+          userId: 3,
+          userName: 'User Three',
+          creditAmount: 50,
+          creditUnits: 5
+        }
+      ]
+    };
+
+    component['updateConfirmationRequirement']();
+
+    const confirmControl = component.addUserForm.get('confirmFeeImpact');
+    expect(confirmControl?.hasValidator).toBeDefined();
   });
 });
