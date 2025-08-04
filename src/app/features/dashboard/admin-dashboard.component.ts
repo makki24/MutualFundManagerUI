@@ -378,7 +378,7 @@ export class AdminDashboardComponent implements OnInit {
     const dialogRef = this.dialog.open(PortfolioFormDialogComponent, {
       width: '800px',
       data: { mode: 'create' },
-      disableClose: true
+      disableClose: false
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -392,7 +392,7 @@ export class AdminDashboardComponent implements OnInit {
     const dialogRef = this.dialog.open(UserFormDialogComponent, {
       width: '600px',
       data: { mode: 'create' },
-      disableClose: true
+      disableClose: false
     });
 
     dialogRef.afterClosed().subscribe(result => {

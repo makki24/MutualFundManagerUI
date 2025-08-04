@@ -2,11 +2,14 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 
 import { AddUserToPortfolioDialogComponent } from './add-user-to-portfolio-dialog.component';
 import { UserService } from '../../../../core/services/user.service';
 import { InvestmentService } from '../../../../core/services/investment.service';
+import { PortfolioService } from '../../../../core/services/portfolio.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { User } from '../../../../core/models/user.model';
 import { Investment } from '../../../../core/models/investment.model';
@@ -24,21 +27,29 @@ describe('AddUserToPortfolioDialogComponent', () => {
   const mockUsers: User[] = [
     {
       id: 1,
-      username: 'user1',
-      email: 'user1@example.com',
+      username: 'john_doe',
+      email: 'john.doe@email.com',
       firstName: 'John',
       lastName: 'Doe',
+      phone: '+1234567890',
       role: 'USER',
-      active: true
+      active: true,
+      createdAt: '2025-08-03T20:42:06',
+      updatedAt: '2025-08-03T20:42:06',
+      // fullName removed - not in User model
     },
     {
       id: 2,
-      username: 'user2',
-      email: 'user2@example.com',
+      username: 'jane_smith',
+      email: 'jane.smith@email.com',
       firstName: 'Jane',
       lastName: 'Smith',
+      phone: '+1234567891',
       role: 'USER',
-      active: true
+      active: true,
+      createdAt: '2025-08-03T20:42:06',
+      updatedAt: '2025-08-03T20:42:06',
+      // fullName removed - not in User model
     }
   ];
 
@@ -78,6 +89,8 @@ describe('AddUserToPortfolioDialogComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AddUserToPortfolioDialogComponent, BrowserAnimationsModule],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: UserService, useValue: mockUserService },
         { provide: InvestmentService, useValue: mockInvestmentService },
         { provide: AuthService, useValue: mockAuthService },
@@ -105,7 +118,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
 
     component.ngOnInit();
 
-    expect(mockUserService.getUsers).toHaveBeenCalledWith(true);
+    expect(mockUserService.getUsers).toHaveBeenCalledWith(true, 'USER');
     expect(mockInvestmentService.getPortfolioInvestments).toHaveBeenCalledWith(1);
     expect(component.allUsers).toEqual(mockUsers);
     expect(component.existingInvestorIds).toEqual([3]);
@@ -132,32 +145,37 @@ describe('AddUserToPortfolioDialogComponent', () => {
 
     component.filterAvailableUsers();
 
-    expect(component.filteredUsers).toEqual([mockUsers[1]]); // Only user2 should be available
+    expect(component.availableUsers).toEqual([mockUsers[1]]); // Only user2 should be available
   });
 
-  it('should filter users by search term', () => {
-    component.allUsers = mockUsers;
+  it('should filter out users with missing data', () => {
+    const usersWithMissingData = [
+      ...mockUsers,
+      { id: 3, username: '', email: '', firstName: '', lastName: '', role: 'USER', active: true } as User
+    ];
+    component.allUsers = usersWithMissingData;
     component.existingInvestorIds = [];
 
-    component.filterAvailableUsers('john');
+    component.filterAvailableUsers();
 
-    expect(component.filteredUsers).toEqual([mockUsers[0]]); // Only John Doe should match
+    expect(component.availableUsers).toEqual(mockUsers); // Only complete users should be available
   });
 
-  it('should display user name correctly', () => {
-    const displayName = component.displayUser(mockUsers[0]);
-    expect(displayName).toBe('John Doe');
+  it('should get user initials correctly', () => {
+    const initials = component.getUserInitials(mockUsers[0]);
+    expect(initials).toBe('JD');
   });
 
-  it('should return empty string for null user', () => {
-    const displayName = component.displayUser(null);
-    expect(displayName).toBe('');
+  it('should return ?? for user with missing data', () => {
+    const userWithMissingData = { id: 1, firstName: '', lastName: '' } as User;
+    const initials = component.getUserInitials(userWithMissingData);
+    expect(initials).toBe('??');
   });
 
   it('should update form when user is selected', () => {
-    component.selectedUser = mockUsers[0];
+    component.availableUsers = mockUsers;
     const mockEvent = {
-      option: { value: mockUsers[0] }
+      value: 1 // user ID
     };
 
     spyOn(component, 'calculateFeeImpact');
@@ -165,8 +183,18 @@ describe('AddUserToPortfolioDialogComponent', () => {
     component.onUserSelected(mockEvent);
 
     expect(component.selectedUser).toEqual(mockUsers[0]);
-    expect(component.addUserForm.get('userId')?.value).toBe(1);
     expect(component.calculateFeeImpact).toHaveBeenCalled();
+  });
+
+  it('should clear fee impact when no user is selected', () => {
+    const mockEvent = {
+      value: 999 // non-existent user ID
+    };
+
+    component.onUserSelected(mockEvent);
+
+    expect(component.selectedUser).toBeNull();
+    expect(component.feeImpact).toBeNull();
   });
 
   it('should calculate simplified fee impact', () => {
@@ -200,6 +228,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
       of(createApiResponse({}))
     );
 
+    component.selectedUser = mockUsers[0];
     component.addUserForm.patchValue({
       userId: 1,
       investmentAmount: 1000,
@@ -218,6 +247,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
       throwError(() => ({ error: { message: 'Investment failed' } }))
     );
 
+    component.selectedUser = mockUsers[0];
     component.addUserForm.patchValue({
       userId: 1,
       investmentAmount: 1000,
@@ -242,6 +272,28 @@ describe('AddUserToPortfolioDialogComponent', () => {
 
     component.addUserToPortfolio();
 
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      'Please fill in all required fields',
+      'Close',
+      { duration: 3000 }
+    );
+    expect(mockInvestmentService.investInPortfolio).not.toHaveBeenCalled();
+  });
+
+  it('should not submit without selected user', () => {
+    component.selectedUser = null;
+    component.addUserForm.patchValue({
+      userId: 1,
+      investmentAmount: 1000
+    });
+
+    component.addUserToPortfolio();
+
+    expect(mockSnackBar.open).toHaveBeenCalledWith(
+      'Please fill in all required fields',
+      'Close',
+      { duration: 3000 }
+    );
     expect(mockInvestmentService.investInPortfolio).not.toHaveBeenCalled();
   });
 

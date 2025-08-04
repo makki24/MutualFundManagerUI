@@ -184,16 +184,12 @@ describe('PortfolioListComponent', () => {
     );
   });
 
-  it('should show snackbar message when viewPortfolio is called', () => {
+  it('should navigate to portfolio details when viewPortfolio is called', () => {
     const portfolioId = 1;
 
     component.viewPortfolio(portfolioId);
 
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      `Portfolio ${portfolioId} details feature coming soon!`,
-      'Close',
-      { duration: 3000 }
-    );
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/portfolios', portfolioId]);
   });
 
   it('should show snackbar message when managePortfolio is called', () => {

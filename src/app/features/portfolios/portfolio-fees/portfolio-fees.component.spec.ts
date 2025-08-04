@@ -113,6 +113,16 @@ describe('PortfolioFeesComponent', () => {
 
     // Setup default mocks
     mockAuthService.getCurrentUser.and.returnValue(mockUser);
+
+    // Setup default successful response to prevent ngOnInit from failing
+    const defaultResponse: ApiResponse<PortfolioFee[]> = {
+      success: true,
+      data: [],
+      message: 'Success',
+      timestamp: new Date().toISOString(),
+      error: null
+    };
+    mockPortfolioFeeService.getPortfolioFees.and.returnValue(of(defaultResponse));
   });
 
   it('should create', () => {
@@ -158,6 +168,7 @@ describe('PortfolioFeesComponent', () => {
     component.portfolioId = 1;
     component.isAdmin = true;
 
+    // Reset the spy to return error for this specific test
     mockPortfolioFeeService.getPortfolioFees.and.returnValue(
       throwError(() => new Error('Failed to load fees'))
     );
@@ -236,6 +247,9 @@ describe('PortfolioFeesComponent', () => {
   });
 
   it('should show error when trying to create fee with active fee exists', () => {
+    // Initialize component properly
+    component.portfolioId = 1;
+    component.isAdmin = true;
     component.activeFee = mockPortfolioFees[0];
 
     component.openCreateFeeDialog();

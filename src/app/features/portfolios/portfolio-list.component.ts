@@ -10,10 +10,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 
 import { PortfolioService } from '../../core/services/portfolio.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Portfolio } from '../../core/models/portfolio.model';
+import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component';
 
 @Component({
   selector: 'app-portfolio-list',
@@ -363,6 +365,7 @@ export class PortfolioListComponent implements OnInit {
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   portfolios: Portfolio[] = [];
   isLoading = true;
@@ -392,9 +395,21 @@ export class PortfolioListComponent implements OnInit {
   }
 
   createPortfolio(): void {
-    this.snackBar.open('Create Portfolio feature coming soon! This will open a form to create a new portfolio.', 'Close', {
-      duration: 5000,
-      panelClass: ['warning-snackbar']
+    const dialogRef = this.dialog.open(PortfolioFormDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: { mode: 'create' },
+      disableClose: false,
+      autoFocus: true,
+      restoreFocus: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Portfolio was created successfully, reload the list
+        this.loadPortfolios();
+      }
     });
   }
 

@@ -156,7 +156,7 @@ import { ChangePasswordDialogComponent } from '../features/auth/change-password-
     .main-toolbar {
       position: sticky;
       top: 0;
-      z-index: 1000;
+      z-index: 100;
     }
 
     .toolbar-title {

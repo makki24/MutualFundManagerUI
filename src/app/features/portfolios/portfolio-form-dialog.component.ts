@@ -412,9 +412,11 @@ interface DialogData {
       width: 100%;
     }
 
+    /* DISABLED - CAUSING BORDER CLIPPING
     .form-field .mat-mdc-form-field-outline {
       border-radius: 8px;
     }
+    */
 
     .step-actions {
       display: flex;

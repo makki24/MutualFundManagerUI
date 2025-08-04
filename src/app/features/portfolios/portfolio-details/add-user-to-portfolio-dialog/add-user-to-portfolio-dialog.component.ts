@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -53,7 +53,7 @@ export interface UserFeeImpact {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatAutocompleteModule,
+    MatSelectModule,
     MatCardModule,
     MatCheckboxModule,
     MatProgressSpinnerModule
@@ -64,50 +64,70 @@ export interface UserFeeImpact {
     <mat-dialog-content>
       <form [formGroup]="addUserForm" class="add-user-form">
 
-        <!-- User Selection -->
-        <mat-form-field appearance="outline" class="full-width">
+        <!-- User Selection with Dropdown -->
+        <mat-form-field appearance="outline" class="full-width mt-16">
           <mat-label>Select User</mat-label>
-          <input matInput
-                 placeholder="Search by name, email, or username"
-                 [matAutocomplete]="userAutocomplete"
-                 formControlName="userSearch"
-                 (input)="onUserSearch($event)"
-                 required>
-          <mat-autocomplete #userAutocomplete="matAutocomplete"
-                            [displayWith]="displayUser"
-                            (optionSelected)="onUserSelected($event)">
-            @for (user of filteredUsers; track user.id) {
-              <mat-option [value]="user">
-                <div class="user-option">
-                  <div class="user-info">
-                    <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
-                    <span class="user-email">{{ user.email }}</span>
-                    <span class="user-username">@{{ user.username }}</span>
-                  </div>
-                  <div class="user-role">
-                    <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
-                      {{ user.role }}
-                    </span>
-                  </div>
-                </div>
-              </mat-option>
-            }
-            @if (filteredUsers.length === 0 && !isLoadingUsers) {
-              <mat-option disabled>
-                No available users found
-              </mat-option>
-            }
+          <mat-select formControlName="userId"
+                      placeholder="Choose a user to add"
+                      (selectionChange)="onUserSelected($event)"
+                      required>
             @if (isLoadingUsers) {
               <mat-option disabled>
-                <mat-spinner diameter="20"></mat-spinner>
-                Searching users...
+                <div class="loading-option">
+                  <mat-spinner diameter="20"></mat-spinner>
+                  <span>Loading users...</span>
+                </div>
               </mat-option>
+            } @else {
+              @for (user of availableUsers; track user.id) {
+                <mat-option [value]="user.id">
+                  <div class="user-option">
+                    <div class="user-info">
+                      <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+                      <span class="user-details">{{ user.email }} • @{{ user.username }}</span>
+                    </div>
+                    <div class="user-role">
+                      <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
+                        {{ user.role }}
+                      </span>
+                    </div>
+                  </div>
+                </mat-option>
+              }
+              @if (availableUsers.length === 0 && !isLoadingUsers) {
+                <mat-option disabled>
+                  No available users found
+                </mat-option>
+              }
             }
-          </mat-autocomplete>
-          <mat-error *ngIf="addUserForm.get('userSearch')?.hasError('required')">
+          </mat-select>
+          <mat-icon matSuffix>person</mat-icon>
+          <mat-error *ngIf="addUserForm.get('userId')?.hasError('required')">
             Please select a user
           </mat-error>
+          <mat-hint>Select a user who is not already invested in this portfolio</mat-hint>
         </mat-form-field>
+
+        <!-- Selected User Display -->
+        @if (selectedUser) {
+          <mat-card class="selected-user-card">
+            <mat-card-content>
+              <div class="selected-user-info">
+                <div class="user-avatar">
+                  {{ getUserInitials(selectedUser) }}
+                </div>
+                <div class="user-details">
+                  <h4>{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h4>
+                  <p>{{ selectedUser.email }}</p>
+                  <p>@{{ selectedUser.username }}</p>
+                  <span class="role-badge" [class.admin]="selectedUser.role === 'ADMIN'">
+                    {{ selectedUser.role }}
+                  </span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
 
         <!-- Investment Amount -->
         <mat-form-field appearance="outline" class="full-width">
@@ -121,6 +141,7 @@ export interface UserFeeImpact {
                  (input)="calculateFeeImpact()"
                  required>
           <span matPrefix>$&nbsp;</span>
+          <mat-icon matSuffix>account_balance_wallet</mat-icon>
           <mat-hint>Minimum investment: $1</mat-hint>
           <mat-error *ngIf="addUserForm.get('investmentAmount')?.hasError('required')">
             Investment amount is required
@@ -134,7 +155,10 @@ export interface UserFeeImpact {
         @if (feeImpact && selectedUser) {
           <mat-card class="fee-impact-card">
             <mat-card-header>
-              <mat-card-title>Investment Impact Preview</mat-card-title>
+              <mat-card-title>
+                <mat-icon>analytics</mat-icon>
+                Investment Impact Preview
+              </mat-card-title>
             </mat-card-header>
             <mat-card-content>
 
@@ -224,7 +248,7 @@ export interface UserFeeImpact {
         }
 
         <!-- Confirmation Checkbox -->
-        @if (feeImpact) {
+        @if (feeImpact && (feeImpact.feeAmount > 0 || feeImpact.existingUsersImpact.length > 0)) {
           <mat-checkbox formControlName="confirmFeeImpact"
                         class="confirmation-checkbox">
             I understand the fee impact and confirm this investment
@@ -242,8 +266,11 @@ export interface UserFeeImpact {
               (click)="addUserToPortfolio()">
         @if (isSubmitting) {
           <mat-spinner diameter="20"></mat-spinner>
+          <span>Adding User...</span>
+        } @else {
+          <mat-icon>person_add</mat-icon>
+          <span>Add User to Portfolio</span>
         }
-        Add User to Portfolio
       </button>
     </mat-dialog-actions>
   `,
@@ -253,10 +280,18 @@ export interface UserFeeImpact {
       flex-direction: column;
       gap: 20px;
       min-width: 500px;
+      max-width: 600px;
     }
 
     .full-width {
       width: 100%;
+    }
+
+    .loading-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
     }
 
     .user-option {
@@ -276,16 +311,13 @@ export interface UserFeeImpact {
     .user-name {
       font-weight: 500;
       font-size: 14px;
+      color: #333;
     }
 
-    .user-email {
+    .user-details {
       font-size: 12px;
       color: #666;
-    }
-
-    .user-username {
-      font-size: 12px;
-      color: #999;
+      margin-top: 2px;
     }
 
     .user-role {
@@ -307,8 +339,54 @@ export interface UserFeeImpact {
       color: #1976d2;
     }
 
+    .selected-user-card {
+      margin: 16px 0;
+      border: 2px solid #e3f2fd;
+      background: #f8f9fa;
+    }
+
+    .selected-user-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .user-details h4 {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .user-details p {
+      margin: 0 0 2px 0;
+      font-size: 12px;
+      color: #666;
+    }
+
     .fee-impact-card {
       margin: 20px 0;
+      border: 1px solid #e3f2fd;
+    }
+
+    .fee-impact-card mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
     }
 
     .impact-section {
@@ -419,6 +497,18 @@ export interface UserFeeImpact {
 
     mat-dialog-actions button {
       margin-left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    // Fix dropdown z-index issues
+    ::ng-deep .mat-mdc-select-panel {
+      z-index: 10000 !important;
+    }
+
+    ::ng-deep .cdk-overlay-pane {
+      z-index: 10000 !important;
     }
 
     @media (max-width: 600px) {
@@ -430,6 +520,11 @@ export interface UserFeeImpact {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
+      }
+
+      .selected-user-info {
+        flex-direction: column;
+        text-align: center;
       }
 
       .summary-row {
@@ -456,7 +551,7 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
 
   addUserForm: FormGroup;
-  filteredUsers: User[] = [];
+  availableUsers: User[] = [];
   allUsers: User[] = [];
   selectedUser: User | null = null;
   feeImpact: FeeImpactPreview | null = null;
@@ -466,7 +561,6 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { portfolioId: number }) {
     this.addUserForm = this.fb.group({
-      userSearch: ['', Validators.required],
       userId: ['', Validators.required],
       investmentAmount: ['', [Validators.required, Validators.min(1)]],
       confirmFeeImpact: [false]
@@ -481,8 +575,8 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
   loadAvailableUsers() {
     this.isLoadingUsers = true;
 
-    // Load all active users
-    this.userService.getUsers(true).subscribe({
+    // Load all active users with role filter
+    this.userService.getUsers(true, 'USER').subscribe({
       next: (response) => {
         if (response.success) {
           this.allUsers = response.data || [];
@@ -514,40 +608,35 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     });
   }
 
-  filterAvailableUsers(searchTerm: string = '') {
-    let availableUsers = this.allUsers.filter(user =>
+  filterAvailableUsers() {
+    // Filter out existing investors and ensure we have valid user data
+    this.availableUsers = this.allUsers.filter(user =>
+      user &&
+      user.id &&
+      user.firstName &&
+      user.lastName &&
+      user.email &&
+      user.username &&
       !this.existingInvestorIds.includes(user.id)
     );
-
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      availableUsers = availableUsers.filter(user =>
-        user.firstName.toLowerCase().includes(term) ||
-        user.lastName.toLowerCase().includes(term) ||
-        user.email.toLowerCase().includes(term) ||
-        user.username.toLowerCase().includes(term)
-      );
-    }
-
-    this.filteredUsers = availableUsers;
-  }
-
-  onUserSearch(event: any) {
-    const searchTerm = event.target.value;
-    this.filterAvailableUsers(searchTerm);
   }
 
   onUserSelected(event: any) {
-    this.selectedUser = event.option.value;
-    this.addUserForm.patchValue({
-      userId: this.selectedUser?.id,
-      userSearch: this.displayUser(this.selectedUser)
-    });
-    this.calculateFeeImpact();
+    const selectedUserId = event.value;
+    this.selectedUser = this.availableUsers.find(user => user.id === selectedUserId) || null;
+
+    if (this.selectedUser) {
+      this.calculateFeeImpact();
+    } else {
+      this.feeImpact = null;
+    }
   }
 
-  displayUser(user: User | null): string {
-    return user ? `${user.firstName} ${user.lastName}` : '';
+  getUserInitials(user: User): string {
+    if (!user || !user.firstName || !user.lastName) {
+      return '??';
+    }
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
   }
 
   calculateFeeImpact() {
@@ -560,7 +649,6 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     }
 
     // Simplified fee impact calculation for preview
-    // In a real implementation, this would call the backend for accurate calculation
     this.calculateSimplifiedFeeImpact(investmentAmount);
   }
 
@@ -611,7 +699,8 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
   }
 
   addUserToPortfolio() {
-    if (this.addUserForm.invalid) {
+    if (this.addUserForm.invalid || !this.selectedUser) {
+      this.snackBar.open('Please fill in all required fields', 'Close', { duration: 3000 });
       return;
     }
 
@@ -628,6 +717,11 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     ).subscribe({
       next: (response) => {
         if (response.success) {
+          this.snackBar.open(
+            `Successfully added ${this.selectedUser?.firstName} ${this.selectedUser?.lastName} to portfolio`,
+            'Close',
+            { duration: 5000, panelClass: ['success-snackbar'] }
+          );
           this.dialogRef.close(response.data);
         } else {
           this.snackBar.open(response.message || 'Failed to add user to portfolio', 'Close', { duration: 5000 });

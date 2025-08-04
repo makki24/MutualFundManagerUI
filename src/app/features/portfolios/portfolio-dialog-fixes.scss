@@ -1,0 +1,80 @@
+// Portfolio Dialog Fixes
+.portfolio-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .mat-mdc-dialog-surface {
+    overflow: visible !important;
+  }
+
+  // Fix form field spacing and overlapping
+  .step-form, .edit-form {
+    .form-field {
+      margin-bottom: 20px !important;
+    }
+
+    .info-note {
+      margin-top: 16px !important;
+      margin-bottom: 16px !important;
+      padding: 12px 16px !important;
+      background: #e8f5e8 !important;
+      border: 1px solid #c8e6c9 !important;
+      border-radius: 8px !important;
+      color: #2e7d32 !important;
+      font-size: 14px !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+
+      mat-icon {
+        color: #4caf50 !important;
+        font-size: 20px !important;
+      }
+    }
+
+    // Ensure proper spacing between NAV field and info note
+    .form-field:has(+ .info-note) {
+      margin-bottom: 8px !important;
+    }
+  }
+
+  // Fix stepper content
+  .mat-stepper-horizontal {
+    .mat-horizontal-content-container {
+      padding: 24px 0 !important;
+    }
+  }
+
+  // Fix form field outlines
+  /* DISABLED - CAUSING BORDER CLIPPING
+  .mat-mdc-form-field-outline {
+    z-index: 1 !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    z-index: 2 !important;
+  }
+}
+
+// Global dialog fixes
+.cdk-overlay-pane {
+  .mat-mdc-dialog-container {
+    .mat-mdc-form-field {
+      position: relative !important;
+      z-index: 10 !important;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      position: relative !important;
+      z-index: 11 !important;
+    }
+
+    input, textarea, select {
+      position: relative !important;
+      z-index: 12 !important;
+      background: white !important;
+    }
+  }
+}

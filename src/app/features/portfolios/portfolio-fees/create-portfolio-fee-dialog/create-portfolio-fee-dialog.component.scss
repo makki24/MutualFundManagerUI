@@ -70,7 +70,7 @@
       gap: 4px;
       padding: 12px;
       background: white;
-      border-radius: 8px;
+      /* border-radius: 8px; // DISABLED - CAUSING CLIPPING */
       border: 1px solid #e0e0e0;
 
       .label {
@@ -99,7 +99,7 @@
     gap: 12px;
     padding: 16px;
     background: #e3f2fd;
-    border-radius: 8px;
+    /* border-radius: 8px; // DISABLED - CAUSING CLIPPING */
     border: 1px solid #bbdefb;
 
     mat-icon {
@@ -197,10 +197,11 @@
 
 // Form field customizations
 .mat-mdc-form-field {
+  /* DISABLED - CAUSING BORDER CLIPPING
   .mat-mdc-form-field-outline {
     border-radius: 8px;
   }
-
+  */
   &.mat-form-field-invalid {
     .mat-mdc-form-field-outline-thick {
       border-color: #f44336;
