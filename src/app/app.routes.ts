@@ -25,6 +25,15 @@ export const routes: Routes = [
         loadComponent: () => import('./features/portfolios/portfolio-list.component').then(m => m.PortfolioListComponent)
       },
       {
+        path: 'portfolios/:id',
+        loadComponent: () => import('./features/portfolios/portfolio-details/portfolio-details.component').then(m => m.PortfolioDetailsComponent)
+      },
+      {
+        path: 'portfolios/:id/fees',
+        loadComponent: () => import('./features/portfolios/portfolio-fees/portfolio-fees.component').then(m => m.PortfolioFeesComponent),
+        canActivate: [adminGuard]
+      },
+      {
         path: 'users',
         loadComponent: () => import('./features/users/user-list.component').then(m => m.UserListComponent),
         canActivate: [adminGuard]

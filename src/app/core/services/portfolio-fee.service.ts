@@ -40,6 +40,10 @@ export class PortfolioFeeService {
     return this.http.get<ApiResponse<UserFeeAllocation[]>>(`${this.API_URL}/portfolios/${portfolioId}/fee-allocations`);
   }
 
+  getFeeAllocations(portfolioId: number, feeId: number): Observable<ApiResponse<UserFeeAllocation[]>> {
+    return this.http.get<ApiResponse<UserFeeAllocation[]>>(`${this.API_URL}/portfolios/${portfolioId}/fees/${feeId}/allocations`);
+  }
+
   // Fee Statistics and Reports
   getPortfolioFeeStats(portfolioId: number): Observable<ApiResponse<any>> {
     return this.http.get<ApiResponse<any>>(`${this.API_URL}/portfolios/${portfolioId}/fees/stats`);

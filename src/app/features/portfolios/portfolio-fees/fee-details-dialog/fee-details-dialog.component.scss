@@ -1,0 +1,396 @@
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 0;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    mat-icon {
+      color: #1976d2;
+    }
+  }
+}
+
+.dialog-content {
+  padding: 20px 24px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.fee-details-tabs {
+  .mat-mdc-tab-body-content {
+    overflow: visible;
+  }
+}
+
+.tab-content {
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fee-summary-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  .fee-avatar {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+
+        &.amount {
+          font-size: 20px;
+          color: #1976d2;
+        }
+      }
+    }
+  }
+
+  .progress-section, .allocation-section {
+    margin: 24px 0;
+
+    h4 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .progress-info, .allocation-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    mat-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .progress-details, .allocation-details {
+      font-size: 12px;
+      color: #666;
+    }
+  }
+
+  .description-section {
+    margin: 24px 0 0 0;
+
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+  }
+}
+
+.statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+
+  .stat-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    .stat-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #1976d2;
+        background: #e3f2fd;
+        border-radius: 50%;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stat-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .stat-value {
+          font-size: 20px;
+          font-weight: 700;
+          color: #1a1a1a;
+        }
+
+        .stat-label {
+          font-size: 12px;
+          font-weight: 500;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+}
+
+.allocations-header {
+  text-align: center;
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.allocations-table {
+  width: 100%;
+
+  .mat-mdc-header-cell {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    background: #f8f9fa;
+  }
+
+  .mat-mdc-cell {
+    padding: 16px 12px;
+  }
+
+  .user-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .user-name {
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+
+    .user-id {
+      color: #666;
+      font-size: 11px;
+    }
+  }
+
+  .amount-cell {
+    .amount {
+      font-weight: 600;
+      font-size: 14px;
+
+      &.credit {
+        color: #4caf50;
+      }
+
+      &.deduction {
+        color: #f44336;
+      }
+    }
+  }
+
+  .units {
+    font-weight: 500;
+    font-size: 13px;
+
+    &.credit {
+      color: #4caf50;
+    }
+
+    &.deduction {
+      color: #f44336;
+    }
+  }
+
+  .date {
+    font-size: 13px;
+    color: #666;
+  }
+
+  .type-chip {
+    font-size: 11px;
+    height: 24px;
+    font-weight: 500;
+  }
+}
+
+.no-allocations-message, .loading-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.dialog-actions {
+  padding: 0 24px 20px;
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    min-width: 120px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .dialog-content {
+    padding: 16px 20px;
+  }
+
+  .dialog-header {
+    padding: 16px 20px 0;
+
+    h2 {
+      font-size: 18px;
+    }
+  }
+
+  .fee-summary-card {
+    .summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+  }
+
+  .statistics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+
+    .stat-card .stat-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 8px;
+
+      mat-icon {
+        align-self: center;
+      }
+    }
+  }
+
+  .allocations-table {
+    .mat-mdc-cell, .mat-mdc-header-cell {
+      padding: 12px 8px;
+      font-size: 12px;
+    }
+  }
+
+  .dialog-actions {
+    padding: 0 20px 16px;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dialog-content {
+    padding: 12px 16px;
+  }
+
+  .dialog-header {
+    padding: 12px 16px 0;
+  }
+
+  .fee-summary-card {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .statistics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions {
+    padding: 0 16px 12px;
+  }
+}

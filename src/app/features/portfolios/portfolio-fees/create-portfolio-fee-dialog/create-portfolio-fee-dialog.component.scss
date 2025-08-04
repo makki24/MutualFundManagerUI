@@ -1,0 +1,267 @@
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 0;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    mat-icon {
+      color: #1976d2;
+    }
+  }
+}
+
+.dialog-content {
+  padding: 20px 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.create-fee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.date-range-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  .date-field {
+    width: 100%;
+  }
+}
+
+.fee-preview-card {
+  border: 1px solid #e3f2fd;
+  background: #f8f9fa;
+  border-radius: 12px;
+
+  .preview-avatar {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+
+    .preview-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+
+      .label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+
+        &.no-fee-text {
+          color: #4caf50;
+          font-style: italic;
+        }
+      }
+    }
+  }
+
+  .fee-explanation {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    border: 1px solid #bbdefb;
+
+    mat-icon {
+      color: #1976d2;
+      font-size: 24px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .explanation-content {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1565c0;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 16px;
+        color: #1976d2;
+
+        li {
+          font-size: 13px;
+          line-height: 1.4;
+          margin-bottom: 4px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.zero-fee-info {
+  border: 1px solid #c8e6c9;
+  background: #f1f8e9;
+  border-radius: 12px;
+
+  .zero-fee-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    mat-icon {
+      color: #4caf50;
+      font-size: 32px;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    div {
+      flex: 1;
+
+      h4 {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #2e7d32;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+        color: #388e3c;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+.dialog-actions {
+  padding: 0 24px 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+
+  button {
+    min-width: 120px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    mat-spinner {
+      margin-right: 8px;
+    }
+  }
+}
+
+// Form field customizations
+.mat-mdc-form-field {
+  .mat-mdc-form-field-outline {
+    border-radius: 8px;
+  }
+
+  &.mat-form-field-invalid {
+    .mat-mdc-form-field-outline-thick {
+      border-color: #f44336;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .dialog-content {
+    padding: 16px 20px;
+    max-height: 80vh;
+  }
+
+  .dialog-header {
+    padding: 16px 20px 0;
+
+    h2 {
+      font-size: 18px;
+    }
+  }
+
+  .date-range-container {
+    grid-template-columns: 1fr;
+  }
+
+  .fee-preview-card {
+    .preview-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fee-explanation {
+      flex-direction: column;
+      gap: 8px;
+
+      mat-icon {
+        align-self: flex-start;
+      }
+    }
+  }
+
+  .dialog-actions {
+    padding: 0 20px 16px;
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dialog-content {
+    padding: 12px 16px;
+  }
+
+  .dialog-header {
+    padding: 12px 16px 0;
+  }
+
+  .dialog-actions {
+    padding: 0 16px 12px;
+  }
+}

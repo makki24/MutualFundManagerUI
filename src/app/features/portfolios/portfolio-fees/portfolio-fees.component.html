@@ -1,0 +1,222 @@
+<div class="portfolio-fees-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <button mat-icon-button (click)="goBack()" matTooltip="Back to Portfolios">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-section">
+        <h2>Portfolio Fees</h2>
+        <p class="subtitle">Manage fees and charges for this portfolio</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Fee Summary Section -->
+  <div class="fee-summary-section">
+    <!-- Active Fee Card -->
+    <mat-card class="active-fee-card" *ngIf="activeFee">
+      <mat-card-header>
+        <div mat-card-avatar class="fee-avatar">
+          <mat-icon>account_balance_wallet</mat-icon>
+        </div>
+        <mat-card-title>Active Portfolio Fee</mat-card-title>
+        <mat-card-subtitle>
+          {{ formatDateRange(activeFee.fromDate, activeFee.toDate) }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fee-amount-display">
+          <div class="amount-section">
+            <span class="amount">₹{{ activeFee.totalFeeAmount | number:'1.2-2' }}</span>
+            <span class="daily-rate">₹{{ activeFee.dailyFeeAmount | number:'1.2-2' }}/day</span>
+          </div>
+          <div class="status-section">
+            <mat-chip color="primary">Active</mat-chip>
+          </div>
+        </div>
+
+        <!-- Fee Progress Bar -->
+        <div class="fee-progress-section">
+          <div class="progress-header">
+            <span>Fee Allocation Progress</span>
+            <span>{{ getFeeAllocationPercentage(activeFee) }}%</span>
+          </div>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="getFeeAllocationPercentage(activeFee)"
+            color="primary">
+          </mat-progress-bar>
+        </div>
+
+        <div class="fee-status-grid">
+          <div class="status-item">
+            <span class="label">Allocated</span>
+            <span class="value">₹{{ activeFee.allocatedFeeAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Remaining</span>
+            <span class="value">₹{{ activeFee.remainingFeeAmount | number:'1.2-2' }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Days Left</span>
+            <span class="value">{{ getDaysRemaining(activeFee.toDate) }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Total Days</span>
+            <span class="value">{{ activeFee.totalDays }}</span>
+          </div>
+        </div>
+
+        <div class="fee-description" *ngIf="activeFee.description">
+          <mat-icon>description</mat-icon>
+          <span>{{ activeFee.description }}</span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button (click)="viewFeeDetails(activeFee)">
+          <mat-icon>visibility</mat-icon>
+          View Details
+        </button>
+        <button mat-button color="warn"
+                (click)="deactivateFee(activeFee)"
+                [disabled]="!isAdmin"
+                matTooltip="Only admins can deactivate fees">
+          <mat-icon>block</mat-icon>
+          Deactivate
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- No Active Fee State -->
+    <mat-card class="no-fee-card" *ngIf="!activeFee && !isLoading">
+      <mat-card-content>
+        <div class="no-fee-message">
+          <mat-icon>money_off</mat-icon>
+          <h3>No Active Fee</h3>
+          <p>This portfolio currently has no active fees. You can create a fee to start charging users.</p>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary"
+                (click)="openCreateFeeDialog()"
+                [disabled]="!isAdmin"
+                matTooltip="Only admins can create fees">
+          <mat-icon>add</mat-icon>
+          Create Portfolio Fee
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Loading State -->
+    <mat-card class="loading-card" *ngIf="isLoading">
+      <mat-card-content>
+        <div class="loading-message">
+          <mat-icon>hourglass_empty</mat-icon>
+          <p>Loading portfolio fees...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Fee History Section -->
+  <mat-card class="fee-history-card">
+    <mat-card-header>
+      <mat-card-title>Fee History</mat-card-title>
+      <div class="header-actions">
+        <button mat-raised-button color="primary"
+                [disabled]="activeFee || !isAdmin"
+                (click)="openCreateFeeDialog()"
+                matTooltip="Only admins can create fees">
+          <mat-icon>add</mat-icon>
+          Add New Fee
+        </button>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container" *ngIf="allFees.length > 0; else noFeesTemplate">
+        <table mat-table [dataSource]="allFees" class="fees-table">
+          <!-- Amount Column -->
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Amount</th>
+            <td mat-cell *matCellDef="let fee">
+              <div class="amount-cell">
+                <span class="amount">₹{{ fee.totalFeeAmount | number:'1.2-2' }}</span>
+                <small class="daily-rate">₹{{ fee.dailyFeeAmount | number:'1.2-2' }}/day</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Period Column -->
+          <ng-container matColumnDef="period">
+            <th mat-header-cell *matHeaderCellDef>Period</th>
+            <td mat-cell *matCellDef="let fee">
+              <div class="period-cell">
+                <span class="date-range">{{ formatDateRange(fee.fromDate, fee.toDate) }}</span>
+                <small class="duration">{{ fee.totalDays }} days</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let fee">
+              <mat-chip [color]="fee.isActive ? 'primary' : 'basic'">
+                {{ fee.isActive ? 'Active' : (isExpired(fee.toDate) ? 'Expired' : 'Inactive') }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Progress Column -->
+          <ng-container matColumnDef="progress">
+            <th mat-header-cell *matHeaderCellDef>Allocation</th>
+            <td mat-cell *matCellDef="let fee">
+              <div class="allocation-progress">
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="getFeeAllocationPercentage(fee)"
+                  [color]="fee.isActive ? 'primary' : 'accent'">
+                </mat-progress-bar>
+                <small>{{ getFeeAllocationPercentage(fee) }}% allocated</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let fee">
+              <div class="action-buttons">
+                <button mat-icon-button
+                        (click)="viewFeeDetails(fee)"
+                        matTooltip="View fee details">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button
+                        (click)="deactivateFee(fee)"
+                        [disabled]="!fee.isActive || !isAdmin"
+                        matTooltip="Deactivate fee"
+                        color="warn">
+                  <mat-icon>block</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- No Fees Template -->
+      <ng-template #noFeesTemplate>
+        <div class="no-fees-message">
+          <mat-icon>history</mat-icon>
+          <h4>No Fee History</h4>
+          <p>No fees have been created for this portfolio yet.</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</div>

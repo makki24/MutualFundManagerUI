@@ -133,8 +133,6 @@ describe('Portfolio Models', () => {
         id: 1,
         portfolioId: 1,
         portfolioName: 'Test Portfolio',
-        feeType: 'MANAGEMENT_FEE',
-        feeTypeDisplayName: 'Management Fee',
         totalFeeAmount: 100.00,
         remainingFeeAmount: 50.00,
         fromDate: '2025-01-01',
@@ -151,19 +149,19 @@ describe('Portfolio Models', () => {
       };
 
       expect(fee).toBeDefined();
-      expect(fee.feeType).toBe('MANAGEMENT_FEE');
       expect(fee.totalFeeAmount).toBe(100.00);
       expect(fee.remainingFeeAmount).toBe(50.00);
       expect(fee.fromDate).toBe('2025-01-01');
       expect(fee.toDate).toBe('2025-01-10');
       expect(fee.isActive).toBe(true);
+      expect(fee.dailyFeeAmount).toBe(10.00);
+      expect(fee.allocatedFeeAmount).toBe(50.00);
     });
   });
 
   describe('CreatePortfolioFeeRequest Interface', () => {
-    it('should create a fee request with new fee system fields', () => {
+    it('should create a fee request with simplified fee system fields', () => {
       const request: CreatePortfolioFeeRequest = {
-        feeType: 'MANAGEMENT_FEE',
         totalFeeAmount: 100.00,
         fromDate: '2025-01-01',
         toDate: '2025-01-10',
@@ -171,31 +169,32 @@ describe('Portfolio Models', () => {
       };
 
       expect(request).toBeDefined();
-      expect(request.feeType).toBe('MANAGEMENT_FEE');
       expect(request.totalFeeAmount).toBe(100.00);
       expect(request.fromDate).toBe('2025-01-01');
       expect(request.toDate).toBe('2025-01-10');
       expect(request.description).toBe('Monthly management fee');
     });
 
-    it('should support different fee types', () => {
-      const feeTypes: Array<CreatePortfolioFeeRequest['feeType']> = [
-        'MANAGEMENT_FEE',
-        'ADMINISTRATIVE_FEE',
-        'PERFORMANCE_FEE',
-        'OTHER'
-      ];
+    it('should support zero fee amounts', () => {
+      const request: CreatePortfolioFeeRequest = {
+        totalFeeAmount: 0,
+        fromDate: '2025-01-01',
+        toDate: '2025-01-10',
+        description: 'No fee period'
+      };
 
-      feeTypes.forEach(feeType => {
-        const request: CreatePortfolioFeeRequest = {
-          feeType,
-          totalFeeAmount: 100.00,
-          fromDate: '2025-01-01',
-          toDate: '2025-01-10'
-        };
+      expect(request.totalFeeAmount).toBe(0);
+      expect(request.description).toBe('No fee period');
+    });
 
-        expect(request.feeType).toBe(feeType);
-      });
+    it('should work without description', () => {
+      const request: CreatePortfolioFeeRequest = {
+        totalFeeAmount: 100.00,
+        fromDate: '2025-01-01',
+        toDate: '2025-01-10'
+      };
+
+      expect(request.description).toBeUndefined();
     });
   });
 });

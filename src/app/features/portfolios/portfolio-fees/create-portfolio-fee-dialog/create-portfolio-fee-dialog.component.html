@@ -1,0 +1,142 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>add_circle</mat-icon>
+    Create Portfolio Fee
+  </h2>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="createFeeForm" class="create-fee-form">
+    <!-- Fee Amount -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Fee Amount</mat-label>
+      <input matInput
+             type="number"
+             formControlName="totalFeeAmount"
+             placeholder="0.00"
+             min="0"
+             step="0.01">
+      <span matTextPrefix>₹&nbsp;</span>
+      <mat-hint>Enter 0 for no fees</mat-hint>
+      <mat-error *ngIf="hasFormError('totalFeeAmount')">
+        {{ getFormErrorMessage('totalFeeAmount') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Date Range -->
+    <div class="date-range-container">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>From Date</mat-label>
+        <input matInput
+               [matDatepicker]="fromDatePicker"
+               formControlName="fromDate"
+               [min]="minDate"
+               (dateChange)="onFromDateChange()">
+        <mat-datepicker-toggle matIconSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromDatePicker></mat-datepicker>
+        <mat-error *ngIf="hasFormError('fromDate')">
+          {{ getFormErrorMessage('fromDate') }}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>To Date</mat-label>
+        <input matInput
+               [matDatepicker]="toDatePicker"
+               formControlName="toDate"
+               [min]="createFeeForm.get('fromDate')?.value">
+        <mat-datepicker-toggle matIconSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #toDatePicker></mat-datepicker>
+        <mat-error *ngIf="hasFormError('toDate') || createFeeForm.hasError('dateRangeInvalid')">
+          {{ getFormErrorMessage('toDate') }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Description -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description (Optional)</mat-label>
+      <textarea matInput
+                formControlName="description"
+                placeholder="Enter fee description..."
+                rows="3"
+                maxlength="500"></textarea>
+      <mat-hint align="end">{{ createFeeForm.get('description')?.value?.length || 0 }}/500</mat-hint>
+    </mat-form-field>
+
+    <!-- Fee Calculation Preview -->
+    <mat-card class="fee-preview-card" *ngIf="feePreview">
+      <mat-card-header>
+        <div mat-card-avatar class="preview-avatar">
+          <mat-icon>calculate</mat-icon>
+        </div>
+        <mat-card-title>Fee Calculation Preview</mat-card-title>
+        <mat-card-subtitle>Impact analysis for the selected period</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="preview-grid">
+          <div class="preview-item">
+            <span class="label">Total Period</span>
+            <span class="value">{{ feePreview.totalDays }} days</span>
+          </div>
+          <div class="preview-item">
+            <span class="label">Daily Fee Rate</span>
+            <span class="value">₹{{ feePreview.dailyRate | number:'1.2-2' }}</span>
+          </div>
+          <div class="preview-item" *ngIf="feePreview.totalFeeAmount > 0">
+            <span class="label">Impact on New Investment</span>
+            <span class="value">₹{{ feePreview.dailyRate | number:'1.2-2' }} per day per user</span>
+          </div>
+          <div class="preview-item" *ngIf="feePreview.totalFeeAmount === 0">
+            <span class="label">Fee Impact</span>
+            <span class="value no-fee-text">No fees will be charged</span>
+          </div>
+        </div>
+
+        <!-- Fee Distribution Explanation -->
+        <div class="fee-explanation" *ngIf="feePreview.totalFeeAmount > 0">
+          <mat-icon>info</mat-icon>
+          <div class="explanation-content">
+            <h4>How Fee Distribution Works</h4>
+            <ul>
+              <li>First investor pays the full fee amount</li>
+              <li>When new investors join, fees are redistributed fairly</li>
+              <li>Existing investors receive credit-back to ensure equal sharing</li>
+              <li>Fee allocation is proportional to remaining days</li>
+            </ul>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Zero Fee Information -->
+    <mat-card class="zero-fee-info" *ngIf="feePreview && feePreview.totalFeeAmount === 0">
+      <mat-card-content>
+        <div class="zero-fee-message">
+          <mat-icon>money_off</mat-icon>
+          <div>
+            <h4>Zero Fee Period</h4>
+            <p>This will create a no-fee period for the selected duration. No charges will be applied to user investments.</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-button mat-dialog-close [disabled]="isSubmitting">
+    Cancel
+  </button>
+  <button mat-raised-button
+          color="primary"
+          [disabled]="createFeeForm.invalid || isSubmitting"
+          (click)="createFee()">
+    <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+    <mat-icon *ngIf="!isSubmitting">add</mat-icon>
+    <span>{{ isSubmitting ? 'Creating...' : 'Create Fee' }}</span>
+  </button>
+</mat-dialog-actions>

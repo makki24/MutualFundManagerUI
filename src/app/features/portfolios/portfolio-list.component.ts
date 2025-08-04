@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { PortfolioService } from '../../core/services/portfolio.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -26,7 +27,8 @@ import { Portfolio } from '../../core/models/portfolio.model';
     MatTableModule,
     MatProgressSpinnerModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    MatTooltipModule
   ],
   template: `
     <div class="portfolio-container">
@@ -75,9 +77,10 @@ import { Portfolio } from '../../core/models/portfolio.model';
                 </div>
               </mat-card-content>
               <mat-card-actions>
-                <button mat-button color="primary">View Details</button>
+                <button mat-button color="primary" (click)="viewPortfolio(portfolio.id); $event.stopPropagation()">View Details</button>
                 @if (isAdmin) {
-                  <button mat-button>Manage</button>
+                  <button mat-button (click)="managePortfolio(portfolio.id); $event.stopPropagation()">Manage</button>
+                  <button mat-button color="warn" (click)="manageFees(portfolio.id); $event.stopPropagation()">Fees</button>
                 }
               </mat-card-actions>
             </mat-card>
@@ -152,6 +155,10 @@ import { Portfolio } from '../../core/models/portfolio.model';
                       <button mat-icon-button color="accent" (click)="managePortfolio(portfolio.id)"
                               matTooltip="Manage Portfolio">
                         <mat-icon>settings</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="manageFees(portfolio.id)"
+                              matTooltip="Manage Fees">
+                        <mat-icon>account_balance_wallet</mat-icon>
                       </button>
                     }
                   </td>
@@ -392,10 +399,14 @@ export class PortfolioListComponent implements OnInit {
   }
 
   viewPortfolio(portfolioId: number): void {
-    this.snackBar.open(`Portfolio ${portfolioId} details feature coming soon!`, 'Close', { duration: 3000 });
+    this.router.navigate(['/portfolios', portfolioId]);
   }
 
   managePortfolio(portfolioId: number): void {
     this.snackBar.open(`Manage portfolio ${portfolioId} feature coming soon!`, 'Close', { duration: 3000 });
+  }
+
+  manageFees(portfolioId: number): void {
+    this.router.navigate(['/portfolios', portfolioId, 'fees']);
   }
 }

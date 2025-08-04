@@ -23,10 +23,10 @@
           <div class="fee-details">
             <div class="fee-info-grid">
               <div class="fee-info-item">
-                <span class="label">Fee Type:</span>
+                <span class="label">Status:</span>
                 <mat-chip-set>
-                  <mat-chip [color]="getFeeTypeColor(activeFee.feeType)">
-                    {{ activeFee.feeTypeDisplayName || activeFee.feeType }}
+                  <mat-chip color="primary">
+                    Active Fee
                   </mat-chip>
                 </mat-chip-set>
               </div>
@@ -78,22 +78,6 @@
         </mat-card-header>
         <mat-card-content>
           <form [formGroup]="feeForm" class="fee-form">
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Fee Type</mat-label>
-                <mat-select formControlName="feeType">
-                  <mat-option value="MANAGEMENT_FEE">Management Fee</mat-option>
-                  <mat-option value="ADMINISTRATIVE_FEE">Administrative Fee</mat-option>
-                  <mat-option value="PERFORMANCE_FEE">Performance Fee</mat-option>
-                  <mat-option value="OTHER">Other</mat-option>
-                </mat-select>
-                <mat-icon matSuffix>category</mat-icon>
-                @if (feeForm.get('feeType')?.hasError('required') && feeForm.get('feeType')?.touched) {
-                  <mat-error>Fee type is required</mat-error>
-                }
-              </mat-form-field>
-            </div>
-
             <div class="form-row">
               <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Total Fee Amount</mat-label>

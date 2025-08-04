@@ -1,0 +1,370 @@
+.portfolio-fees-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .title-section {
+      flex: 1;
+
+      h2 {
+        margin: 0 0 4px 0;
+        font-size: 28px;
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: #666;
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.fee-summary-section {
+  display: flex;
+  justify-content: center;
+}
+
+.active-fee-card, .no-fee-card, .loading-card {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.active-fee-card {
+  .fee-avatar {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fee-amount-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .amount-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .amount {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1976d2;
+      }
+
+      .daily-rate {
+        font-size: 14px;
+        color: #666;
+      }
+    }
+
+    .status-section {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .fee-progress-section {
+    margin-bottom: 20px;
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    mat-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+    }
+  }
+
+  .fee-status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+
+    .status-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+
+      .label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+    }
+  }
+
+  .fee-description {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    margin-bottom: 16px;
+
+    mat-icon {
+      color: #1976d2;
+      font-size: 20px;
+    }
+
+    span {
+      color: #1565c0;
+      font-size: 14px;
+    }
+  }
+}
+
+.no-fee-card, .loading-card {
+  .no-fee-message, .loading-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #666;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+      color: #bbb;
+    }
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  }
+}
+
+.fee-history-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .fees-table {
+    width: 100%;
+    margin-top: 16px;
+
+    .mat-mdc-header-cell {
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+
+    .mat-mdc-cell {
+      padding: 16px 12px;
+    }
+
+    .amount-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .amount {
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+
+      .daily-rate {
+        color: #666;
+        font-size: 12px;
+      }
+    }
+
+    .period-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .date-range {
+        font-weight: 500;
+        color: #1a1a1a;
+      }
+
+      .duration {
+        color: #666;
+        font-size: 12px;
+      }
+    }
+
+    .allocation-progress {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 120px;
+
+      mat-progress-bar {
+        height: 6px;
+        border-radius: 3px;
+      }
+
+      small {
+        font-size: 11px;
+        color: #666;
+        text-align: center;
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 4px;
+    }
+  }
+
+  .no-fees-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px 20px;
+    text-align: center;
+    color: #666;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .portfolio-fees-container {
+    padding: 16px;
+  }
+
+  .active-fee-card {
+    .fee-amount-display {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .fee-status-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .fee-history-card {
+    mat-card-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+
+    .fees-table {
+      .mat-mdc-cell, .mat-mdc-header-cell {
+        padding: 12px 8px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  .page-header h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolio-fees-container {
+    padding: 12px;
+  }
+
+  .active-fee-card {
+    .fee-amount-display .amount-section .amount {
+      font-size: 28px;
+    }
+  }
+
+  .fees-table {
+    font-size: 11px;
+
+    .allocation-progress {
+      min-width: 80px;
+    }
+  }
+}

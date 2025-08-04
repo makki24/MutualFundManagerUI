@@ -75,8 +75,7 @@ export class PortfolioFeeManagementComponent implements OnInit {
 
   private createFeeForm(): FormGroup {
     return this.fb.group({
-      feeType: ['MANAGEMENT_FEE', [Validators.required]],
-      totalFeeAmount: ['', [Validators.required, Validators.min(0.01)]],
+      totalFeeAmount: ['', [Validators.required, Validators.min(0)]],
       fromDate: ['', [Validators.required]],
       toDate: ['', [Validators.required]],
       description: ['']
@@ -166,7 +165,6 @@ export class PortfolioFeeManagementComponent implements OnInit {
     }
 
     const feeRequest: CreatePortfolioFeeRequest = {
-      feeType: this.feeForm.get('feeType')?.value,
       totalFeeAmount: this.feeForm.get('totalFeeAmount')?.value,
       fromDate: this.formatDate(this.feeForm.get('fromDate')?.value),
       toDate: this.formatDate(this.feeForm.get('toDate')?.value),

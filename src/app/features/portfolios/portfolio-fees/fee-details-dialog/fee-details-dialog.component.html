@@ -1,0 +1,235 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>
+    <mat-icon>receipt_long</mat-icon>
+    Fee Details
+  </h2>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <mat-tab-group class="fee-details-tabs">
+    <!-- Overview Tab -->
+    <mat-tab label="Overview">
+      <div class="tab-content">
+        <!-- Fee Summary Card -->
+        <mat-card class="fee-summary-card">
+          <mat-card-header>
+            <div mat-card-avatar class="fee-avatar">
+              <mat-icon>account_balance_wallet</mat-icon>
+            </div>
+            <mat-card-title>Fee Summary</mat-card-title>
+            <mat-card-subtitle>{{ formatDateRange() }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <span class="label">Total Amount</span>
+                <span class="value amount">₹{{ fee.totalFeeAmount | number:'1.2-2' }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Daily Rate</span>
+                <span class="value">₹{{ fee.dailyFeeAmount | number:'1.2-2' }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">Status</span>
+                <mat-chip [color]="fee.isActive ? 'primary' : 'basic'">
+                  {{ fee.isActive ? 'Active' : (isExpired() ? 'Expired' : 'Inactive') }}
+                </mat-chip>
+              </div>
+              <div class="summary-item">
+                <span class="label">Created By</span>
+                <span class="value">{{ fee.createdByUserName }}</span>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Progress Section -->
+            <div class="progress-section">
+              <h4>Fee Period Progress</h4>
+              <div class="progress-info">
+                <span>{{ getDaysElapsed() }} of {{ fee.totalDays }} days completed</span>
+                <span>{{ getProgressPercentage() }}%</span>
+              </div>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="getProgressPercentage()"
+                color="accent">
+              </mat-progress-bar>
+              <div class="progress-details">
+                <span>Days Remaining: {{ getDaysRemaining() }}</span>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Allocation Section -->
+            <div class="allocation-section">
+              <h4>Fee Allocation Status</h4>
+              <div class="allocation-info">
+                <span>₹{{ fee.allocatedFeeAmount | number:'1.2-2' }} of ₹{{ fee.totalFeeAmount | number:'1.2-2' }} allocated</span>
+                <span>{{ getFeeAllocationPercentage() }}%</span>
+              </div>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="getFeeAllocationPercentage()"
+                color="primary">
+              </mat-progress-bar>
+              <div class="allocation-details">
+                <span>Remaining: ₹{{ fee.remainingFeeAmount | number:'1.2-2' }}</span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="description-section" *ngIf="fee.description">
+              <h4>Description</h4>
+              <p>{{ fee.description }}</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Statistics Cards -->
+        <div class="statistics-grid">
+          <mat-card class="stat-card">
+            <mat-card-content>
+              <div class="stat-content">
+                <mat-icon>people</mat-icon>
+                <div class="stat-info">
+                  <span class="stat-value">{{ getTotalUsersAffected() }}</span>
+                  <span class="stat-label">Users Affected</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="stat-card">
+            <mat-card-content>
+              <div class="stat-content">
+                <mat-icon>trending_down</mat-icon>
+                <div class="stat-info">
+                  <span class="stat-value">₹{{ getTotalDeductionsMade() | number:'1.2-2' }}</span>
+                  <span class="stat-label">Total Deductions</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="stat-card">
+            <mat-card-content>
+              <div class="stat-content">
+                <mat-icon>trending_up</mat-icon>
+                <div class="stat-info">
+                  <span class="stat-value">₹{{ getTotalCreditsGiven() | number:'1.2-2' }}</span>
+                  <span class="stat-label">Total Credits</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="stat-card">
+            <mat-card-content>
+              <div class="stat-content">
+                <mat-icon>calculate</mat-icon>
+                <div class="stat-info">
+                  <span class="stat-value">₹{{ getAverageFeePerUser() | number:'1.2-2' }}</span>
+                  <span class="stat-label">Avg Fee/User</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- User Allocations Tab -->
+    <mat-tab label="User Allocations">
+      <div class="tab-content">
+        <div class="allocations-header">
+          <h3>Fee Allocation Details</h3>
+          <p>Detailed breakdown of fee allocations and credits for each user</p>
+        </div>
+
+        <div class="table-container" *ngIf="!isLoadingAllocations && userAllocations.length > 0; else noAllocationsTemplate">
+          <table mat-table [dataSource]="userAllocations" class="allocations-table">
+            <!-- User Column -->
+            <ng-container matColumnDef="user">
+              <th mat-header-cell *matHeaderCellDef>User</th>
+              <td mat-cell *matCellDef="let allocation">
+                <div class="user-cell">
+                  <span class="user-name">{{ allocation.userName }}</span>
+                  <small class="user-id">ID: {{ allocation.userId }}</small>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Amount Column -->
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>Amount</th>
+              <td mat-cell *matCellDef="let allocation">
+                <div class="amount-cell">
+                  <span class="amount" [class.credit]="allocation.type === 'CREDIT'" [class.deduction]="allocation.type === 'DEDUCTION'">
+                    {{ allocation.type === 'CREDIT' ? '+' : '-' }}₹{{ allocation.allocatedAmount | number:'1.2-2' }}
+                  </span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Units Column -->
+            <ng-container matColumnDef="unitsDeducted">
+              <th mat-header-cell *matHeaderCellDef>Units Adjusted</th>
+              <td mat-cell *matCellDef="let allocation">
+                <span class="units" [class.credit]="allocation.type === 'CREDIT'" [class.deduction]="allocation.type === 'DEDUCTION'">
+                  {{ allocation.type === 'CREDIT' ? '+' : '-' }}{{ allocation.unitsDeducted | number:'1.4-4' }}
+                </span>
+              </td>
+            </ng-container>
+
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let allocation">
+                <span class="date">{{ allocation.allocationDate | date:'dd/MM/yyyy' }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Type Column -->
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let allocation">
+                <mat-chip [color]="allocation.type === 'CREDIT' ? 'accent' : 'primary'" class="type-chip">
+                  {{ allocation.type === 'CREDIT' ? 'Credit' : 'Deduction' }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="allocationColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: allocationColumns;"></tr>
+          </table>
+        </div>
+
+        <!-- No Allocations Template -->
+        <ng-template #noAllocationsTemplate>
+          <div class="no-allocations-message" *ngIf="!isLoadingAllocations">
+            <mat-icon>assignment</mat-icon>
+            <h4>No Allocations Yet</h4>
+            <p>No fee allocations have been made for this fee period.</p>
+          </div>
+
+          <div class="loading-message" *ngIf="isLoadingAllocations">
+            <mat-icon>hourglass_empty</mat-icon>
+            <p>Loading allocation details...</p>
+          </div>
+        </ng-template>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-raised-button color="primary" (click)="close()">
+    <mat-icon>close</mat-icon>
+    Close
+  </button>
+</mat-dialog-actions>

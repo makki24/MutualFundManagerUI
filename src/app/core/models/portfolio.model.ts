@@ -96,8 +96,6 @@ export interface PortfolioFee {
   id: number;
   portfolioId: number;
   portfolioName?: string;
-  feeType: 'MANAGEMENT_FEE' | 'ADMINISTRATIVE_FEE' | 'PERFORMANCE_FEE' | 'OTHER';
-  feeTypeDisplayName?: string;
   totalFeeAmount: number;
   remainingFeeAmount: number;
   fromDate: string;
@@ -107,14 +105,13 @@ export interface PortfolioFee {
   createdByUserId?: number;
   createdByUserName?: string;
   createdAt?: string;
-  totalDays?: number;
-  remainingDays?: number;
-  dailyFeeAmount?: number;
-  allocatedFeeAmount?: number;
+  totalDays: number;
+  remainingDays: number;
+  dailyFeeAmount: number;
+  allocatedFeeAmount: number;
 }
 
 export interface CreatePortfolioFeeRequest {
-  feeType: 'MANAGEMENT_FEE' | 'ADMINISTRATIVE_FEE' | 'PERFORMANCE_FEE' | 'OTHER';
   totalFeeAmount: number;
   fromDate: string;
   toDate: string;
