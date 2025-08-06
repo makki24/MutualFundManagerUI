@@ -156,6 +156,6 @@ export class PortfolioFeesComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/portfolios']);
+    this.router.navigate(['/portfolios', this.portfolioId]);
   }
 }

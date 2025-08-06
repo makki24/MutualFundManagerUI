@@ -679,7 +679,7 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     let existingUsersImpact: UserFeeImpact[] = [];
 
     // Calculate fee deduction if there's an active fee
-    if (this.activeFee && this.activeFee.remainingFeeAmount > 0) {
+    if (this.activeFee && this.activeFee.totalFeeAmount > 0) {
       // Calculate proportional fee based on remaining days and user count
       const totalUsers = currentUserCount + 1; // Including the new user
       const dailyFeePerUser = this.activeFee.dailyFeeAmount / totalUsers;
