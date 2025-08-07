@@ -1,0 +1,160 @@
+.holdings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-left h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+  color: #333;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-actions mat-form-field {
+  min-width: 200px;
+}
+
+.card-actions {
+  margin-left: auto;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-container mat-spinner {
+  margin-bottom: 20px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.holdings-table {
+  width: 100%;
+}
+
+.holding-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.holding-symbol {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1976d2;
+}
+
+.holding-company {
+  font-size: 12px;
+  color: #666;
+}
+
+.price-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.manual-update-icon {
+  color: #ff9800;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.gain-loss-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.gain-loss-amount {
+  font-weight: 500;
+}
+
+.gain-loss-percentage {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.gain-loss-amount.positive, .gain-loss-percentage.positive {
+  color: #4caf50;
+}
+
+.gain-loss-amount.negative, .gain-loss-percentage.negative {
+  color: #f44336;
+}
+
+.no-data, .no-selection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.no-data mat-icon, .no-selection mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.no-data h3, .no-selection h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+}
+
+.no-data p, .no-selection p {
+  margin: 0 0 24px 0;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-left {
+    justify-content: center;
+  }
+
+  .header-actions {
+    flex-direction: column;
+  }
+
+  .header-actions mat-form-field {
+    min-width: auto;
+    width: 100%;
+  }
+}

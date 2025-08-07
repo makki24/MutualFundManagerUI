@@ -41,6 +41,7 @@ export interface Holding {
   totalValue: number;
   gainLoss: number;
   gainLossPercentage: number;
+  needsManualUpdate?: boolean;
 }
 
 export interface Investment {

@@ -51,7 +51,7 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
               <div class="portfolio-info">
                 <mat-card-title>{{ portfolio.name }}</mat-card-title>
                 <mat-card-subtitle>
-                  Created by {{ portfolio.createdBy?.username || 'Unknown' }}
+                  Created by {{ portfolio.createdBy.username || 'Unknown' }}
                   @if (portfolio.createdAt) {
                     • {{ portfolio.createdAt | date:'mediumDate' }}
                   }

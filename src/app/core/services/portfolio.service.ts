@@ -86,6 +86,10 @@ export class PortfolioService {
     return this.http.put(`${this.API_URL}/portfolios/${portfolioId}/holdings/prices`, prices);
   }
 
+  updateAllPrices(portfolioId: number): Observable<any> {
+    return this.http.put(`${this.API_URL}/portfolios/${portfolioId}/holdings/prices/update-all`, {});
+  }
+
   // New Fee Management Methods
   createPortfolioFee(portfolioId: number, feeRequest: CreatePortfolioFeeRequest, createdByUserId: number): Observable<ApiResponse<PortfolioFee>> {
     const params = new HttpParams().set('createdByUserId', createdByUserId.toString());
