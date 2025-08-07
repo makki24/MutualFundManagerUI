@@ -10,7 +10,7 @@ import {
   UpdatePortfolioRequest,
   PortfolioFee,
   CreatePortfolioFeeRequest,
-  UserFeeAllocation
+  UserFeeAllocation, Holding
 } from '../models/portfolio.model';
 import { ApiResponse } from '../models/api-response.model';
 
@@ -66,8 +66,8 @@ export class PortfolioService {
     return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/fees/calculate`, {});
   }
 
-  getPortfolioHoldings(portfolioId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.API_URL}/portfolios/${portfolioId}/holdings`);
+  getPortfolioHoldings(portfolioId: number): Observable<ApiResponse<Holding[]>> {
+    return this.http.get<ApiResponse<Holding[]>>(`${this.API_URL}/portfolios/${portfolioId}/holdings`);
   }
 
   addHolding(portfolioId: number, holding: any): Observable<any> {

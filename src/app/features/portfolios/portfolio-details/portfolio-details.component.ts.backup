@@ -70,10 +70,6 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
                     <mat-icon>account_balance_wallet</mat-icon>
                     Manage Fees
                   </button>
-                  <button mat-button (click)="manageHoldings()">
-                    <mat-icon>pie_chart</mat-icon>
-                    Manage Holdings
-                  </button>
                 }
               </div>
             </div>
@@ -237,35 +233,10 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
             <!-- Holdings Tab -->
             <mat-tab label="Holdings">
               <div class="tab-content">
-                <div class="holdings-section">
-                  <div class="section-header">
-                    <h3>Portfolio Holdings ({{ portfolio.totalHoldings }})</h3>
-                    @if (isAdmin) {
-                      <button mat-raised-button color="primary" (click)="manageHoldings()">
-                        <mat-icon>pie_chart</mat-icon>
-                        Manage Holdings
-                      </button>
-                    }
-                  </div>
-                  <div class="holdings-preview">
-                    <mat-icon>trending_up</mat-icon>
-                    <h4>Holdings Overview</h4>
-                    <p>View and manage portfolio holdings, buy/sell stocks, and track performance.</p>
-                    <div class="holdings-stats">
-                      <div class="stat-card">
-                        <div class="stat-label">Total Holdings</div>
-                        <div class="stat-value">{{ portfolio.totalHoldings }}</div>
-                      </div>
-                      <div class="stat-card">
-                        <div class="stat-label">Holdings Value</div>
-                        <div class="stat-value">{{ portfolio.totalHoldingsValue | currency:'USD':'symbol':'1.0-0' }}</div>
-                      </div>
-                    </div>
-                    <button mat-raised-button color="primary" (click)="manageHoldings()">
-                      <mat-icon>open_in_new</mat-icon>
-                      Open Holdings Manager
-                    </button>
-                  </div>
+                <div class="coming-soon">
+                  <mat-icon>pie_chart</mat-icon>
+                  <h3>Holdings Management</h3>
+                  <p>Portfolio holdings management coming soon!</p>
                 </div>
               </div>
             </mat-tab>
@@ -378,7 +349,7 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
       padding: 20px;
     }
 
-    .investors-section, .holdings-section {
+    .investors-section {
       width: 100%;
     }
 
@@ -460,66 +431,6 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
       justify-content: center;
     }
 
-    .holdings-preview {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      text-align: center;
-      background: #f9f9f9;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-
-    .holdings-preview mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      margin-bottom: 16px;
-      color: #1976d2;
-    }
-
-    .holdings-preview h4 {
-      margin: 0 0 8px 0;
-      font-size: 18px;
-      color: #333;
-    }
-
-    .holdings-preview p {
-      margin: 0 0 20px 0;
-      color: #666;
-      max-width: 400px;
-    }
-
-    .holdings-stats {
-      display: flex;
-      gap: 20px;
-      margin: 20px 0;
-    }
-
-    .stat-card {
-      padding: 16px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      min-width: 120px;
-    }
-
-    .stat-card .stat-label {
-      font-size: 12px;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-
-    .stat-card .stat-value {
-      font-size: 18px;
-      font-weight: 600;
-      color: #333;
-    }
-
     .no-investors, .coming-soon {
       display: flex;
       flex-direction: column;
@@ -576,11 +487,6 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
 
       .section-header h3 {
         text-align: center;
-      }
-
-      .holdings-stats {
-        flex-direction: column;
-        gap: 12px;
       }
     }
   `]
@@ -688,10 +594,6 @@ export class PortfolioDetailsComponent implements OnInit {
 
   manageFees(): void {
     this.router.navigate(['/portfolios', this.portfolioId, 'fees']);
-  }
-
-  manageHoldings(): void {
-    this.router.navigate(['/holdings'], { queryParams: { portfolioId: this.portfolioId } });
   }
 
   goBack(): void {

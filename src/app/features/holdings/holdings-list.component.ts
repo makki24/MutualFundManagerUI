@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,11 +8,15 @@ import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { PortfolioService } from '../../core/services/portfolio.service';
+import { StockService } from '../../core/services/stock.service';
 import { Portfolio, Holding } from '../../core/models/portfolio.model';
+import { BuySharesDialogComponent, BuySharesDialogData } from './buy-shares-dialog/buy-shares-dialog.component';
 
 @Component({
   selector: 'app-holdings-list',
@@ -25,12 +30,18 @@ import { Portfolio, Holding } from '../../core/models/portfolio.model';
     MatTableModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatTooltipModule
   ],
   template: `
     <div class="holdings-container">
       <div class="page-header">
-        <h1>Holdings Management</h1>
+        <div class="header-left">
+          <button mat-icon-button (click)="goBack()" matTooltip="Back">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <h1>Holdings Management</h1>
+        </div>
         <div class="header-actions">
           <mat-form-field appearance="outline">
             <mat-label>Select Portfolio</mat-label>
@@ -177,7 +188,13 @@ import { Portfolio, Holding } from '../../core/models/portfolio.model';
       gap: 20px;
     }
 
-    .page-header h1 {
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-left h1 {
       margin: 0;
       font-size: 28px;
       font-weight: 500;
@@ -292,8 +309,8 @@ import { Portfolio, Holding } from '../../core/models/portfolio.model';
         align-items: stretch;
       }
 
-      .page-header h1 {
-        text-align: center;
+      .header-left {
+        justify-content: center;
       }
 
       .header-actions {
@@ -309,6 +326,10 @@ import { Portfolio, Holding } from '../../core/models/portfolio.model';
 })
 export class HoldingsListComponent implements OnInit {
   private portfolioService = inject(PortfolioService);
+  private stockService = inject(StockService);
+  private dialog = inject(MatDialog);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private snackBar = inject(MatSnackBar);
 
   portfolios: Portfolio[] = [];
@@ -318,18 +339,22 @@ export class HoldingsListComponent implements OnInit {
   displayedColumns = ['symbol', 'quantity', 'avgPrice', 'currentPrice', 'totalValue', 'gainLoss', 'actions'];
 
   ngOnInit(): void {
-    this.loadPortfolios();
+    // Check for portfolioId query parameter
+    const portfolioIdParam = this.route.snapshot.queryParams['portfolioId'];
+    this.loadPortfolios(portfolioIdParam ? Number(portfolioIdParam) : null);
   }
 
-  loadPortfolios(): void {
+  loadPortfolios(preselectedPortfolioId?: number | null): void {
     this.portfolioService.getPortfolios().subscribe({
       next: (response) => {
         if (response.success) {
           this.portfolios = response.data || [];
-          if (this.portfolios.length > 0) {
+          if (preselectedPortfolioId && this.portfolios.find(p => p.id === preselectedPortfolioId)) {
+            this.selectedPortfolioControl.setValue(preselectedPortfolioId);
+          } else if (this.portfolios.length > 0) {
             this.selectedPortfolioControl.setValue(this.portfolios[0].id);
-            this.onPortfolioChange();
           }
+          this.onPortfolioChange();
         }
       },
       error: (error) => {
@@ -352,7 +377,7 @@ export class HoldingsListComponent implements OnInit {
     this.isLoading = true;
     this.portfolioService.getPortfolioHoldings(portfolioId).subscribe({
       next: (holdings) => {
-        this.holdings = holdings;
+        this.holdings = holdings.data ?? [];
         this.isLoading = false;
       },
       error: (error) => {
@@ -370,11 +395,55 @@ export class HoldingsListComponent implements OnInit {
   }
 
   addHolding(): void {
-    this.snackBar.open('Add holding feature coming soon!', 'Close', { duration: 3000 });
+    const portfolioId = this.selectedPortfolioControl.value;
+    if (!portfolioId) return;
+
+    const portfolio = this.portfolios.find(p => p.id === portfolioId);
+    if (!portfolio) return;
+
+    const dialogRef = this.dialog.open(BuySharesDialogComponent, {
+      maxWidth: 900,
+      data: {
+        portfolioId: portfolioId,
+        portfolioName: portfolio.name
+      } as BuySharesDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadHoldings(portfolioId);
+        this.snackBar.open('New holding added successfully!', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   buyShares(holding: Holding): void {
-    this.snackBar.open(`Buy shares for ${holding.symbol} feature coming soon!`, 'Close', { duration: 3000 });
+    const portfolioId = this.selectedPortfolioControl.value;
+    if (!portfolioId) return;
+
+    const portfolio = this.portfolios.find(p => p.id === portfolioId);
+    if (!portfolio) return;
+
+    const dialogRef = this.dialog.open(BuySharesDialogComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      data: {
+        portfolioId: portfolioId,
+        portfolioName: portfolio.name,
+        existingHolding: {
+          symbol: holding.symbol,
+          companyName: holding.companyName,
+          currentPrice: holding.currentPrice
+        }
+      } as BuySharesDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadHoldings(portfolioId);
+        this.snackBar.open('Shares purchased successfully!', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   sellShares(holding: Holding): void {
@@ -382,13 +451,46 @@ export class HoldingsListComponent implements OnInit {
   }
 
   updatePrice(holding: Holding): void {
-    this.snackBar.open(`Update price for ${holding.symbol} feature coming soon!`, 'Close', { duration: 3000 });
+    const portfolioId = this.selectedPortfolioControl.value;
+    if (!portfolioId) return;
+
+    this.stockService.getStockPrice(holding.symbol).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.snackBar.open(`Price updated for ${holding.symbol}: ${response.data?.primaryPrice}`, 'Close', { duration: 3000 });
+          this.loadHoldings(portfolioId);
+        }
+      },
+      error: (error) => {
+        console.error('Failed to update price:', error);
+        this.snackBar.open(`Failed to update price for ${holding.symbol}`, 'Close', { duration: 3000 });
+      }
+    });
   }
 
   updateAllPrices(): void {
     const portfolioId = this.selectedPortfolioControl.value;
     if (!portfolioId) return;
 
-    this.snackBar.open('Update all prices feature coming soon!', 'Close', { duration: 3000 });
+    this.snackBar.open('Updating all prices...', 'Close', { duration: 2000 });
+
+    // Update prices for all holdings
+    const updatePromises = this.holdings.map(holding =>
+      this.stockService.getStockPrice(holding.symbol).toPromise()
+    );
+
+    Promise.allSettled(updatePromises).then(() => {
+      this.loadHoldings(portfolioId);
+      this.snackBar.open('All prices updated successfully!', 'Close', { duration: 3000 });
+    });
+  }
+
+  goBack(): void {
+    const portfolioId = this.route.snapshot.queryParams['portfolioId'];
+    if (portfolioId) {
+      this.router.navigate(['/portfolios', portfolioId]);
+    } else {
+      this.router.navigate(['/portfolios']);
+    }
   }
 }
