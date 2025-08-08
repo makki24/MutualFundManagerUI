@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 
@@ -18,6 +19,7 @@ describe('PortfolioListComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
+  let mockDialog: jasmine.SpyObj<MatDialog>;
 
   const mockAdminUser: User = {
     id: 1,
@@ -85,6 +87,7 @@ describe('PortfolioListComponent', () => {
     const authServiceSpy = jasmine.createSpyObj('AuthService', ['isAdmin']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+    const dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -95,7 +98,8 @@ describe('PortfolioListComponent', () => {
         { provide: PortfolioService, useValue: portfolioServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: MatSnackBar, useValue: snackBarSpy }
+        { provide: MatSnackBar, useValue: snackBarSpy },
+        { provide: MatDialog, useValue: dialogSpy }
       ]
     }).compileComponents();
 
@@ -105,6 +109,7 @@ describe('PortfolioListComponent', () => {
     mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     mockSnackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
+    mockDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
   });
 
   it('should create', () => {
@@ -172,16 +177,14 @@ describe('PortfolioListComponent', () => {
   });
 
   it('should show snackbar message when createPortfolio is called', () => {
+    const mockDialogRef = {
+      afterClosed: () => of(false)
+    };
+    mockDialog.open.and.returnValue(mockDialogRef as any);
+
     component.createPortfolio();
 
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      'Create Portfolio feature coming soon! This will open a form to create a new portfolio.',
-      'Close',
-      {
-        duration: 5000,
-        panelClass: ['warning-snackbar']
-      }
-    );
+    expect(mockDialog.open).toHaveBeenCalled();
   });
 
   it('should navigate to portfolio details when viewPortfolio is called', () => {

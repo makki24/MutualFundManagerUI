@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -163,10 +163,13 @@ describe('PortfolioFeesComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
-  it('should handle error when loading portfolio fees', () => {
+  it('should handle error when loading portfolio fees', fakeAsync(() => {
     // Initialize component first
     component.portfolioId = 1;
     component.isAdmin = true;
+
+    // Clear any previous calls
+    mockSnackBar.open.calls.reset();
 
     // Reset the spy to return error for this specific test
     mockPortfolioFeeService.getPortfolioFees.and.returnValue(
@@ -174,6 +177,7 @@ describe('PortfolioFeesComponent', () => {
     );
 
     component.loadPortfolioFees();
+    tick(); // Process the async operation
 
     expect(component.isLoading).toBe(false);
     expect(mockSnackBar.open).toHaveBeenCalledWith(
@@ -181,7 +185,7 @@ describe('PortfolioFeesComponent', () => {
       'Close',
       { duration: 3000 }
     );
-  });
+  }));
 
   it('should calculate fee allocation percentage correctly', () => {
     const fee = mockPortfolioFees[0];
@@ -248,9 +252,13 @@ describe('PortfolioFeesComponent', () => {
 
   it('should show error when trying to create fee with active fee exists', () => {
     // Initialize component properly
+    fixture.detectChanges(); // This ensures the component is properly initialized
     component.portfolioId = 1;
     component.isAdmin = true;
     component.activeFee = mockPortfolioFees[0];
+
+    // Clear any previous calls
+    mockSnackBar.open.calls.reset();
 
     component.openCreateFeeDialog();
 
@@ -263,8 +271,9 @@ describe('PortfolioFeesComponent', () => {
   });
 
   it('should navigate back to portfolios when goBack is called', () => {
+    component.portfolioId = 1;
     component.goBack();
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/portfolios']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/portfolios', 1]);
   });
 });

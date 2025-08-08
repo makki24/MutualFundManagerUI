@@ -1,0 +1,89 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #drawer class="sidenav" fixedInViewport
+      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+      [mode]="(isHandset$ | async) ? 'over' : 'side'"
+      [opened]="(isHandset$ | async) === false">
+
+    <mat-toolbar class="sidenav-header">
+      <mat-icon class="logo-icon">account_balance</mat-icon>
+      <span class="logo-text">MF Manager</span>
+    </mat-toolbar>
+
+    <mat-nav-list>
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Dashboard</span>
+      </a>
+
+      @if (isAdmin) {
+        <a mat-list-item routerLink="/portfolios" routerLinkActive="active">
+          <mat-icon matListItemIcon>pie_chart</mat-icon>
+          <span matListItemTitle>Portfolios</span>
+        </a>
+
+        <a mat-list-item routerLink="/users" routerLinkActive="active">
+          <mat-icon matListItemIcon>people</mat-icon>
+          <span matListItemTitle>Users</span>
+        </a>
+
+        <a mat-list-item routerLink="/holdings" routerLinkActive="active">
+          <mat-icon matListItemIcon>trending_up</mat-icon>
+          <span matListItemTitle>Holdings</span>
+        </a>
+      }
+
+      <a mat-list-item routerLink="/transactions" routerLinkActive="active">
+        <mat-icon matListItemIcon>receipt_long</mat-icon>
+        <span matListItemTitle>Transactions</span>
+      </a>
+
+      <mat-divider></mat-divider>
+
+      <a mat-list-item (click)="logout()">
+        <mat-icon matListItemIcon>logout</mat-icon>
+        <span matListItemTitle>Logout</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" class="main-toolbar">
+      <button
+        type="button"
+        aria-label="Toggle sidenav"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="isHandset$ | async">
+        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+      </button>
+
+      <span class="toolbar-title">{{ getPageTitle() }}</span>
+
+      <span class="toolbar-spacer"></span>
+
+      <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+
+      <mat-menu #userMenu="matMenu">
+        <div class="user-info">
+          <div class="user-name">{{ currentUser?.firstName }} {{ currentUser?.lastName }}</div>
+          <div class="user-role">{{ currentUser?.role }}</div>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="changePassword()">
+          <mat-icon>lock</mat-icon>
+          <span>Change Password</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

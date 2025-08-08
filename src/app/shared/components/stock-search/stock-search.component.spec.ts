@@ -80,14 +80,20 @@ describe('StockSearchComponent', () => {
     mockStockService.searchStocks.and.returnValue(of(mockResponse));
 
     component.ngOnInit();
+    fixture.detectChanges();
+
+    let receivedStocks: Stock[] = [];
+    component.filteredStocks$.subscribe(stocks => {
+      receivedStocks = stocks;
+    });
+
     component.searchControl.setValue('REL');
     tick(300); // Wait for debounce
 
     expect(mockStockService.searchStocks).toHaveBeenCalledWith('REL');
+    expect(receivedStocks).toEqual(mockStocks);
 
-    component.filteredStocks$.subscribe(stocks => {
-      expect(stocks).toEqual(mockStocks);
-    });
+    tick(); // Ensure all async operations complete
   }));
 
   it('should not search when input length < 2', fakeAsync(() => {
@@ -106,15 +112,21 @@ describe('StockSearchComponent', () => {
     mockStockService.searchStocks.and.returnValue(throwError(() => new Error('API Error')));
 
     component.ngOnInit();
+    fixture.detectChanges();
+
+    let receivedStocks: Stock[] = [];
+    component.filteredStocks$.subscribe(stocks => {
+      receivedStocks = stocks;
+    });
+
     component.searchControl.setValue('REL');
     tick(300);
 
     expect(mockStockService.searchStocks).toHaveBeenCalledWith('REL');
     expect(component.isLoading).toBeFalse();
+    expect(receivedStocks).toEqual([]);
 
-    component.filteredStocks$.subscribe(stocks => {
-      expect(stocks).toEqual([]);
-    });
+    tick(); // Ensure all async operations complete
   }));
 
   it('should emit stockSelected when stock is selected', () => {
@@ -179,11 +191,15 @@ describe('StockSearchComponent', () => {
     mockStockService.searchStocks.and.returnValue(of(mockResponse));
 
     component.ngOnInit();
+
+    let receivedStocks: Stock[] = [];
+    component.filteredStocks$.subscribe(stocks => {
+      receivedStocks = stocks;
+    });
+
     component.searchControl.setValue('INVALID');
     tick(300);
 
-    component.filteredStocks$.subscribe(stocks => {
-      expect(stocks).toEqual([]);
-    });
+    expect(receivedStocks).toEqual([]);
   }));
 });
