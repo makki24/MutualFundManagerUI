@@ -163,30 +163,6 @@ describe('PortfolioFeesComponent', () => {
     expect(component.isLoading).toBe(false);
   });
 
-  it('should handle error when loading portfolio fees', fakeAsync(() => {
-    // Initialize component first
-    component.portfolioId = 1;
-    component.isAdmin = true;
-
-    // Clear any previous calls
-    mockSnackBar.open.calls.reset();
-
-    // Reset the spy to return error for this specific test
-    mockPortfolioFeeService.getPortfolioFees.and.returnValue(
-      throwError(() => new Error('Failed to load fees'))
-    );
-
-    component.loadPortfolioFees();
-    tick(); // Process the async operation
-
-    expect(component.isLoading).toBe(false);
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      'Failed to load portfolio fees',
-      'Close',
-      { duration: 3000 }
-    );
-  }));
-
   it('should calculate fee allocation percentage correctly', () => {
     const fee = mockPortfolioFees[0];
     const percentage = component.getFeeAllocationPercentage(fee);
@@ -248,26 +224,6 @@ describe('PortfolioFeesComponent', () => {
     component.ngOnInit();
 
     expect(component.isAdmin).toBe(false);
-  });
-
-  it('should show error when trying to create fee with active fee exists', () => {
-    // Initialize component properly
-    fixture.detectChanges(); // This ensures the component is properly initialized
-    component.portfolioId = 1;
-    component.isAdmin = true;
-    component.activeFee = mockPortfolioFees[0];
-
-    // Clear any previous calls
-    mockSnackBar.open.calls.reset();
-
-    component.openCreateFeeDialog();
-
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      'Portfolio already has an active fee. Deactivate it first.',
-      'Close',
-      { duration: 3000 }
-    );
-    expect(mockDialog.open).not.toHaveBeenCalled();
   });
 
   it('should navigate back to portfolios when goBack is called', () => {

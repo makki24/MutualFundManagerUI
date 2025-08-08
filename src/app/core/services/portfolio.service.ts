@@ -90,6 +90,15 @@ export class PortfolioService {
     return this.http.put(`${this.API_URL}/portfolios/${portfolioId}/holdings/prices/update-all`, {});
   }
 
+  updateStockPrice(portfolioId: number, symbol: string, newPrice: number): Observable<ApiResponse<any>> {
+    const params = new HttpParams().set('newPrice', newPrice.toString());
+    return this.http.put<ApiResponse<any>>(
+      `${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/price`,
+      {},
+      { params }
+    );
+  }
+
   // New Fee Management Methods
   createPortfolioFee(portfolioId: number, feeRequest: CreatePortfolioFeeRequest, createdByUserId: number): Observable<ApiResponse<PortfolioFee>> {
     const params = new HttpParams().set('createdByUserId', createdByUserId.toString());

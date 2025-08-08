@@ -17,6 +17,7 @@ import { PortfolioService } from '../../../core/services/portfolio.service';
 import { StockService } from '../../../core/services/stock.service';
 import { Portfolio, Holding } from '../../../core/models/portfolio.model';
 import { BuySharesDialogComponent, BuySharesDialogData } from '../buy-shares-dialog/buy-shares-dialog.component';
+import { UpdatePriceDialogComponent, UpdatePriceDialogData, UpdatePriceDialogResult } from '../update-price-dialog/update-price-dialog.component';
 
 interface PriceUpdateResult {
   success: boolean;
@@ -187,16 +188,39 @@ export class HoldingsListComponent implements OnInit {
     const portfolioId = this.selectedPortfolioControl.value;
     if (!portfolioId) return;
 
-    this.stockService.getStockPrice(holding.symbol).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.snackBar.open(`Price updated for ${holding.symbol}: ${response.data?.primaryPrice}`, 'Close', { duration: 3000 });
-          this.loadHoldings(portfolioId);
-        }
-      },
-      error: (error) => {
-        console.error('Failed to update price:', error);
-        this.snackBar.open(`Failed to update price for ${holding.symbol}`, 'Close', { duration: 3000 });
+    const dialogRef = this.dialog.open(UpdatePriceDialogComponent, {
+      width: '450px',
+      data: {
+        holding: holding,
+        portfolioId: portfolioId
+      } as UpdatePriceDialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: UpdatePriceDialogResult) => {
+      if (result) {
+        this.portfolioService.updateStockPrice(portfolioId, holding.symbol, result.newPrice).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.snackBar.open(
+                `Price updated for ${holding.symbol}: $${result.newPrice}`, 
+                'Close', 
+                { duration: 3000 }
+              );
+              this.loadHoldings(portfolioId);
+            } else {
+              this.snackBar.open(
+                response.message || `Failed to update price for ${holding.symbol}`, 
+                'Close', 
+                { duration: 3000 }
+              );
+            }
+          },
+          error: (error) => {
+            console.error('Failed to update price:', error);
+            const errorMessage = error.error?.message || `Failed to update price for ${holding.symbol}`;
+            this.snackBar.open(errorMessage, 'Close', { duration: 3000 });
+          }
+        });
       }
     });
   }
