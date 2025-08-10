@@ -45,7 +45,11 @@ export const routes: Routes = [
       },
       {
         path: 'transactions',
-        loadComponent: () => import('./features/transactions/transaction-list.component').then(m => m.TransactionListComponent)
+        loadComponent: () => import('./features/transactions/transactions-page/transactions-page.component').then(m => m.TransactionsPageComponent)
+      },
+      {
+        path: 'transactions/portfolio/:portfolioId',
+        loadComponent: () => import('./features/transactions/transactions-page/transactions-page.component').then(m => m.TransactionsPageComponent)
       }
     ]
   },

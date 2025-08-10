@@ -65,6 +65,11 @@ export class AuthService {
     return userStr ? JSON.parse(userStr) : null;
   }
 
+  getCurrentUserId(): number | null {
+    const user = this.getCurrentUser();
+    return user ? user.id : null;
+  }
+
   private setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }

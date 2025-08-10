@@ -5,6 +5,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 
+import { AddUserToPortfolioDialogComponent } from './add-user-to-portfolio-dialog/add-user-to-portfolio-dialog.component';
+import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-user-dialog.component';
+
 import { PortfolioDetailsComponent } from './portfolio-details.component';
 import { PortfolioService } from '../../../core/services/portfolio.service';
 import { InvestmentService } from '../../../core/services/investment.service';
@@ -132,6 +135,7 @@ describe('PortfolioDetailsComponent', () => {
   });
 
   it('should handle portfolio loading error', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
     mockAuthService.isAdmin.and.returnValue(false);
     mockPortfolioService.getPortfolioDetails.and.returnValue(
       throwError(() => new Error('Failed to load'))
@@ -142,6 +146,7 @@ describe('PortfolioDetailsComponent', () => {
 
     component.ngOnInit();
 
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load portfolio details:', jasmine.any(Error));
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Failed to load portfolio details',
       'Close',
@@ -151,6 +156,7 @@ describe('PortfolioDetailsComponent', () => {
   });
 
   it('should handle investments loading error', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
     mockAuthService.isAdmin.and.returnValue(false);
     mockPortfolioService.getPortfolioDetails.and.returnValue(
       of(createApiResponse(mockPortfolio))
@@ -161,6 +167,7 @@ describe('PortfolioDetailsComponent', () => {
 
     component.ngOnInit();
 
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load portfolio investments:', jasmine.any(Error));
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Failed to load portfolio investments',
       'Close',
@@ -186,26 +193,59 @@ describe('PortfolioDetailsComponent', () => {
     const dialogRef = { afterClosed: () => of(true) };
     mockDialog.open.and.returnValue(dialogRef as any);
 
-    spyOn(component, 'loadPortfolioInvestments');
-    spyOn(component, 'loadPortfolioDetails');
+    const loadInvestmentsSpy = spyOn(component, 'loadPortfolioInvestments');
+    const loadDetailsSpy = spyOn(component, 'loadPortfolioDetails');
 
     component.openAddUserDialog();
 
-    expect(mockDialog.open).toHaveBeenCalled();
+    expect(mockDialog.open).toHaveBeenCalledWith(AddUserToPortfolioDialogComponent, {
+      width: jasmine.any(String),
+      maxHeight: jasmine.any(String),
+      data: { portfolioId: 1 }
+    });
+    
+    // Test the dialog closed callback
+    dialogRef.afterClosed().subscribe(() => {
+      expect(loadInvestmentsSpy).toHaveBeenCalled();
+      expect(loadDetailsSpy).toHaveBeenCalled();
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        'User added to portfolio successfully',
+        'Close',
+        { duration: 3000 }
+      );
+    });
   });
 
   it('should open withdraw dialog for admin', () => {
     component.isAdmin = true;
     component.portfolioId = 1;
+    const testInvestment = mockInvestments[0];
     const dialogRef = { afterClosed: () => of(true) };
     mockDialog.open.and.returnValue(dialogRef as any);
 
-    spyOn(component, 'loadPortfolioInvestments');
-    spyOn(component, 'loadPortfolioDetails');
+    const loadInvestmentsSpy = spyOn(component, 'loadPortfolioInvestments');
+    const loadDetailsSpy = spyOn(component, 'loadPortfolioDetails');
 
-    component.openWithdrawDialog(mockInvestments[0]);
+    component.openWithdrawDialog(testInvestment);
 
-    expect(mockDialog.open).toHaveBeenCalled();
+    expect(mockDialog.open).toHaveBeenCalledWith(WithdrawUserDialogComponent, {
+      width: jasmine.any(String),
+      data: {
+        portfolioId: 1,
+        investment: testInvestment
+      }
+    });
+    
+    // Test the dialog closed callback
+    dialogRef.afterClosed().subscribe(() => {
+      expect(loadInvestmentsSpy).toHaveBeenCalled();
+      expect(loadDetailsSpy).toHaveBeenCalled();
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        'User withdrawal processed successfully',
+        'Close',
+        { duration: 3000 }
+      );
+    });
   });
 
   it('should redirect to portfolios if no portfolio ID', () => {

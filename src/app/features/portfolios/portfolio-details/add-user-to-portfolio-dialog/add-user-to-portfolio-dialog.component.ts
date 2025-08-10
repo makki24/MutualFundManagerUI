@@ -103,9 +103,11 @@ export interface UserFeeImpact {
             }
           </mat-select>
           <mat-icon matSuffix>person</mat-icon>
-          <mat-error *ngIf="addUserForm.get('userId')?.hasError('required')">
-            Please select a user
-          </mat-error>
+          @if(addUserForm.get('userId')?.hasError('required')) {
+            <mat-error>
+              Please select a user
+            </mat-error>
+          }
           <mat-hint>Select a user who is not already invested in this portfolio</mat-hint>
         </mat-form-field>
 

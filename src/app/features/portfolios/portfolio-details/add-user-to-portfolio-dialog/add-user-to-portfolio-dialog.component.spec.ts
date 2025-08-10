@@ -120,69 +120,138 @@ describe('AddUserToPortfolioDialogComponent', () => {
     fixture = TestBed.createComponent(AddUserToPortfolioDialogComponent);
     component = fixture.componentInstance;
 
-    // Setup default mock responses
-    mockUserService.getUsers.and.returnValue(of(createApiResponse(mockUsers)));
-    mockInvestmentService.getPortfolioInvestments.and.returnValue(of(createApiResponse(mockInvestments)));
-    mockPortfolioService.getPortfolioFees.and.returnValue(of(createApiResponse([])));
+    // Setup default mock responses with ApiResponse wrapper
+    mockUserService.getUsers.and.returnValue(of({
+      success: true,
+      message: 'Users retrieved successfully',
+      data: mockUsers,
+      timestamp: new Date().toISOString(),
+      error: null
+    }));
+    
+    mockInvestmentService.getPortfolioInvestments.and.returnValue(of({
+      success: true,
+      message: 'Investments retrieved successfully',
+      data: mockInvestments,
+      timestamp: new Date().toISOString(),
+      error: null
+    }));
+    
+    mockPortfolioService.getPortfolioFees.and.returnValue(of({
+      success: true,
+      message: 'Fees retrieved successfully',
+      data: [],
+      timestamp: new Date().toISOString(),
+      error: null
+    }));
+    
+    // Setup current user
+    mockAuthService.getCurrentUser.and.returnValue({
+      id: 1,
+      username: 'admin',
+      email: 'admin@example.com',
+      firstName: 'Admin',
+      lastName: 'User',
+      phone: '+1234567890',
+      role: 'ADMIN',
+      active: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load available users and portfolio fees on init', () => {
+  it('should load available users and portfolio fees on init', (done) => {
     component.ngOnInit();
 
-    expect(mockUserService.getUsers).toHaveBeenCalledWith(true, 'USER');
-    expect(mockInvestmentService.getPortfolioInvestments).toHaveBeenCalledWith(1);
-    expect(mockPortfolioService.getPortfolioFees).toHaveBeenCalledWith(1, true);
-    expect(component.allUsers).toEqual(mockUsers);
-    expect(component.existingInvestorIds).toEqual([3]);
+    // Wait for async operations to complete
+    fixture.detectChanges();
+    
+    fixture.whenStable().then(() => {
+      expect(mockUserService.getUsers).toHaveBeenCalledWith(true, 'USER');
+      expect(mockInvestmentService.getPortfolioInvestments).toHaveBeenCalledWith(1);
+      expect(mockPortfolioService.getPortfolioFees).toHaveBeenCalledWith(1, true);
+      expect(component.allUsers).toEqual(mockUsers);
+      expect(component.existingInvestorIds).toEqual([3]);
+      done();
+    });
   });
 
-  it('should load active portfolio fee', () => {
+  it('should load active portfolio fee', (done) => {
     mockPortfolioService.getPortfolioFees.and.returnValue(
-      of(createApiResponse([mockPortfolioFee]))
+      of({
+        success: true,
+        message: 'Fees retrieved successfully',
+        data: [mockPortfolioFee],
+        timestamp: new Date().toISOString(),
+        error: null
+      })
     );
 
     component.loadPortfolioFees();
-
-    expect(component.activeFee).toEqual(mockPortfolioFee);
+    
+    fixture.whenStable().then(() => {
+      expect(component.activeFee).toEqual(mockPortfolioFee);
+      done();
+    });
   });
 
-  it('should handle no active portfolio fees', () => {
+  it('should handle no active portfolio fees', (done) => {
     mockPortfolioService.getPortfolioFees.and.returnValue(
-      of(createApiResponse([]))
+      of({
+        success: true,
+        message: 'No active fees found',
+        data: [],
+        timestamp: new Date().toISOString(),
+        error: null
+      })
     );
 
     component.loadPortfolioFees();
-
-    expect(component.activeFee).toBeNull();
+    
+    fixture.whenStable().then(() => {
+      expect(component.activeFee).toBeNull();
+      done();
+    });
   });
 
-  it('should handle portfolio fees loading error', () => {
+  it('should handle portfolio fees loading error', (done) => {
+    const error = new Error('Failed to load fees');
+    const consoleErrorSpy = spyOn(console, 'error');
+    
     mockPortfolioService.getPortfolioFees.and.returnValue(
-      throwError(() => new Error('Failed to load fees'))
+      throwError(() => error)
     );
 
     component.loadPortfolioFees();
-
-    expect(component.activeFee).toBeNull();
+    
+    fixture.whenStable().then(() => {
+      expect(component.activeFee).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load portfolio fees:', error);
+      done();
+    });
   });
 
-  it('should handle user loading error', () => {
+  it('should handle user loading error', (done) => {
+    const error = new Error('Failed to load users');
     mockUserService.getUsers.and.returnValue(
-      throwError(() => new Error('Failed to load users'))
+      throwError(() => error)
     );
 
     component.ngOnInit();
-
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      'Failed to load users',
-      'Close',
-      { duration: 3000 }
-    );
-    expect(component.isLoadingUsers).toBe(false);
+    
+    fixture.whenStable().then(() => {
+      expect(mockSnackBar.open).toHaveBeenCalledWith(
+        'Failed to load users',
+        'Close',
+        { duration: 3000 }
+      );
+      expect(component.isLoadingUsers).toBe(false);
+      done();
+    });
   });
 
   it('should filter available users excluding existing investors', () => {

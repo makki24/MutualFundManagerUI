@@ -111,7 +111,8 @@ describe('HoldingsListComponent', () => {
     const portfolioServiceSpy = jasmine.createSpyObj('PortfolioService', [
       'getPortfolios',
       'getPortfolioHoldings',
-      'updateAllPrices'
+      'updateAllPrices',
+      'updateStockPrice'
     ]);
     const stockServiceSpy = jasmine.createSpyObj('StockService', ['getStockPrice']);
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
@@ -317,24 +318,11 @@ describe('HoldingsListComponent', () => {
   describe('updatePrice', () => {
     beforeEach(() => {
       component.selectedPortfolioControl.setValue(1);
-      stockService.getStockPrice.and.returnValue(of({
-        success: true,
-        message: 'Price fetched successfully',
-        data: {
-          tickerId: 'AAPL',
-          companyName: 'Apple Inc.',
-          industry: 'Technology',
-          currentPrice: {
-            bsePrice: '165.00',
-            nsePrice: '165.00'
-          },
-          percentChange: 3.125,
-          yearHigh: 180,
-          yearLow: 120,
-          primaryPrice: 165
-        } as StockPrice,
-        timestamp: new Date().toISOString()
-      } as ApiResponse<StockPrice>));
+      // Dialog should return a result with the new price
+      const dialogRef = { afterClosed: () => of({ newPrice: 165 }) };
+      dialog.open.and.returnValue(dialogRef as any);
+      // Stub updateStockPrice to succeed by default
+      portfolioService.updateStockPrice.and.returnValue(of({ success: true, message: 'OK', data: null } as any));
     });
 
     it('should update individual stock price', () => {
@@ -342,13 +330,14 @@ describe('HoldingsListComponent', () => {
 
       component.updatePrice(holding);
 
-      expect(stockService.getStockPrice).toHaveBeenCalledWith('AAPL');
-      expect(snackBar.open).toHaveBeenCalledWith('Price updated for AAPL: 165', 'Close', { duration: 3000 });
+      expect(portfolioService.updateStockPrice).toHaveBeenCalledWith(1, 'AAPL', 165);
+      expect(snackBar.open).toHaveBeenCalledWith('Price updated for AAPL: $165', 'Close', { duration: 3000 });
       expect(portfolioService.getPortfolioHoldings).toHaveBeenCalledWith(1);
     });
 
     it('should handle individual price update error', () => {
-      stockService.getStockPrice.and.returnValue(throwError('API Error'));
+      // Error from backend when updating price
+      portfolioService.updateStockPrice.and.returnValue(throwError('API Error'));
       const holding = mockHoldings[0];
 
       component.updatePrice(holding);
@@ -362,7 +351,7 @@ describe('HoldingsListComponent', () => {
 
       component.updatePrice(holding);
 
-      expect(stockService.getStockPrice).not.toHaveBeenCalled();
+      expect(portfolioService.updateStockPrice).not.toHaveBeenCalled();
     });
   });
 

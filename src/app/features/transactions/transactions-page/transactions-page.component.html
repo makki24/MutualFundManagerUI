@@ -1,0 +1,45 @@
+<div class="transactions-page">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        Transactions
+        <span *ngIf="portfolio" class="portfolio-name">
+          - {{ portfolio.name }}
+        </span>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-tab-group [(selectedIndex)]="selectedTabIndex" animationDuration="300ms">
+        <!-- User Transactions Tab -->
+        <mat-tab label="My Transactions">
+          <div class="tab-content">
+            <app-transactions-list 
+              [viewType]="'user'"
+              [portfolioId]="portfolioId">
+            </app-transactions-list>
+          </div>
+        </mat-tab>
+
+        <!-- Portfolio Transactions Tab (only show if portfolioId exists) -->
+        <mat-tab label="Portfolio Transactions" *ngIf="portfolioId">
+          <div class="tab-content">
+            <app-transactions-list 
+              [viewType]="'portfolio'"
+              [portfolioId]="portfolioId">
+            </app-transactions-list>
+          </div>
+        </mat-tab>
+
+        <!-- All Portfolios Tab (only show if no specific portfolio) -->
+        <mat-tab label="All Portfolios" *ngIf="!portfolioId">
+          <div class="tab-content">
+            <app-transactions-list 
+              [viewType]="'user'">
+            </app-transactions-list>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

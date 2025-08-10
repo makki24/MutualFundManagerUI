@@ -1,0 +1,178 @@
+.transactions-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  mat-card-header {
+    flex-shrink: 0;
+    
+    .transaction-count {
+      font-size: 0.8em;
+      color: rgba(0, 0, 0, 0.6);
+      margin-left: 8px;
+    }
+  }
+  
+  mat-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 16px;
+  }
+}
+
+.filters-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  
+  .filter-field {
+    flex: 1;
+    min-width: 200px;
+    max-width: 250px;
+  }
+  
+  .filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    
+    button {
+      mat-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+}
+
+.table-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #555;
+    }
+  }
+}
+
+.transactions-table {
+  width: 100%;
+  
+  th.mat-header-cell {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  td.mat-cell {
+    padding: 12px;
+  }
+  
+  .positive-amount {
+    color: #4caf50;
+    font-weight: 500;
+  }
+  
+  .negative-amount {
+    color: #f44336;
+    font-weight: 500;
+  }
+  
+  .no-data {
+    text-align: center;
+    padding: 40px;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 16px;
+  }
+  
+  mat-chip {
+    font-size: 12px;
+    height: 24px;
+    line-height: 24px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  
+  p {
+    margin-top: 16px;
+    color: rgba(0, 0, 0, 0.54);
+  }
+}
+
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 12px;
+  
+  span {
+    color: rgba(0, 0, 0, 0.54);
+  }
+}
+
+.end-of-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 8px;
+  color: rgba(0, 0, 0, 0.54);
+  
+  mat-icon {
+    color: #4caf50;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .filters-section {
+    .filter-field {
+      min-width: 100%;
+    }
+    
+    .filter-actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+  
+  .transactions-table {
+    font-size: 12px;
+    
+    td.mat-cell {
+      padding: 8px;
+    }
+  }
+}

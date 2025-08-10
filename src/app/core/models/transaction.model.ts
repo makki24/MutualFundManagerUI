@@ -1,12 +1,24 @@
+export enum TransactionType {
+  BUY = 'BUY',
+  SELL = 'SELL',
+  DIVIDEND = 'DIVIDEND',
+  FEE = 'FEE',
+  INVESTMENT = 'INVESTMENT',
+  WITHDRAWAL = 'WITHDRAWAL'
+}
+
 export interface Transaction {
   id: number;
-  userId: number;
+  userId?: number;
   portfolioId: number;
-  type: 'INVESTMENT' | 'WITHDRAWAL' | 'FEE' | 'BUY' | 'SELL';
-  amount: number;
+  transactionType: TransactionType;
+  symbol?: string;
+  quantity?: number;
+  pricePerUnit?: number;
+  totalAmount: number;
   units?: number;
   navValue?: number;
-  description: string;
+  description?: string;
   createdAt: string;
   user?: {
     id: number;
@@ -23,9 +35,23 @@ export interface Transaction {
 export interface TransactionFilter {
   userId?: number;
   portfolioId?: number;
-  type?: string;
+  type?: TransactionType;
+  symbol?: string;
   startDate?: string;
   endDate?: string;
   page?: number;
   size?: number;
+}
+
+export interface PaginationHeaders {
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  hasNext: boolean;
+}
+
+export interface TransactionResponse {
+  transactions: Transaction[];
+  pagination: PaginationHeaders;
 }

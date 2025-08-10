@@ -61,11 +61,11 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
                 <button mat-icon-button (click)="goBack()" matTooltip="Back to Portfolios">
                   <mat-icon>arrow_back</mat-icon>
                 </button>
+                <button mat-button (click)="viewTransactions()">
+                  <mat-icon>receipt_long</mat-icon>
+                  View Transactions
+                </button>
                 @if (isAdmin) {
-                  <button mat-raised-button color="primary" (click)="openAddUserDialog()">
-                    <mat-icon>person_add</mat-icon>
-                    Add User
-                  </button>
                   <button mat-button (click)="manageFees()">
                     <mat-icon>account_balance_wallet</mat-icon>
                     Manage Fees
@@ -83,27 +83,27 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
             <div class="portfolio-stats">
               <div class="stat-item">
                 <div class="stat-label">NAV</div>
-                <div class="stat-value">{{ portfolio.navValue | currency:'USD':'symbol':'1.4-4' }}</div>
+                <div class="stat-value">{{ portfolio.navValue | currency:'INR':'symbol':'1.4-4' }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-label">Total AUM</div>
-                <div class="stat-value">{{ portfolio.totalAum | currency:'USD':'symbol':'1.0-0' }}</div>
+                <div class="stat-value">{{ portfolio.totalPortfolioValue | currency:'INR':'symbol':'1.0-0' }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-label">Total Units</div>
-                <div class="stat-value">{{ portfolio.totalUnits | number:'1.0-0' }}</div>
+                <div class="stat-value">{{ portfolio.totalUnits | number:'1.4-4' }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-label">Available Cash</div>
-                <div class="stat-value">{{ portfolio.remainingCash | currency:'USD':'symbol':'1.0-0' }}</div>
+                <div class="stat-value">{{ portfolio.remainingCash | currency:'INR':'symbol':'1.0-0' }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-label">Investors</div>
                 <div class="stat-value">{{ portfolio.totalInvestors }}</div>
               </div>
               <div class="stat-item">
-                <div class="stat-label">Holdings</div>
-                <div class="stat-value">{{ portfolio.totalHoldings }}</div>
+                <div class="stat-label">Holdings value</div>
+                <div class="stat-value">{{ portfolio.totalHoldingsValue | currency:'INR':'symbol':'1.0-0' }}</div>
               </div>
             </div>
           </mat-card-content>
@@ -151,9 +151,9 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
                           <th mat-header-cell *matHeaderCellDef>Investment</th>
                           <td mat-cell *matCellDef="let investment">
                             <div class="investment-info">
-                              <div class="amount">{{ investment.totalInvested | currency:'USD':'symbol':'1.2-2' }}</div>
+                              <div class="amount">{{ investment.totalInvested | currency:'INR':'symbol':'1.2-2' }}</div>
                               <div class="units">{{ investment.unitsHeld | number:'1.4-4' }} units</div>
-                              <div class="avg-nav">Avg NAV: {{ investment.averageNav | currency:'USD':'symbol':'1.4-4' }}</div>
+                              <div class="avg-nav">Avg NAV: {{ investment.averageNav | currency:'INR':'symbol':'1.4-4' }}</div>
                             </div>
                           </td>
                         </ng-container>
@@ -163,11 +163,11 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
                           <th mat-header-cell *matHeaderCellDef>Current Value</th>
                           <td mat-cell *matCellDef="let investment">
                             <div class="value-info">
-                              <div class="current-value">{{ investment.currentValue | currency:'USD':'symbol':'1.2-2' }}</div>
+                              <div class="current-value">{{ investment.currentValue | currency:'INR':'symbol':'1.2-2' }}</div>
                               <div class="returns"
                                    [class.positive]="investment.totalReturns >= 0"
                                    [class.negative]="investment.totalReturns < 0">
-                                {{ investment.totalReturns >= 0 ? '+' : '' }}{{ investment.totalReturns | currency:'USD':'symbol':'1.2-2' }}
+                                {{ investment.totalReturns >= 0 ? '+' : '' }}{{ investment.totalReturns | currency:'INR':'symbol':'1.2-2' }}
                                 ({{ investment.returnPercentage | number:'1.2-2' }}%)
                               </div>
                             </div>
@@ -188,7 +188,7 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
                         <ng-container matColumnDef="fees">
                           <th mat-header-cell *matHeaderCellDef>Fees Paid</th>
                           <td mat-cell *matCellDef="let investment">
-                            {{ investment.totalChargesPaid | currency:'USD':'symbol':'1.2-2' }}
+                            {{ investment.totalChargesPaid | currency:'INR':'symbol':'1.2-2' }}
                           </td>
                         </ng-container>
 
@@ -258,7 +258,7 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
                       </div>
                       <div class="stat-card">
                         <div class="stat-label">Holdings Value</div>
-                        <div class="stat-value">{{ portfolio.totalHoldingsValue | currency:'USD':'symbol':'1.0-0' }}</div>
+                        <div class="stat-value">{{ portfolio.totalHoldingsValue | currency:'INR':'symbol':'1.0-0' }}</div>
                       </div>
                     </div>
                     <button mat-raised-button color="primary" (click)="manageHoldings()">
@@ -692,6 +692,10 @@ export class PortfolioDetailsComponent implements OnInit {
 
   manageHoldings(): void {
     this.router.navigate(['/holdings'], { queryParams: { portfolioId: this.portfolioId } });
+  }
+
+  viewTransactions(): void {
+    this.router.navigate(['/transactions/portfolio', this.portfolioId]);
   }
 
   goBack(): void {

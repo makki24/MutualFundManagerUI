@@ -420,8 +420,8 @@ export class TransactionListComponent implements OnInit {
       // For admin, load all transactions or portfolio-specific transactions
       if (filter.portfolioId) {
         this.transactionService.getPortfolioTransactions(filter.portfolioId, filter).subscribe({
-          next: (transactions) => {
-            this.transactions = transactions;
+          next: (response) => {
+            this.transactions = response.transactions;
             this.isLoading = false;
           },
           error: (error) => {
@@ -433,8 +433,8 @@ export class TransactionListComponent implements OnInit {
       } else {
         // Load all transactions for admin (this would need a new API endpoint)
         this.transactionService.getUserTransactions(currentUser.id, filter).subscribe({
-          next: (transactions) => {
-            this.transactions = transactions;
+          next: (response) => {
+            this.transactions = response.transactions;
             this.isLoading = false;
           },
           error: (error) => {
@@ -447,8 +447,8 @@ export class TransactionListComponent implements OnInit {
     } else {
       // For regular users, load their transactions
       this.transactionService.getUserTransactions(currentUser.id, filter).subscribe({
-        next: (transactions) => {
-          this.transactions = transactions;
+        next: (response) => {
+          this.transactions = response.transactions;
           this.isLoading = false;
         },
         error: (error) => {
