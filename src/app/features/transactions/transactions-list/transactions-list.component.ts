@@ -15,6 +15,7 @@ import { Subject, fromEvent, debounceTime, takeUntil } from 'rxjs';
 import { Transaction, TransactionFilter, TransactionType, PaginationHeaders } from '../../../core/models/transaction.model';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { InvestmentService } from '../../../core/services/investment.service';
 
 @Component({
   selector: 'app-transactions-list',
@@ -43,6 +44,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
 
   private readonly transactionService = inject(TransactionService);
   private readonly authService = inject(AuthService);
+  private readonly investmentService = inject(InvestmentService);
   private destroy$ = new Subject<void>();
 
   transactions: Transaction[] = [];
@@ -67,6 +69,10 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   startDate?: Date;
   endDate?: Date;
 
+  // User filter (for portfolio view)
+  portfolioUsers: { id: number; name: string }[] = [];
+  selectedUserId?: number;
+
   // Pagination info
   totalCount = 0;
   totalPages = 0;
@@ -75,6 +81,8 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     // If viewing portfolio transactions, remove portfolio column
     if (this.viewType === 'portfolio' && this.portfolioId) {
       this.displayedColumns = this.displayedColumns.filter(col => col !== 'portfolio');
+      // Load users in this portfolio for filtering
+      this.loadPortfolioUsers();
     }
     
     this.loadTransactions();
@@ -158,6 +166,11 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
 
   private fetchTransactions() {
     if (this.viewType === 'portfolio' && this.portfolioId) {
+      // If a specific user is selected, fetch that user's transactions filtered by this portfolio
+      if (this.selectedUserId) {
+        const userFilter: TransactionFilter = { ...this.filter, portfolioId: this.portfolioId };
+        return this.transactionService.getUserTransactions(this.selectedUserId, userFilter);
+      }
       return this.transactionService.getPortfolioTransactions(this.portfolioId, this.filter);
     } else {
       const userId = this.authService.getCurrentUserId();
@@ -188,6 +201,10 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.filter.symbol = this.selectedSymbol;
     this.filter.startDate = this.startDate?.toISOString();
     this.filter.endDate = this.endDate?.toISOString();
+    // Ensure portfolioId is preserved when needed
+    if (this.viewType === 'portfolio' && this.portfolioId) {
+      this.filter.portfolioId = this.selectedUserId ? this.portfolioId : undefined;
+    }
     
     this.loadTransactions();
   }
@@ -197,6 +214,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.selectedSymbol = undefined;
     this.startDate = undefined;
     this.endDate = undefined;
+    // Do not clear selectedUserId here so user filter persists unless explicitly changed
     
     this.filter = {
       page: 0,
@@ -236,6 +254,26 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
+    });
+  }
+
+  private loadPortfolioUsers(): void {
+    if (!this.portfolioId) return;
+    this.investmentService.getPortfolioInvestments(this.portfolioId).subscribe({
+      next: (response) => {
+        if (response?.success && Array.isArray(response.data)) {
+          // Map unique users from investments
+          const seen = new Set<number>();
+          this.portfolioUsers = response.data
+            .map((inv: any) => inv.user)
+            .filter((u: any) => u && typeof u.id === 'number' && !seen.has(u.id) && (seen.add(u.id) || true))
+            .map((u: any) => ({ id: u.id, name: `${u.firstName} ${u.lastName}`.trim() }));
+        }
+      },
+      error: (err) => {
+        // Silently ignore; user filter is optional
+        console.error('Failed to load portfolio users', err);
+      }
     });
   }
 }

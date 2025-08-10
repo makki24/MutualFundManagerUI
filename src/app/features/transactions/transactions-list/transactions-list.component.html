@@ -26,6 +26,17 @@
         <input matInput [(ngModel)]="selectedSymbol" placeholder="Enter symbol">
       </mat-form-field>
 
+      <!-- User filter (only for portfolio view) -->
+      <mat-form-field appearance="outline" class="filter-field" *ngIf="viewType === 'portfolio' && portfolioUsers.length > 0">
+        <mat-label>User</mat-label>
+        <mat-select [(ngModel)]="selectedUserId">
+          <mat-option [value]="undefined">All Users</mat-option>
+          <mat-option *ngFor="let u of portfolioUsers" [value]="u.id">
+            {{ u.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Start Date</mat-label>
         <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate">
