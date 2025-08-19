@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -10,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
 import { Subject, fromEvent, debounceTime, takeUntil } from 'rxjs';
 import { Transaction, TransactionFilter, TransactionType, PaginationHeaders } from '../../../core/models/transaction.model';
@@ -27,6 +29,7 @@ import { InvestmentService } from '../../../core/services/investment.service';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatButtonToggleModule,
     MatSelectModule,
     MatDatepickerModule,
     MatFormFieldModule,
@@ -45,10 +48,19 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   private readonly transactionService = inject(TransactionService);
   private readonly authService = inject(AuthService);
   private readonly investmentService = inject(InvestmentService);
+  private readonly router = inject(Router);
   private destroy$ = new Subject<void>();
 
   transactions: Transaction[] = [];
-  displayedColumns: string[] = ['date', 'type', 'symbol', 'quantity', 'price', 'amount', 'portfolio'];
+  // Columns emphasize deltas and details
+  displayedColumns: string[] = ['date', 'type', 'symbol', 'units', 'nav', 'cash', 'net', 'description', 'createdBy', 'expand'];
+
+  // Expanded row state
+  expandedElement: Transaction | null = null;
+
+  // View mode with persistence
+  viewMode: 'table' | 'timeline' = 'table';
+  private readonly VIEW_MODE_KEY = 'transactions_view_mode';
   
   // Pagination
   currentPage = 0;
@@ -78,12 +90,13 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   totalPages = 0;
 
   ngOnInit(): void {
-    // If viewing portfolio transactions, remove portfolio column
+    // Load users for portfolio filter if applicable
     if (this.viewType === 'portfolio' && this.portfolioId) {
-      this.displayedColumns = this.displayedColumns.filter(col => col !== 'portfolio');
-      // Load users in this portfolio for filtering
       this.loadPortfolioUsers();
     }
+    // Restore view mode
+    const saved = localStorage.getItem(this.VIEW_MODE_KEY) as 'table' | 'timeline' | null;
+    if (saved === 'table' || saved === 'timeline') this.viewMode = saved;
     
     this.loadTransactions();
     this.setupInfiniteScroll();
@@ -92,6 +105,27 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // Row expand/collapse
+  toggleExpand(row: Transaction): void {
+    this.expandedElement = this.expandedElement === row ? null : row;
+  }
+
+  // Handle view mode toggle and persist
+  onViewModeChange(mode: 'table' | 'timeline'): void {
+    if (mode !== 'table' && mode !== 'timeline') return;
+    this.viewMode = mode;
+    try {
+      localStorage.setItem(this.VIEW_MODE_KEY, mode);
+    } catch {}
+  }
+
+  // Navigate back to portfolio details when in portfolio view
+  goBackToPortfolio(): void {
+    if (this.viewType === 'portfolio' && this.portfolioId) {
+      this.router.navigate(['/portfolios', this.portfolioId]);
+    }
   }
 
   private setupInfiniteScroll(): void {
@@ -191,6 +225,25 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.hasMorePages = pagination.hasNext;
   }
 
+  // Group transactions by day for timeline view
+  get timelineGroups(): { dateLabel: string; items: Transaction[] }[] {
+    const groups = new Map<string, Transaction[]>();
+    for (const t of this.transactions) {
+      const d = new Date(t.createdAt);
+      const key = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(t);
+    }
+    // Sort keys descending (newest first)
+    const sortedKeys = Array.from(groups.keys()).sort((a, b) => (a < b ? 1 : -1));
+    return sortedKeys.map((k) => {
+      const date = new Date(k);
+      const label = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      const items = groups.get(k)!.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      return { dateLabel: label, items };
+    });
+  }
+
   applyFilters(): void {
     // Reset pagination
     this.currentPage = 0;
@@ -229,18 +282,19 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   }
 
   getTransactionTypeColor(type: TransactionType): string {
-    switch (type) {
+    const t = String(type);
+    switch (t) {
       case TransactionType.BUY:
-        return 'primary';
-      case TransactionType.SELL:
-        return 'accent';
-      case TransactionType.DIVIDEND:
-        return 'success';
-      case TransactionType.FEE:
-        return 'warn';
+      case 'USER_INVESTMENT':
       case TransactionType.INVESTMENT:
         return 'primary';
+      case TransactionType.SELL:
       case TransactionType.WITHDRAWAL:
+        return 'accent';
+      case TransactionType.DIVIDEND:
+        return 'accent';
+      case TransactionType.FEE:
+      case 'FEE_DEDUCTION':
         return 'warn';
       default:
         return '';
@@ -255,6 +309,103 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  // ----- Delta helpers -----
+  private numOrNull(v: any): number | null {
+    return (v === null || v === undefined || v === '') ? null : Number(v);
+  }
+
+  unitsDelta(t: any): number | null {
+    const before = this.numOrNull(t?.unitsBefore);
+    const after = this.numOrNull(t?.unitsAfter);
+    if (before !== null && after !== null) return after - before;
+    const qty = this.numOrNull(t?.quantity ?? t?.units);
+    if (qty === null) return null;
+    const type = String(t?.transactionType || '');
+    if (['BUY', 'INVESTMENT', 'USER_INVESTMENT', 'DIVIDEND'].includes(type)) return qty;
+    if (['SELL', 'WITHDRAWAL', 'FEE', 'FEE_DEDUCTION'].includes(type)) return -qty;
+    return qty;
+  }
+
+  navDelta(t: any): number | null {
+    const before = this.numOrNull(t?.navBefore ?? t?.navValue);
+    const after = this.numOrNull(t?.navAfter ?? t?.navValue);
+    if (before !== null && after !== null) return after - before;
+    return null;
+  }
+
+  hasCash(t: any): boolean {
+    const before = this.numOrNull(t?.remainingCashBefore);
+    const after = this.numOrNull(t?.remainingCashAfter);
+    return before !== null && after !== null;
+  }
+
+  cashDelta(t: any): number | null {
+    const before = this.numOrNull(t?.remainingCashBefore);
+    const after = this.numOrNull(t?.remainingCashAfter);
+    if (before !== null && after !== null) return after - before;
+    return null;
+  }
+
+  deltaClass(val: number | null): string {
+    if (val === null) return 'delta-neutral';
+    if (val > 0) return 'delta-pos';
+    if (val < 0) return 'delta-neg';
+    return 'delta-neutral';
+  }
+
+  bestAmount(t: any): number | null {
+    const net = this.numOrNull(t?.netAmount);
+    if (net !== null) return net;
+    const total = this.numOrNull(t?.totalAmount);
+    return total;
+  }
+
+  bestAmountClass(val: number | null | undefined): string {
+    const n = this.numOrNull(val);
+    if (n === null) return 'amount-neutral';
+    if (n > 0) return 'amount-pos';
+    if (n < 0) return 'amount-neg';
+    return 'amount-neutral';
+  }
+
+  // Back-compat with template binding
+  amountClass(val: number | null | undefined): string {
+    return this.bestAmountClass(val);
+  }
+
+  typeIcon(type: any): string {
+    switch (String(type)) {
+      case 'BUY':
+      case 'INVESTMENT':
+      case 'USER_INVESTMENT':
+        return 'trending_up';
+      case 'SELL':
+      case 'WITHDRAWAL':
+        return 'trending_down';
+      case 'DIVIDEND':
+        return 'payments';
+      case 'FEE':
+      case 'FEE_DEDUCTION':
+        return 'receipt_long';
+      default:
+        return 'receipt';
+    }
+  }
+
+  fmtNumber(val: any, format: string = '1.2-2'): string {
+    const n = this.numOrNull(val);
+    return n === null ? '—' : new Intl.NumberFormat('en-US', {
+      minimumIntegerDigits: 1,
+      minimumFractionDigits: Number((format.split('-')[0].split('.')[1]) || 0),
+      maximumFractionDigits: Number((format.split('-')[1]) || 2)
+    }).format(n);
+  }
+
+  fmtCurrency(val: any, currency: string = 'INR'): string {
+    const n = this.numOrNull(val);
+    return n === null ? '—' : new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n);
   }
 
   private loadPortfolioUsers(): void {

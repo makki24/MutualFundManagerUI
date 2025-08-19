@@ -14,9 +14,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { PortfolioService } from '../../../core/services/portfolio.service';
+import { HoldingService } from '../../../core/services/holding.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { StockService } from '../../../core/services/stock.service';
 import { Portfolio, Holding } from '../../../core/models/portfolio.model';
 import { BuySharesDialogComponent, BuySharesDialogData } from '../buy-shares-dialog/buy-shares-dialog.component';
+import { SellSharesDialogComponent, SellSharesDialogData } from '../sell-shares-dialog/sell-shares-dialog.component';
 import { UpdatePriceDialogComponent, UpdatePriceDialogData, UpdatePriceDialogResult } from '../update-price-dialog/update-price-dialog.component';
 
 interface PriceUpdateResult {
@@ -60,6 +63,8 @@ interface PriceUpdateResult {
 export class HoldingsListComponent implements OnInit {
   private portfolioService = inject(PortfolioService);
   private stockService = inject(StockService);
+  private holdingService = inject(HoldingService);
+  private authService = inject(AuthService);
   private dialog = inject(MatDialog);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -181,7 +186,30 @@ export class HoldingsListComponent implements OnInit {
   }
 
   sellShares(holding: Holding): void {
-    this.snackBar.open(`Sell shares for ${holding.symbol} feature coming soon!`, 'Close', { duration: 3000 });
+    const portfolioId = this.selectedPortfolioControl.value;
+    if (!portfolioId) return;
+
+    const adminUserId = this.authService.getCurrentUserId();
+    if (!adminUserId) {
+      this.snackBar.open('Cannot determine current admin user. Please re-login.', 'Close', { duration: 4000 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open<SellSharesDialogComponent, SellSharesDialogData, Holding>(SellSharesDialogComponent, {
+      maxWidth: 900,
+      data: {
+        portfolioId,
+        holding,
+        adminUserId
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadHoldings(portfolioId);
+        this.snackBar.open('Shares sold successfully!', 'Close', { duration: 3000 });
+      }
+    });
   }
 
   updatePrice(holding: Holding): void {
@@ -202,15 +230,15 @@ export class HoldingsListComponent implements OnInit {
           next: (response) => {
             if (response.success) {
               this.snackBar.open(
-                `Price updated for ${holding.symbol}: $${result.newPrice}`, 
-                'Close', 
+                `Price updated for ${holding.symbol}: $${result.newPrice}`,
+                'Close',
                 { duration: 3000 }
               );
               this.loadHoldings(portfolioId);
             } else {
               this.snackBar.open(
-                response.message || `Failed to update price for ${holding.symbol}`, 
-                'Close', 
+                response.message || `Failed to update price for ${holding.symbol}`,
+                'Close',
                 { duration: 3000 }
               );
             }

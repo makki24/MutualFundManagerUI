@@ -9,6 +9,8 @@ import { of, throwError } from 'rxjs';
 import { HoldingsListComponent } from './holdings-list.component';
 import { PortfolioService } from '../../../core/services/portfolio.service';
 import { StockService } from '../../../core/services/stock.service';
+import { HoldingService } from '../../../core/services/holding.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Portfolio, Holding } from '../../../core/models/portfolio.model';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import { StockPrice } from '../../../core/models/stock.model';
@@ -22,6 +24,8 @@ describe('HoldingsListComponent', () => {
   let snackBar: jasmine.SpyObj<MatSnackBar>;
   let dialog: jasmine.SpyObj<MatDialog>;
   let activatedRoute: any;
+  let holdingService: jasmine.SpyObj<HoldingService>;
+  let authService: jasmine.SpyObj<AuthService>;
 
   const mockPortfolios: Portfolio[] = [
     {
@@ -118,6 +122,9 @@ describe('HoldingsListComponent', () => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
     const dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    const holdingServiceSpy = jasmine.createSpyObj('HoldingService', ['sellShares']);
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getCurrentUserId']);
+    authServiceSpy.getCurrentUserId.and.returnValue(1);
 
     activatedRoute = {
       snapshot: {
@@ -133,7 +140,9 @@ describe('HoldingsListComponent', () => {
         { provide: Router, useValue: routerSpy },
         { provide: MatSnackBar, useValue: snackBarSpy },
         { provide: MatDialog, useValue: dialogSpy },
-        { provide: ActivatedRoute, useValue: activatedRoute }
+        { provide: ActivatedRoute, useValue: activatedRoute },
+        { provide: HoldingService, useValue: holdingServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy }
       ]
     }).compileComponents();
 
@@ -144,6 +153,8 @@ describe('HoldingsListComponent', () => {
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     snackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
     dialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+    holdingService = TestBed.inject(HoldingService) as jasmine.SpyObj<HoldingService>;
+    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
   });
 
   beforeEach(() => {
@@ -398,16 +409,15 @@ describe('HoldingsListComponent', () => {
       expect(dialog.open).toHaveBeenCalled();
     });
 
-    it('should show sell shares coming soon message', () => {
+    it('should open sell shares dialog and show success message after sale', () => {
+      const dialogRef = { afterClosed: () => of(true) };
+      dialog.open.and.returnValue(dialogRef as any);
       const holding = mockHoldings[0];
 
       component.sellShares(holding);
 
-      expect(snackBar.open).toHaveBeenCalledWith(
-        'Sell shares for AAPL feature coming soon!',
-        'Close',
-        { duration: 3000 }
-      );
+      expect(dialog.open).toHaveBeenCalled();
+      expect(snackBar.open).toHaveBeenCalledWith('Shares sold successfully!', 'Close', { duration: 3000 });
     });
   });
 

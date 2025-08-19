@@ -8,12 +8,15 @@ import { of, throwError, Subject } from 'rxjs';
 import { Transaction, TransactionType, TransactionResponse, PaginationHeaders } from '../../../core/models/transaction.model';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ElementRef } from '@angular/core';
+import { RouterTestingModule } from '@angular/router/testing';
+import { InvestmentService } from '../../../core/services/investment.service';
 
 describe('TransactionsListComponent', () => {
   let component: TransactionsListComponent;
   let fixture: ComponentFixture<TransactionsListComponent>;
   let mockTransactionService: jasmine.SpyObj<TransactionService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockInvestmentService: jasmine.SpyObj<InvestmentService>;
 
   const mockPaginationHeaders: PaginationHeaders = {
     totalCount: 50,
@@ -59,16 +62,25 @@ describe('TransactionsListComponent', () => {
       'getPortfolioTransactions'
     ]);
     mockAuthService = jasmine.createSpyObj('AuthService', ['getCurrentUserId']);
+    mockInvestmentService = jasmine.createSpyObj('InvestmentService', [
+      'getUserInvestments',
+      'getPortfolioInvestments',
+      'getUserInvestmentSummary',
+      'investInPortfolio',
+      'withdrawFromPortfolio'
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [
         TransactionsListComponent, 
         NoopAnimationsModule,
-        MatNativeDateModule
+        MatNativeDateModule,
+        RouterTestingModule
       ],
       providers: [
         { provide: TransactionService, useValue: mockTransactionService },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: InvestmentService, useValue: mockInvestmentService },
         provideNativeDateAdapter()
       ]
     }).compileComponents();
@@ -80,6 +92,17 @@ describe('TransactionsListComponent', () => {
     component.scrollContainer = {
       nativeElement: document.createElement('div')
     } as ElementRef;
+
+    // Default: avoid undefined subscribe when portfolio view triggers user load
+    mockInvestmentService.getPortfolioInvestments.and.returnValue(
+      of({
+        success: true,
+        message: '',
+        data: [],
+        timestamp: new Date().toISOString(),
+        error: null
+      })
+    );
   });
 
   it('should create', () => {
@@ -106,14 +129,14 @@ describe('TransactionsListComponent', () => {
       expect(component.displayedColumns).not.toContain('portfolio');
     });
 
-    it('should keep portfolio column when viewType is user', () => {
+    it('should not include portfolio column when viewType is user', () => {
       component.viewType = 'user';
       mockAuthService.getCurrentUserId.and.returnValue(1);
       mockTransactionService.getUserTransactions.and.returnValue(of(mockTransactionResponse));
       
       component.ngOnInit();
       
-      expect(component.displayedColumns).toContain('portfolio');
+      expect(component.displayedColumns).not.toContain('portfolio');
     });
   });
 
@@ -318,10 +341,10 @@ describe('TransactionsListComponent', () => {
     it('should return correct color for transaction types', () => {
       expect(component.getTransactionTypeColor(TransactionType.BUY)).toBe('primary');
       expect(component.getTransactionTypeColor(TransactionType.SELL)).toBe('accent');
-      expect(component.getTransactionTypeColor(TransactionType.DIVIDEND)).toBe('success');
+      expect(component.getTransactionTypeColor(TransactionType.DIVIDEND)).toBe('accent');
       expect(component.getTransactionTypeColor(TransactionType.FEE)).toBe('warn');
       expect(component.getTransactionTypeColor(TransactionType.INVESTMENT)).toBe('primary');
-      expect(component.getTransactionTypeColor(TransactionType.WITHDRAWAL)).toBe('warn');
+      expect(component.getTransactionTypeColor(TransactionType.WITHDRAWAL)).toBe('accent');
     });
 
     it('should format date correctly', () => {

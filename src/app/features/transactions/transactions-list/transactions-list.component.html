@@ -1,14 +1,39 @@
 <mat-card class="transactions-container">
   <mat-card-header>
     <mat-card-title>
-      {{ viewType === 'portfolio' ? 'Portfolio' : 'User' }} Transactions
-      <span class="transaction-count" *ngIf="totalCount > 0">
-        ({{ totalCount }} total)
-      </span>
+      <div class="header-row">
+        <button
+          mat-icon-button
+          class="back-button"
+          aria-label="Back to portfolio"
+          (click)="goBackToPortfolio()"
+          *ngIf="viewType === 'portfolio' && portfolioId">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <span>
+          {{ viewType === 'portfolio' ? 'Portfolio' : 'User' }} Transactions
+          <span class="transaction-count" *ngIf="totalCount > 0">
+            ({{ totalCount }} total)
+          </span>
+        </span>
+      </div>
     </mat-card-title>
   </mat-card-header>
 
   <mat-card-content>
+    <!-- View Toggle -->
+    <div class="view-toggle">
+      <mat-button-toggle-group [value]="viewMode" (change)="onViewModeChange($event.value)" aria-label="View mode">
+        <mat-button-toggle value="table">
+          <mat-icon>table_chart</mat-icon>
+          Table
+        </mat-button-toggle>
+        <mat-button-toggle value="timeline">
+          <mat-icon>timeline</mat-icon>
+          Timeline
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
     <!-- Filters Section -->
     <div class="filters-section">
       <mat-form-field appearance="outline" class="filter-field">
@@ -63,79 +88,121 @@
       </div>
     </div>
 
-    <!-- Transactions Table with Scroll Container -->
+    <!-- Scroll Container for both views -->
     <div class="table-container" #scrollContainer>
       <div *ngIf="isLoading" class="loading-container">
         <mat-spinner diameter="50"></mat-spinner>
         <p>Loading transactions...</p>
       </div>
 
-      <table mat-table [dataSource]="transactions" class="transactions-table" *ngIf="!isLoading">
+      <!-- Table view -->
+      <table mat-table [dataSource]="transactions" class="transactions-table" *ngIf="!isLoading && viewMode === 'table'" multiTemplateDataRows>
         <!-- Date Column -->
         <ng-container matColumnDef="date">
           <th mat-header-cell *matHeaderCellDef>Date</th>
-          <td mat-cell *matCellDef="let transaction">
-            {{ formatDate(transaction.createdAt) }}
-          </td>
+          <td mat-cell *matCellDef="let t">{{ formatDate(t.createdAt) }}</td>
         </ng-container>
 
         <!-- Type Column -->
         <ng-container matColumnDef="type">
           <th mat-header-cell *matHeaderCellDef>Type</th>
-          <td mat-cell *matCellDef="let transaction">
-            <mat-chip [color]="getTransactionTypeColor(transaction.transactionType)" selected>
-              {{ transaction.transactionType }}
-            </mat-chip>
+          <td mat-cell *matCellDef="let t">
+            <mat-icon class="type-icon">{{ typeIcon(t.transactionType) }}</mat-icon>
+            <mat-chip [color]="getTransactionTypeColor(t.transactionType)" selected>{{ t.transactionType }}</mat-chip>
           </td>
         </ng-container>
 
-        <!-- Symbol Column -->
+        <!-- Symbol Column (optional) -->
         <ng-container matColumnDef="symbol">
           <th mat-header-cell *matHeaderCellDef>Symbol</th>
-          <td mat-cell *matCellDef="let transaction">
-            {{ transaction.symbol || '-' }}
+          <td mat-cell *matCellDef="let t">{{ t.symbol || '—' }}</td>
+        </ng-container>
+
+        <!-- Units Delta Column -->
+        <ng-container matColumnDef="units">
+          <th mat-header-cell *matHeaderCellDef>Units</th>
+          <td mat-cell *matCellDef="let t">
+            <span [ngClass]="deltaClass(unitsDelta(t))">{{ unitsDelta(t) | number:'1.2-2' }}</span>
+            <div class="sub">{{ fmtNumber(t.unitsBefore, '1.2-2') }} → {{ fmtNumber(t.unitsAfter, '1.2-2') }}</div>
           </td>
         </ng-container>
 
-        <!-- Quantity Column -->
-        <ng-container matColumnDef="quantity">
-          <th mat-header-cell *matHeaderCellDef>Quantity</th>
-          <td mat-cell *matCellDef="let transaction">
-            {{ transaction.quantity || transaction.units || '-' }}
+        <!-- NAV Delta Column -->
+        <ng-container matColumnDef="nav">
+          <th mat-header-cell *matHeaderCellDef>NAV</th>
+          <td mat-cell *matCellDef="let t">
+            <ng-container *ngIf="navDelta(t) !== null; else noNav">
+              <span [ngClass]="deltaClass(navDelta(t))">{{ navDelta(t) | number:'1.2-4' }}</span>
+              <div class="sub">{{ fmtNumber(t.navBefore, '1.2-4') }} → {{ fmtNumber(t.navAfter, '1.2-4') }}</div>
+            </ng-container>
+            <ng-template #noNav>—</ng-template>
           </td>
         </ng-container>
 
-        <!-- Price Column -->
-        <ng-container matColumnDef="price">
-          <th mat-header-cell *matHeaderCellDef>Price/NAV</th>
-          <td mat-cell *matCellDef="let transaction">
-            <span *ngIf="transaction.pricePerUnit">₹{{ transaction.pricePerUnit | number:'1.2-2' }}</span>
-            <span *ngIf="!transaction.pricePerUnit && transaction.navValue">₹{{ transaction.navValue | number:'1.2-2' }}</span>
-            <span *ngIf="!transaction.pricePerUnit && !transaction.navValue">-</span>
+        <!-- Cash Delta Column -->
+        <ng-container matColumnDef="cash">
+          <th mat-header-cell *matHeaderCellDef>Cash</th>
+          <td mat-cell *matCellDef="let t">
+            <ng-container *ngIf="hasCash(t); else noCash">
+              <span [ngClass]="deltaClass(cashDelta(t))">{{ cashDelta(t) | currency }}</span>
+              <div class="sub">{{ fmtCurrency(t.remainingCashBefore) }} → {{ fmtCurrency(t.remainingCashAfter) }}</div>
+            </ng-container>
+            <ng-template #noCash>—</ng-template>
           </td>
         </ng-container>
 
-        <!-- Amount Column -->
-        <ng-container matColumnDef="amount">
-          <th mat-header-cell *matHeaderCellDef>Amount</th>
-          <td mat-cell *matCellDef="let transaction">
-            <span [class.positive-amount]="transaction.transactionType === 'BUY' || transaction.transactionType === 'INVESTMENT'"
-                  [class.negative-amount]="transaction.transactionType === 'SELL' || transaction.transactionType === 'WITHDRAWAL' || transaction.transactionType === 'FEE'">
-              ₹{{ transaction.totalAmount | number:'1.2-2' }}
-            </span>
+        <!-- Net Amount Column -->
+        <ng-container matColumnDef="net">
+          <th mat-header-cell *matHeaderCellDef>Net</th>
+          <td mat-cell *matCellDef="let t">
+            <span [ngClass]="amountClass(bestAmount(t))">{{ bestAmount(t) | currency }}</span>
           </td>
         </ng-container>
 
-        <!-- Portfolio Column (only for user view) -->
-        <ng-container matColumnDef="portfolio">
-          <th mat-header-cell *matHeaderCellDef>Portfolio</th>
-          <td mat-cell *matCellDef="let transaction">
-            {{ transaction.portfolio?.name || '-' }}
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let t">{{ t.description }}</td>
+        </ng-container>
+
+        <!-- Created By Column -->
+        <ng-container matColumnDef="createdBy">
+          <th mat-header-cell *matHeaderCellDef>By</th>
+          <td mat-cell *matCellDef="let t">{{ t.createdBy?.fullName || t.createdBy?.username }}</td>
+        </ng-container>
+
+        <!-- Expand Toggle Column -->
+        <ng-container matColumnDef="expand">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let t">
+            <button mat-icon-button aria-label="Toggle details" (click)="$event.stopPropagation(); toggleExpand(t)">
+              <mat-icon>{{ expandedElement === t ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row" (click)="toggleExpand(row)"></tr>
+
+        <!-- Expanded Detail Row -->
+        <ng-container matColumnDef="detail">
+          <td mat-cell *matCellDef="let t" [attr.colspan]="displayedColumns.length">
+            <div class="detail-container">
+              <div class="detail-grid">
+                <div><strong>Portfolio:</strong> {{ t.portfolioName || '—' }}</div>
+                <div><strong>User:</strong> {{ t.user?.fullName || t.user?.username || '—' }}</div>
+                <div><strong>Reference ID:</strong> {{ t.referenceId || '—' }}</div>
+                <div><strong>Charges:</strong> {{ t.charges | currency }}</div>
+                <div><strong>Price/Unit:</strong> {{ t.pricePerUnit | currency }}</div>
+                <div><strong>Total Amount:</strong> {{ t.totalAmount | currency }}</div>
+                <div><strong>Created At:</strong> {{ formatDate(t.createdAt) }}</div>
+                <div><strong>Created By:</strong> {{ t.createdBy?.fullName || t.createdBy?.username }}</div>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-row *matRowDef="let row; columns: ['detail'];" class="detail-row" [class.expanded]="expandedElement === row" [style.display]="expandedElement === row ? 'table-row' : 'none'"></tr>
 
         <!-- No data row -->
         <tr class="mat-row" *matNoDataRow>
@@ -144,6 +211,69 @@
           </td>
         </tr>
       </table>
+
+      <!-- Timeline view -->
+      <div class="timeline" *ngIf="!isLoading && viewMode === 'timeline'">
+        <div class="timeline-group" *ngFor="let g of timelineGroups">
+          <div class="timeline-date">{{ g.dateLabel }}</div>
+          <div class="timeline-items">
+            <div class="timeline-item" *ngFor="let t of g.items" (click)="toggleExpand(t)">
+              <div class="timeline-dot"></div>
+              <div class="timeline-card">
+                <div class="header">
+                  <div class="type">
+                    <mat-icon class="type-icon">{{ typeIcon(t.transactionType) }}</mat-icon>
+                    <mat-chip [color]="getTransactionTypeColor(t.transactionType)" selected>{{ t.transactionType }}</mat-chip>
+                    <span class="timestamp">{{ formatDate(t.createdAt) }}</span>
+                  </div>
+                  <div class="net" [ngClass]="amountClass(bestAmount(t))">{{ bestAmount(t) | currency }}</div>
+                </div>
+                <div class="body">
+                  <div class="row">
+                    <div class="label">Symbol</div>
+                    <div class="value">{{ t.symbol || '—' }}</div>
+                  </div>
+                  <div class="row">
+                    <div class="label">Units Δ</div>
+                    <div class="value">
+                      <span [ngClass]="deltaClass(unitsDelta(t))">{{ unitsDelta(t) | number:'1.2-2' }}</span>
+                      <span class="sub">{{ fmtNumber(t.unitsBefore, '1.2-2') }} → {{ fmtNumber(t.unitsAfter, '1.2-2') }}</span>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="label">NAV Δ</div>
+                    <div class="value">
+                      <ng-container *ngIf="navDelta(t) !== null; else noNavTL">
+                        <span [ngClass]="deltaClass(navDelta(t))">{{ navDelta(t) | number:'1.2-4' }}</span>
+                        <span class="sub">{{ fmtNumber(t.navBefore, '1.2-4') }} → {{ fmtNumber(t.navAfter, '1.2-4') }}</span>
+                      </ng-container>
+                      <ng-template #noNavTL>—</ng-template>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="label">Cash Δ</div>
+                    <div class="value">
+                      <ng-container *ngIf="hasCash(t); else noCashTL">
+                        <span [ngClass]="deltaClass(cashDelta(t))">{{ cashDelta(t) | currency }}</span>
+                        <span class="sub">{{ fmtCurrency(t.remainingCashBefore) }} → {{ fmtCurrency(t.remainingCashAfter) }}</span>
+                      </ng-container>
+                      <ng-template #noCashTL>—</ng-template>
+                    </div>
+                  </div>
+                  <div class="row" *ngIf="t.description">
+                    <div class="label">Description</div>
+                    <div class="value">{{ t.description }}</div>
+                  </div>
+                  <div class="row meta">
+                    <div><strong>By:</strong> {{ t.createdBy?.fullName || t.createdBy?.username || '—' }}</div>
+                    <div><strong>Ref:</strong> {{ t.referenceId || '—' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Loading more indicator -->
       <div *ngIf="isLoadingMore" class="loading-more">

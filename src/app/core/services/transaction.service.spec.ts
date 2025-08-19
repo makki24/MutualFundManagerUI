@@ -145,7 +145,7 @@ describe('TransactionService', () => {
         result = response;
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/portfolio/${portfolioId}?page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}/portfolio/${portfolioId}?page=0&size=20&userNullOnly=true`);
       expect(req.request.method).toBe('GET');
 
       req.flush({ success: true, message: 'Success', data: mockTransactions }, {
@@ -177,7 +177,7 @@ describe('TransactionService', () => {
       service.getPortfolioTransactions(portfolioId, filter).subscribe();
 
       const req = httpMock.expectOne(
-        `${apiUrl}/portfolio/${portfolioId}?page=2&size=30&type=${TransactionType.DIVIDEND}&startDate=2024-02-01&endDate=2024-02-28`
+        `${apiUrl}/portfolio/${portfolioId}?page=2&size=30&type=${TransactionType.DIVIDEND}&startDate=2024-02-01&endDate=2024-02-28&userNullOnly=true`
       );
       expect(req.request.method).toBe('GET');
       req.flush({ success: true, message: 'Success', data: [] });
@@ -278,7 +278,7 @@ describe('TransactionService', () => {
         result = response;
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/portfolio/${portfolioId}?page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}/portfolio/${portfolioId}?page=0&size=20&userNullOnly=true`);
       
       // Test with string 'false'
       req.flush({ success: true, message: 'Success', data: [] }, {
@@ -299,7 +299,7 @@ describe('TransactionService', () => {
         result = response;
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/portfolio/${portfolioId}?page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}/portfolio/${portfolioId}?page=0&size=20&userNullOnly=true`);
       
       // Send response without headers
       req.flush({ success: true, message: 'Success', data: [] });
@@ -340,7 +340,7 @@ describe('TransactionService', () => {
         }
       );
 
-      const req = httpMock.expectOne(`${apiUrl}/portfolio/${portfolioId}?page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}/portfolio/${portfolioId}?page=0&size=20&userNullOnly=true`);
       req.flush('Not found', { status: 404, statusText: 'Not Found' });
 
       expect(errorResponse.status).toBe(404);

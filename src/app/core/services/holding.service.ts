@@ -65,12 +65,17 @@ export class HoldingService {
     symbol: string,
     quantity: number,
     sellPrice: number,
-    adminUserId: number
+    adminUserId: number,
+    additionalCharges?: number
   ): Observable<ApiResponse<Holding>> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('quantity', quantity.toString())
       .set('sellPrice', sellPrice.toString())
       .set('adminUserId', adminUserId.toString());
+
+    if (additionalCharges !== undefined && additionalCharges !== null) {
+      params = params.set('additionalCharges', additionalCharges.toString());
+    }
 
     return this.http.post<ApiResponse<Holding>>(
       `${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/sell`,

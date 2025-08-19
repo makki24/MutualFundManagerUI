@@ -25,10 +25,29 @@ export interface Transaction {
     username: string;
     firstName: string;
     lastName: string;
+    fullName?: string;
   };
   portfolio?: {
     id: number;
     name: string;
+  };
+  // Extended optional fields used by UI
+  portfolioName?: string;
+  netAmount?: number;
+  charges?: number;
+  referenceId?: string | number | null;
+  unitsBefore?: number | null;
+  unitsAfter?: number | null;
+  navBefore?: number | null;
+  navAfter?: number | null;
+  remainingCashBefore?: number | null;
+  remainingCashAfter?: number | null;
+  createdBy?: {
+    id: number;
+    username: string;
+    firstName?: string;
+    lastName?: string;
+    fullName?: string;
   };
 }
 

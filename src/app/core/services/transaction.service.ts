@@ -34,7 +34,7 @@ export class TransactionService {
 
     return this.http.get<ApiResponse<Transaction[]>>(
       `${this.API_URL}/user/${userId}`,
-      { 
+      {
         params,
         observe: 'response'
       }
@@ -48,7 +48,7 @@ export class TransactionService {
           pageSize: parseInt(headers.get('X-Page-Size') || '20', 10),
           hasNext: headers.get('X-Has-Next') === 'true'
         };
-        
+
         return {
           transactions: response.body?.data || [],
           pagination
@@ -66,11 +66,15 @@ export class TransactionService {
       if (filter.symbol) params = params.set('symbol', filter.symbol);
       if (filter.startDate) params = params.set('startDate', filter.startDate);
       if (filter.endDate) params = params.set('endDate', filter.endDate);
+      // When no user is selected, request portfolio-level transactions where user is null
+      if (filter.userId === undefined || filter.userId === null) {
+        params = params.set('userNullOnly', 'true');
+      }
     }
 
     return this.http.get<ApiResponse<Transaction[]>>(
       `${this.API_URL}/portfolio/${portfolioId}`,
-      { 
+      {
         params,
         observe: 'response'
       }
@@ -84,7 +88,7 @@ export class TransactionService {
           pageSize: parseInt(headers.get('X-Page-Size') || '20', 10),
           hasNext: headers.get('X-Has-Next') === 'true'
         };
-        
+
         return {
           transactions: response.body?.data || [],
           pagination

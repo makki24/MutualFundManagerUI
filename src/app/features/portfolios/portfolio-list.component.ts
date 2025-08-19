@@ -62,11 +62,11 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                 <div class="portfolio-stats">
                   <div class="stat">
                     <span class="stat-label">NAV</span>
-                    <span class="stat-value">{{ portfolio.navValue | currency:'USD':'symbol':'1.4-4' }}</span>
+                    <span class="stat-value">{{ portfolio.navValue | currency:'INR':'symbol':'1.4-4' }}</span>
                   </div>
                   <div class="stat">
                     <span class="stat-label">Total AUM</span>
-                    <span class="stat-value">{{ portfolio.totalAum | currency:'USD':'symbol':'1.0-0' }}</span>
+                    <span class="stat-value">{{ portfolio.totalAum | currency:'INR':'symbol':'1.0-0' }}</span>
                   </div>
                   <div class="stat">
                     <span class="stat-label">Investors</span>
@@ -83,6 +83,14 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                 @if (isAdmin) {
                   <button mat-button (click)="managePortfolio(portfolio.id); $event.stopPropagation()">Manage</button>
                   <button mat-button color="warn" (click)="manageFees(portfolio.id); $event.stopPropagation()">Fees</button>
+                  <button mat-button color="warn" (click)="deletePortfolio(portfolio.id); $event.stopPropagation()">
+                    <mat-icon>delete</mat-icon>
+                    Delete
+                  </button>
+                  <button mat-button color="warn" (click)="devDeletePortfolio(portfolio.id); $event.stopPropagation()" matTooltip="Dev Delete (danger)">
+                    <mat-icon>delete_forever</mat-icon>
+                    Dev Delete
+                  </button>
                 }
               </mat-card-actions>
             </mat-card>
@@ -107,14 +115,14 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                 <ng-container matColumnDef="nav">
                   <th mat-header-cell *matHeaderCellDef>NAV</th>
                   <td mat-cell *matCellDef="let portfolio">
-                    {{ portfolio.navValue | currency:'USD':'symbol':'1.4-4' }}
+                    {{ portfolio.navValue | currency:'INR':'symbol':'1.4-4' }}
                   </td>
                 </ng-container>
 
                 <ng-container matColumnDef="aum">
                   <th mat-header-cell *matHeaderCellDef>Total AUM</th>
                   <td mat-cell *matCellDef="let portfolio">
-                    {{ portfolio.totalAum | currency:'USD':'symbol':'1.0-0' }}
+                    {{ portfolio.totalAum | currency:'INR':'symbol':'1.0-0' }}
                   </td>
                 </ng-container>
 
@@ -128,7 +136,7 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                 <ng-container matColumnDef="cash">
                   <th mat-header-cell *matHeaderCellDef>Available Cash</th>
                   <td mat-cell *matCellDef="let portfolio">
-                    {{ portfolio.remainingCash | currency:'USD':'symbol':'1.0-0' }}
+                    {{ portfolio.remainingCash | currency:'INR':'symbol':'1.0-0' }}
                   </td>
                 </ng-container>
 
@@ -162,6 +170,14 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                               matTooltip="Manage Fees">
                         <mat-icon>account_balance_wallet</mat-icon>
                       </button>
+                      <button mat-icon-button color="warn" (click)="deletePortfolio(portfolio.id); $event.stopPropagation()"
+                              matTooltip="Delete Portfolio">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="devDeletePortfolio(portfolio.id); $event.stopPropagation()"
+                              matTooltip="Dev Delete (danger)">
+                        <mat-icon>delete_forever</mat-icon>
+                      </button>
                     }
                   </td>
                 </ng-container>
@@ -193,7 +209,6 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
       max-width: 1200px;
       margin: 0 auto;
     }
-
     .page-header {
       display: flex;
       justify-content: space-between;
@@ -423,5 +438,51 @@ export class PortfolioListComponent implements OnInit {
 
   manageFees(portfolioId: number): void {
     this.router.navigate(['/portfolios', portfolioId, 'fees']);
+  }
+
+  deletePortfolio(portfolioId: number): void {
+    const confirmed = window.confirm('Are you sure you want to delete this portfolio? This action cannot be undone.');
+    if (!confirmed) {
+      return;
+    }
+
+    this.portfolioService.deletePortfolio(portfolioId).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.snackBar.open(response.message || 'Portfolio deleted successfully', 'Close', { duration: 4000 });
+          this.loadPortfolios();
+        } else {
+          this.snackBar.open(response.message || 'Failed to delete portfolio', 'Close', { duration: 5000 });
+        }
+      },
+      error: (error) => {
+        const message = error?.error?.message || 'Failed to delete portfolio';
+        this.snackBar.open(message, 'Close', { duration: 6000 });
+        console.error('Delete portfolio failed:', error);
+      }
+    });
+  }
+
+  devDeletePortfolio(id: number): void {
+    if (!this.isAdmin) return;
+    const adminUserId = this.authService.getCurrentUserId();
+    if (!adminUserId) {
+      this.snackBar.open('Cannot determine current admin user. Please re-login.', 'Close', { duration: 5000 });
+      return;
+    }
+    const confirmed = window.confirm('This will liquidate all holdings, withdraw all users, and delete the portfolio. This is for development only. Continue?');
+    if (!confirmed) return;
+
+    this.portfolioService.devDeletePortfolio(id, adminUserId).subscribe({
+      next: () => {
+        this.snackBar.open('Portfolio dev-deleted successfully', 'Close', { duration: 4000 });
+        this.loadPortfolios();
+      },
+      error: (err) => {
+        console.error('Dev delete failed', err);
+        const msg = err?.error?.message || 'Failed to dev-delete portfolio';
+        this.snackBar.open(msg, 'Close', { duration: 6000 });
+      }
+    });
   }
 }
