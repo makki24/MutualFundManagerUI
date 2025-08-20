@@ -11,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
 import { Subject, fromEvent, debounceTime, takeUntil } from 'rxjs';
@@ -35,6 +36,7 @@ import { InvestmentService } from '../../../core/services/investment.service';
     MatFormFieldModule,
     MatInputModule,
     MatChipsModule,
+    MatTooltipModule,
     FormsModule
   ],
   templateUrl: './transactions-list.component.html',
@@ -53,7 +55,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
 
   transactions: Transaction[] = [];
   // Columns emphasize deltas and details
-  displayedColumns: string[] = ['date', 'type', 'symbol', 'units', 'nav', 'cash', 'net', 'description', 'createdBy', 'expand'];
+  displayedColumns: string[] = ['date', 'type', 'symbol', 'qty', 'units', 'nav', 'cash', 'net', 'description', 'expand'];
 
   // Expanded row state
   expandedElement: Transaction | null = null;
@@ -285,10 +287,13 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     const t = String(type);
     switch (t) {
       case TransactionType.BUY:
+      case 'BUY_SHARES':
+      case 'CASH_ADDITION':
       case 'USER_INVESTMENT':
       case TransactionType.INVESTMENT:
         return 'primary';
       case TransactionType.SELL:
+      case 'SELL_SHARES':
       case TransactionType.WITHDRAWAL:
         return 'accent';
       case TransactionType.DIVIDEND:
@@ -296,6 +301,8 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
       case TransactionType.FEE:
       case 'FEE_DEDUCTION':
         return 'warn';
+      case 'NAV_UPDATE':
+        return '';
       default:
         return '';
     }
@@ -378,10 +385,13 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   typeIcon(type: any): string {
     switch (String(type)) {
       case 'BUY':
+      case 'BUY_SHARES':
+      case 'CASH_ADDITION':
       case 'INVESTMENT':
       case 'USER_INVESTMENT':
         return 'trending_up';
       case 'SELL':
+      case 'SELL_SHARES':
       case 'WITHDRAWAL':
         return 'trending_down';
       case 'DIVIDEND':
@@ -389,9 +399,21 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
       case 'FEE':
       case 'FEE_DEDUCTION':
         return 'receipt_long';
+      case 'NAV_UPDATE':
+        return 'insights';
       default:
         return 'receipt';
     }
+  }
+
+  // Trade helpers
+  isTradeType(type: any): boolean {
+    const t = String(type);
+    return t === 'BUY' || t === 'SELL' || t === 'BUY_SHARES' || t === 'SELL_SHARES';
+  }
+
+  getDisplayQuantity(t: any): number | null {
+    return this.isTradeType(t?.transactionType) ? (this.numOrNull(t?.quantity) ?? null) : null;
   }
 
   fmtNumber(val: any, format: string = '1.2-2'): string {

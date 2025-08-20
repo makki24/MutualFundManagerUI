@@ -107,8 +107,8 @@
         <ng-container matColumnDef="type">
           <th mat-header-cell *matHeaderCellDef>Type</th>
           <td mat-cell *matCellDef="let t">
-            <mat-icon class="type-icon">{{ typeIcon(t.transactionType) }}</mat-icon>
-            <mat-chip [color]="getTransactionTypeColor(t.transactionType)" selected>{{ t.transactionType }}</mat-chip>
+            <mat-icon class="type-icon" matTooltip="{{ t.transactionType }}">{{ typeIcon(t.transactionType) }}</mat-icon>
+            <mat-chip appearance="filled" [color]="getTransactionTypeColor(t.transactionType)" selected matTooltip="{{ t.transactionType }}">{{ t.transactionType }}</mat-chip>
           </td>
         </ng-container>
 
@@ -118,12 +118,23 @@
           <td mat-cell *matCellDef="let t">{{ t.symbol || '—' }}</td>
         </ng-container>
 
+        <!-- Quantity Column (trades only) -->
+        <ng-container matColumnDef="qty">
+          <th mat-header-cell *matHeaderCellDef>Qty</th>
+          <td mat-cell *matCellDef="let t">
+            {{ getDisplayQuantity(t) ?? '—' }}
+          </td>
+        </ng-container>
+
         <!-- Units Delta Column -->
         <ng-container matColumnDef="units">
-          <th mat-header-cell *matHeaderCellDef>Units</th>
+          <th mat-header-cell *matHeaderCellDef>Units Δ</th>
           <td mat-cell *matCellDef="let t">
-            <span [ngClass]="deltaClass(unitsDelta(t))">{{ unitsDelta(t) | number:'1.2-2' }}</span>
-            <div class="sub">{{ fmtNumber(t.unitsBefore, '1.2-2') }} → {{ fmtNumber(t.unitsAfter, '1.2-2') }}</div>
+            <ng-container *ngIf="!isTradeType(t.transactionType); else tradeUnitsDash">
+              <span [ngClass]="deltaClass(unitsDelta(t))">{{ unitsDelta(t) | number:'1.2-2' }}</span>
+              <div class="sub">{{ fmtNumber(t.unitsBefore, '1.2-2') }} → {{ fmtNumber(t.unitsAfter, '1.2-2') }}</div>
+            </ng-container>
+            <ng-template #tradeUnitsDash>—</ng-template>
           </td>
         </ng-container>
 
@@ -165,11 +176,7 @@
           <td mat-cell *matCellDef="let t">{{ t.description }}</td>
         </ng-container>
 
-        <!-- Created By Column -->
-        <ng-container matColumnDef="createdBy">
-          <th mat-header-cell *matHeaderCellDef>By</th>
-          <td mat-cell *matCellDef="let t">{{ t.createdBy?.fullName || t.createdBy?.username }}</td>
-        </ng-container>
+        <!-- Removed Created By column (single user environment) -->
 
         <!-- Expand Toggle Column -->
         <ng-container matColumnDef="expand">
@@ -223,7 +230,7 @@
                 <div class="header">
                   <div class="type">
                     <mat-icon class="type-icon">{{ typeIcon(t.transactionType) }}</mat-icon>
-                    <mat-chip [color]="getTransactionTypeColor(t.transactionType)" selected>{{ t.transactionType }}</mat-chip>
+                    <mat-chip appearance="filled" [color]="getTransactionTypeColor(t.transactionType)" selected>{{ t.transactionType }}</mat-chip>
                     <span class="timestamp">{{ formatDate(t.createdAt) }}</span>
                   </div>
                   <div class="net" [ngClass]="amountClass(bestAmount(t))">{{ bestAmount(t) | currency }}</div>
@@ -236,8 +243,11 @@
                   <div class="row">
                     <div class="label">Units Δ</div>
                     <div class="value">
-                      <span [ngClass]="deltaClass(unitsDelta(t))">{{ unitsDelta(t) | number:'1.2-2' }}</span>
-                      <span class="sub">{{ fmtNumber(t.unitsBefore, '1.2-2') }} → {{ fmtNumber(t.unitsAfter, '1.2-2') }}</span>
+                      <ng-container *ngIf="!isTradeType(t.transactionType); else tradeUnitsDashTL">
+                        <span [ngClass]="deltaClass(unitsDelta(t))">{{ unitsDelta(t) | number:'1.2-2' }}</span>
+                        <span class="sub">{{ fmtNumber(t.unitsBefore, '1.2-2') }} → {{ fmtNumber(t.unitsAfter, '1.2-2') }}</span>
+                      </ng-container>
+                      <ng-template #tradeUnitsDashTL>—</ng-template>
                     </div>
                   </div>
                   <div class="row">
@@ -265,7 +275,6 @@
                     <div class="value">{{ t.description }}</div>
                   </div>
                   <div class="row meta">
-                    <div><strong>By:</strong> {{ t.createdBy?.fullName || t.createdBy?.username || '—' }}</div>
                     <div><strong>Ref:</strong> {{ t.referenceId || '—' }}</div>
                   </div>
                 </div>

@@ -64,7 +64,7 @@
             <ng-container matColumnDef="avgPrice">
               <th mat-header-cell *matHeaderCellDef>Avg Price</th>
               <td mat-cell *matCellDef="let holding">
-                {{ holding.averagePrice | currency:'USD':'symbol':'1.2-2' }}
+                {{ (holding.averagePrice ?? holding.buyPrice) | currency:'USD':'symbol':'1.2-2' }}
               </td>
             </ng-container>
 
@@ -80,26 +80,43 @@
               </td>
             </ng-container>
 
-            <ng-container matColumnDef="totalValue">
-              <th mat-header-cell *matHeaderCellDef>Total Value</th>
+            <ng-container matColumnDef="invested">
+              <th mat-header-cell *matHeaderCellDef>Invested</th>
               <td mat-cell *matCellDef="let holding">
-                {{ holding.totalValue | currency:'USD':'symbol':'1.2-2' }}
+                {{ (holding.totalInvested ?? (holding.averagePrice ?? holding.buyPrice) * holding.quantity) | currency:'USD':'symbol':'1.2-2' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalValue">
+              <th mat-header-cell *matHeaderCellDef>Current Value</th>
+              <td mat-cell *matCellDef="let holding">
+                {{ (holding.totalValue ?? holding.currentValue) | currency:'USD':'symbol':'1.2-2' }}
               </td>
             </ng-container>
 
             <ng-container matColumnDef="gainLoss">
-              <th mat-header-cell *matHeaderCellDef>Gain/Loss</th>
+              <th mat-header-cell *matHeaderCellDef>Unrealized P/L</th>
               <td mat-cell *matCellDef="let holding">
                 <div class="gain-loss-info">
-                  <div class="gain-loss-amount" [class.positive]="holding.gainLoss >= 0"
-                       [class.negative]="holding.gainLoss < 0">
-                    {{ holding.gainLoss | currency:'USD':'symbol':'1.2-2' }}
+                  <div class="gain-loss-amount"
+                       [class.positive]="(holding.gainLoss ?? holding.unrealizedGainLoss) >= 0"
+                       [class.negative]="(holding.gainLoss ?? holding.unrealizedGainLoss) < 0">
+                    {{ (holding.gainLoss ?? holding.unrealizedGainLoss) | currency:'USD':'symbol':'1.2-2' }}
                   </div>
-                  <div class="gain-loss-percentage" [class.positive]="holding.gainLossPercentage >= 0"
-                       [class.negative]="holding.gainLossPercentage < 0">
-                    ({{ holding.gainLossPercentage | number:'1.2-2' }}%)
+                  <div class="gain-loss-percentage"
+                       [class.positive]="(holding.gainLossPercentage ?? holding.returnPercentage) >= 0"
+                       [class.negative]="(holding.gainLossPercentage ?? holding.returnPercentage) < 0"
+                       matTooltip="Return percentage">
+                    ({{ (holding.gainLossPercentage ?? holding.returnPercentage) | number:'1.2-2' }}%)
                   </div>
                 </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="lastUpdated">
+              <th mat-header-cell *matHeaderCellDef>Last Updated</th>
+              <td mat-cell *matCellDef="let holding">
+                <span [matTooltip]="holding.lastPriceUpdate || '—'">{{ holding.lastPriceUpdate ? (holding.lastPriceUpdate | date:'short') : '—' }}</span>
               </td>
             </ng-container>
 

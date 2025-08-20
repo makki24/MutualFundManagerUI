@@ -75,7 +75,17 @@ export class HoldingsListComponent implements OnInit {
   selectedPortfolioControl = new FormControl<number | null>(null);
   isLoading = false;
   isUpdatingPrices = false;
-  displayedColumns = ['symbol', 'quantity', 'avgPrice', 'currentPrice', 'totalValue', 'gainLoss', 'actions'];
+  displayedColumns = [
+    'symbol',
+    'quantity',
+    'avgPrice',
+    'currentPrice',
+    'invested',
+    'totalValue',
+    'gainLoss',
+    'lastUpdated',
+    'actions'
+  ];
 
   ngOnInit(): void {
     // Check for portfolioId query parameter
@@ -164,7 +174,7 @@ export class HoldingsListComponent implements OnInit {
     if (!portfolio) return;
 
     const dialogRef = this.dialog.open(BuySharesDialogComponent, {
-      width: '800px',
+      maxWidth: 900,
       maxHeight: '90vh',
       data: {
         portfolioId: portfolioId,
