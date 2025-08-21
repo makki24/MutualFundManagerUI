@@ -31,11 +31,14 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  display: flex;
+  align-items: center;
 }
 
 .toolbar-title {
   font-size: 18px;
   font-weight: 500;
+  margin-right: 12px;
 }
 
 .toolbar-spacer {
@@ -45,7 +48,8 @@
 .main-content {
   padding: 20px;
   background: #f5f5f5;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
+  overflow: auto;
 }
 
 .user-info {
@@ -73,8 +77,109 @@ mat-nav-list a.active mat-icon {
   color: #1976d2;
 }
 
+/* Toolbar actions alignment (e.g., holdings controls) */
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.toolbar-actions .mat-mdc-form-field {
+  margin: 0;
+  --mat-form-field-container-height: 32px;
+  --mat-form-field-filled-label-display: none;
+}
+
+.toolbar-actions .mat-mdc-text-field-wrapper {
+  min-height: 32px;
+  height: 32px;
+  align-items: center;
+}
+
+.toolbar-actions .mat-mdc-form-field-infix {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.toolbar-actions .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.toolbar-actions .mat-mdc-select-trigger {
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-actions .mat-mdc-select-value,
+.toolbar-actions .mat-mdc-select-trigger .mat-mdc-select-value-text {
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.toolbar-actions .mat-mdc-form-field .mat-mdc-form-field-icon-prefix,
+.toolbar-actions .mat-mdc-form-field .mat-mdc-form-field-icon-suffix {
+  height: 24px;
+}
+
+/* Ensure no extra space is reserved below the field in toolbar */
+.toolbar-actions .mat-mdc-form-field-bottom-align,
+.toolbar-actions .mat-mdc-form-field-subscript-wrapper {
+  height: 0;
+  margin: 0;
+}
+
+/* Optional: a predictable width for the portfolio selector */
+.toolbar-actions .toolbar-field.compact {
+  width: 200px;
+}
+
+/* Bare mat-select (no form-field) compact sizing */
+.toolbar-actions .toolbar-select.compact.mat-mdc-select {
+  height: 32px;
+  line-height: 32px;
+  width: 160px;
+  min-width: 0;
+  border: 1px solid rgba(0, 0, 0, 0.23); /* Material default outline */
+  border-radius: 4px;
+}
+
+.toolbar-actions .toolbar-select .mat-mdc-select-trigger {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.toolbar-actions .toolbar-select .mat-mdc-select-value,
+.toolbar-actions .toolbar-select .mat-mdc-select-value-text {
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* Hover/focus states to match Material outline behavior */
+.toolbar-actions .toolbar-select.compact.mat-mdc-select:hover {
+  border-color: rgba(0, 0, 0, 0.37);
+}
+
+.toolbar-actions .toolbar-select.compact.mat-mdc-select.mat-mdc-select-invalid,
+.toolbar-actions .toolbar-select.compact.mat-mdc-select:focus-within {
+  border-color: #1976d2; /* primary */
+}
+
 @media (max-width: 768px) {
   .main-content {
     padding: 16px;
   }
+
+  .hide-sm {
+    display: none !important;
+  }
+}
+
+.hide-sm {
+  display: inline;
 }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -20,6 +20,8 @@ import { Portfolio } from '../../../core/models/portfolio.model';
 import { Investment } from '../../../core/models/investment.model';
 import { AddUserToPortfolioDialogComponent } from './add-user-to-portfolio-dialog/add-user-to-portfolio-dialog.component';
 import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-user-dialog.component';
+import { ToolbarService } from '../../../layout/toolbar/toolbar.service';
+import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-toolbar-controls.component';
 
 @Component({
   selector: 'app-portfolio-details',
@@ -44,41 +46,8 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
           <p>Loading portfolio details...</p>
         </div>
       } @else if (portfolio) {
-        <!-- Portfolio Header -->
+        <!-- Portfolio Stats card (header moved to global toolbar) -->
         <mat-card class="portfolio-header-card">
-          <mat-card-header>
-            <div class="header-content">
-              <div class="portfolio-info">
-                <mat-card-title>{{ portfolio.name }}</mat-card-title>
-                <mat-card-subtitle>
-                  Created by {{ portfolio.createdBy.username || 'Unknown' }}
-                  @if (portfolio.createdAt) {
-                    • {{ portfolio.createdAt | date:'mediumDate' }}
-                  }
-                </mat-card-subtitle>
-              </div>
-              <div class="header-actions">
-                <button mat-icon-button (click)="goBack()" matTooltip="Back to Portfolios">
-                  <mat-icon>arrow_back</mat-icon>
-                </button>
-                <button mat-button (click)="viewTransactions()">
-                  <mat-icon>receipt_long</mat-icon>
-                  View Transactions
-                </button>
-                @if (isAdmin) {
-                  <button mat-button (click)="manageFees()">
-                    <mat-icon>account_balance_wallet</mat-icon>
-                    Manage Fees
-                  </button>
-                  <button mat-button (click)="manageHoldings()">
-                    <mat-icon>pie_chart</mat-icon>
-                    Manage Holdings
-                  </button>
-                }
-              </div>
-            </div>
-          </mat-card-header>
-
           <mat-card-content>
             <div class="portfolio-stats">
               <div class="stat-item">
@@ -585,7 +554,7 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
     }
   `]
 })
-export class PortfolioDetailsComponent implements OnInit {
+export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private portfolioService = inject(PortfolioService);
@@ -593,6 +562,7 @@ export class PortfolioDetailsComponent implements OnInit {
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+  private toolbar = inject(ToolbarService);
 
   portfolioId!: number;
   portfolio: Portfolio | null = null;
@@ -609,17 +579,29 @@ export class PortfolioDetailsComponent implements OnInit {
     if (this.portfolioId) {
       this.loadPortfolioDetails();
       this.loadPortfolioInvestments();
+      // Register toolbar controls immediately (title set after details load)
+      this.toolbar.setControls(PortfolioDetailsToolbarControlsComponent);
     } else {
       this.router.navigate(['/portfolios']);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.toolbar.clear();
   }
 
   loadPortfolioDetails(): void {
     this.isLoading = true;
     this.portfolioService.getPortfolioDetails(this.portfolioId).subscribe({
       next: (response) => {
-        if (response.success) {
-          this.portfolio = response.data;
+        if (response.success && response.data) {
+          const p = response.data as Portfolio;
+          this.portfolio = p;
+          // Set toolbar title to include name and date
+          const createdBy = p.createdBy?.username || 'Unknown';
+          const dateStr = p.createdAt ? new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit', year: 'numeric' }).format(new Date(p.createdAt)) : '';
+          const title = dateStr ? `${p.name} • ${createdBy} • ${dateStr}` : `${p.name} • ${createdBy}`;
+          this.toolbar.setTitle(title);
         }
         this.isLoading = false;
       },

@@ -1,14 +1,5 @@
 <div class="transactions-page">
   <mat-card>
-    <mat-card-header>
-      <mat-card-title>
-        Transactions
-        <span *ngIf="portfolio" class="portfolio-name">
-          - {{ portfolio.name }}
-        </span>
-      </mat-card-title>
-    </mat-card-header>
-
     <mat-card-content>
       <app-transactions-list
         *ngIf="portfolioId"

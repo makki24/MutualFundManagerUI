@@ -38,9 +38,7 @@ import { Portfolio } from '../../core/models/portfolio.model';
   ],
   template: `
     <div class="transactions-container">
-      <div class="page-header">
-        <h1>Transaction History</h1>
-      </div>
+      
 
       <!-- Filters -->
       <mat-card class="filters-card">
@@ -208,16 +206,6 @@ import { Portfolio } from '../../core/models/portfolio.model';
       margin: 0 auto;
     }
 
-    .page-header {
-      margin-bottom: 24px;
-    }
-
-    .page-header h1 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 500;
-      color: #333;
-    }
 
     .filters-card {
       margin-bottom: 24px;

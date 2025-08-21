@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router, RouterModule } from '@angular/router';
+import { RouterOutlet, Router, RouterModule, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,12 +10,17 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Location } from '@angular/common';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable, map, shareReplay } from 'rxjs';
+import { Observable, map, shareReplay, filter } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 import { ChangePasswordDialogComponent } from '../../features/auth/change-password-dialog.component';
+import { PortfolioFormDialogComponent } from '../../features/portfolios/portfolio-form-dialog.component';
+import { UserFormDialogComponent } from '../../features/users/user-form-dialog.component';
+import { ToolbarService } from '../toolbar/toolbar.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -30,7 +35,10 @@ import { ChangePasswordDialogComponent } from '../../features/auth/change-passwo
     MatButtonModule,
     MatListModule,
     MatMenuModule,
-    MatDividerModule
+    MatTooltipModule,
+    MatDividerModule,
+    PortfolioFormDialogComponent,
+    UserFormDialogComponent
   ],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
@@ -41,20 +49,82 @@ export class MainLayoutComponent implements OnInit {
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+  private location = inject(Location);
+  public toolbar = inject(ToolbarService);
 
   currentUser: User | null = null;
   isAdmin = false;
-
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
       shareReplay()
     );
 
+  private lastUrl: string | null = null;
+  private prevUrl: string | null = null;
+
   ngOnInit(): void {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       this.isAdmin = user?.role === 'ADMIN';
+    });
+
+    // Track previous route to decide back button visibility
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
+      this.prevUrl = this.lastUrl;
+      this.lastUrl = e.urlAfterRedirects ?? e.url;
+    });
+  }
+
+  createUserFromToolbar(): void {
+    if (!this.isAdmin) return;
+    const dialogRef = this.dialog.open(UserFormDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      data: { mode: 'create' }
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      // User list component will refresh accordingly
+    });
+  }
+
+  goBack(): void {
+    this.location.back();
+  }
+
+  isRoute(path: string): boolean {
+    return this.router.url.includes(path);
+  }
+
+  isPortfolioListRoute(): boolean {
+    const currentPath = (this.router.url.split('?')[0]) || '';
+    return currentPath === '/portfolios';
+  }
+
+  showBackButton(): boolean {
+    const currentPath = (this.router.url.split('?')[0]) || '';
+    if (currentPath === '/dashboard') return false;
+    if (currentPath === '/portfolios' || currentPath === '/users') return false;
+
+    if (currentPath === '/holdings') {
+      const prevPath = (this.prevUrl || '').split('?')[0];
+      if (!prevPath) return false; // first load via sidebar
+      if (['/dashboard', '/portfolios', '/users'].includes(prevPath)) return false; // came from sidebar/root pages
+    }
+    return true;
+  }
+
+  createPortfolioFromToolbar(): void {
+    if (!this.isAdmin) return;
+    const dialogRef = this.dialog.open(PortfolioFormDialogComponent, {
+      maxWidth: 900,
+      disableClose: true,
+      data: { mode: 'create' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // No-op: portfolio-list component will refresh via its own subscription after creation
     });
   }
 

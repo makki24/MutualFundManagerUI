@@ -45,17 +45,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
   ],
   template: `
     <div class="user-list-container">
-      <!-- Header -->
-      <div class="page-header">
-        <div class="header-content">
-          <h1>User Management</h1>
-          <p>Manage user accounts and permissions</p>
-        </div>
-        <button mat-raised-button color="primary" (click)="createUser()">
-          <mat-icon>person_add</mat-icon>
-          Add User
-        </button>
-      </div>
+      
 
       <!-- Filters -->
       <mat-card class="filters-card">
@@ -229,24 +219,12 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
     }
 
     .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 24px;
+      display: none;
     }
 
-    .header-content h1 {
-      margin: 0 0 8px 0;
-      font-size: 28px;
-      font-weight: 600;
-      color: #1a1a1a;
-    }
+    .header-content h1 { display: none; }
 
-    .header-content p {
-      margin: 0;
-      color: #666;
-      font-size: 16px;
-    }
+    .header-content p { display: none; }
 
     .filters-card {
       margin-bottom: 24px;

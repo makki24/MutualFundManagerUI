@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -21,6 +21,8 @@ import { Portfolio, Holding } from '../../../core/models/portfolio.model';
 import { BuySharesDialogComponent, BuySharesDialogData } from '../buy-shares-dialog/buy-shares-dialog.component';
 import { SellSharesDialogComponent, SellSharesDialogData } from '../sell-shares-dialog/sell-shares-dialog.component';
 import { UpdatePriceDialogComponent, UpdatePriceDialogData, UpdatePriceDialogResult } from '../update-price-dialog/update-price-dialog.component';
+import { ToolbarService } from '../../../layout/toolbar/toolbar.service';
+import { HoldingsToolbarControlsComponent } from '../holdings-toolbar-controls/holdings-toolbar-controls.component';
 
 interface PriceUpdateResult {
   success: boolean;
@@ -60,7 +62,7 @@ interface PriceUpdateResult {
   templateUrl: './holdings-list.component.html',
   styleUrls: ['./holdings-list.component.css']
 })
-export class HoldingsListComponent implements OnInit {
+export class HoldingsListComponent implements OnInit, OnDestroy {
   private portfolioService = inject(PortfolioService);
   private stockService = inject(StockService);
   private holdingService = inject(HoldingService);
@@ -69,12 +71,14 @@ export class HoldingsListComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private toolbar = inject(ToolbarService);
 
   portfolios: Portfolio[] = [];
   holdings: Holding[] = [];
   selectedPortfolioControl = new FormControl<number | null>(null);
   isLoading = false;
   isUpdatingPrices = false;
+  private pendingPortfolioId: number | null = null;
   displayedColumns = [
     'symbol',
     'quantity',
@@ -88,9 +92,48 @@ export class HoldingsListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    // Check for portfolioId query parameter
+    // Register toolbar controls for this feature
+    this.toolbar.setControls(HoldingsToolbarControlsComponent);
+
+    // Load portfolios and preselect from URL if provided
     const portfolioIdParam = this.route.snapshot.queryParams['portfolioId'];
     this.loadPortfolios(portfolioIdParam ? Number(portfolioIdParam) : null);
+
+    // React to query param changes from toolbar
+    this.route.queryParams.subscribe(params => {
+      const pid = params['portfolioId'] ? Number(params['portfolioId']) : null;
+      const addHolding = params['addHolding'] === 'true' || params['addHolding'] === true;
+      const updatePrices = params['updatePrices'] === 'true' || params['updatePrices'] === true;
+
+      if (pid !== (this.selectedPortfolioControl.value ?? null)) {
+        // If portfolios not yet loaded, store pending id
+        if (this.portfolios.length === 0) {
+          this.pendingPortfolioId = pid;
+        } else if (!pid || this.portfolios.find(p => p.id === pid)) {
+          this.selectedPortfolioControl.setValue(pid);
+          this.onPortfolioChange();
+        }
+      }
+
+      if (addHolding) {
+        // Open dialog then remove the flag to avoid repeated openings
+        setTimeout(() => {
+          this.addHolding();
+          this.router.navigate([], { queryParams: { addHolding: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        });
+      }
+
+      if (updatePrices) {
+        setTimeout(() => {
+          this.updateAllPrices();
+          this.router.navigate([], { queryParams: { updatePrices: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        });
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.toolbar.setControls(null);
   }
 
   loadPortfolios(preselectedPortfolioId?: number | null): void {
@@ -98,12 +141,14 @@ export class HoldingsListComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.portfolios = response.data || [];
-          if (preselectedPortfolioId && this.portfolios.find(p => p.id === preselectedPortfolioId)) {
-            this.selectedPortfolioControl.setValue(preselectedPortfolioId);
+          const effectivePreselect = this.pendingPortfolioId ?? preselectedPortfolioId;
+          if (effectivePreselect && this.portfolios.find(p => p.id === effectivePreselect)) {
+            this.selectedPortfolioControl.setValue(effectivePreselect);
           } else if (this.portfolios.length > 0) {
             this.selectedPortfolioControl.setValue(this.portfolios[0].id);
           }
           this.onPortfolioChange();
+          this.pendingPortfolioId = null;
         }
       },
       error: (error) => {

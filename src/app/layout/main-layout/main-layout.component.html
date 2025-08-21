@@ -57,7 +57,33 @@
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
 
-      <span class="toolbar-title">{{ getPageTitle() }}</span>
+      <!-- Back button visibility controlled by logic -->
+      @if (showBackButton()) {
+        <button mat-icon-button (click)="goBack()" matTooltip="Back">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+      }
+
+      <span class="toolbar-title">{{ toolbar.title() || getPageTitle() }}</span>
+
+      <!-- Context actions placed in global toolbar -->
+      <div class="toolbar-actions">
+        @if (toolbar.controls()) {
+          <ng-container [ngComponentOutlet]="toolbar.controls()"></ng-container>
+        }
+      </div>
+      @if (isAdmin && isPortfolioListRoute()) {
+        <button mat-button color="accent" (click)="createPortfolioFromToolbar()" matTooltip="Create Portfolio">
+          <mat-icon>add</mat-icon>
+          <span class="hide-sm">Create Portfolio</span>
+        </button>
+      }
+      @if (isAdmin && isRoute('/users')) {
+        <button mat-button color="accent" (click)="createUserFromToolbar()" matTooltip="Add User">
+          <mat-icon>person_add</mat-icon>
+          <span class="hide-sm">Add User</span>
+        </button>
+      }
 
       <span class="toolbar-spacer"></span>
 

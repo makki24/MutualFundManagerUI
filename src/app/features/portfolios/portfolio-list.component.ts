@@ -34,15 +34,7 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
   ],
   template: `
     <div class="portfolio-container">
-      <div class="page-header">
-        <h1>Portfolios</h1>
-        @if (isAdmin) {
-          <button mat-raised-button color="primary" (click)="createPortfolio()">
-            <mat-icon>add</mat-icon>
-            Create Portfolio
-          </button>
-        }
-      </div>
+      
 
       @if (isLoading) {
         <div class="loading-container">
@@ -209,19 +201,7 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
       max-width: 1200px;
       margin: 0 auto;
     }
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .page-header h1 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 500;
-      color: #333;
-    }
+    
 
     .loading-container {
       display: flex;

@@ -1,25 +1,4 @@
 <mat-card class="transactions-container">
-  <mat-card-header>
-    <mat-card-title>
-      <div class="header-row">
-        <button
-          mat-icon-button
-          class="back-button"
-          aria-label="Back to portfolio"
-          (click)="goBackToPortfolio()"
-          *ngIf="viewType === 'portfolio' && portfolioId">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
-        <span>
-          {{ viewType === 'portfolio' ? 'Portfolio' : 'User' }} Transactions
-          <span class="transaction-count" *ngIf="totalCount > 0">
-            ({{ totalCount }} total)
-          </span>
-        </span>
-      </div>
-    </mat-card-title>
-  </mat-card-header>
-
   <mat-card-content>
     <!-- View Toggle -->
     <div class="view-toggle">
