@@ -68,21 +68,11 @@ export class PortfolioService {
     return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/withdraw`, request);
   }
 
-  updateNav(portfolioId: number): Observable<any> {
-    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/nav/update`, {});
-  }
-
-  calculateFees(portfolioId: number): Observable<any> {
-    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/fees/calculate`, {});
-  }
 
   getPortfolioHoldings(portfolioId: number): Observable<ApiResponse<Holding[]>> {
     return this.http.get<ApiResponse<Holding[]>>(`${this.API_URL}/portfolios/${portfolioId}/holdings`);
   }
 
-  addHolding(portfolioId: number, holding: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings`, holding);
-  }
 
   buyShares(portfolioId: number, symbol: string, request: any): Observable<any> {
     return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/buy`, request);
@@ -92,12 +82,18 @@ export class PortfolioService {
     return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/sell`, request);
   }
 
-  updatePrices(portfolioId: number, prices: any): Observable<any> {
-    return this.http.put(`${this.API_URL}/portfolios/${portfolioId}/holdings/prices`, prices);
-  }
 
   updateAllPrices(portfolioId: number): Observable<any> {
     return this.http.put(`${this.API_URL}/portfolios/${portfolioId}/holdings/prices/update-all`, {});
+  }
+
+  updatePricesByDate(portfolioId: number, date: string): Observable<any> {
+    const params = new HttpParams().set('date', date);
+    return this.http.put(
+      `${this.API_URL}/portfolios/${portfolioId}/holdings/prices/update-by-date`,
+      {},
+      { params }
+    );
   }
 
   updateStockPrice(portfolioId: number, symbol: string, newPrice: number): Observable<ApiResponse<any>> {
@@ -120,27 +116,11 @@ export class PortfolioService {
     return this.http.get<ApiResponse<PortfolioFee[]>>(`${this.API_URL}/portfolios/${portfolioId}/fees`);
   }
 
-  getPortfolioFeeById(portfolioId: number, feeId: number): Observable<ApiResponse<PortfolioFee>> {
-    return this.http.get<ApiResponse<PortfolioFee>>(`${this.API_URL}/portfolios/${portfolioId}/fees/${feeId}`);
-  }
-
   deactivatePortfolioFee(portfolioId: number, feeId: number): Observable<ApiResponse<any>> {
     return this.http.delete<ApiResponse<any>>(`${this.API_URL}/portfolios/${portfolioId}/fees/${feeId}`);
   }
 
-  getUserFeeAllocations(userId: number): Observable<ApiResponse<UserFeeAllocation[]>> {
-    return this.http.get<ApiResponse<UserFeeAllocation[]>>(`${this.API_URL}/users/${userId}/fee-allocations`);
-  }
-
   getPortfolioFeeAllocations(portfolioId: number): Observable<ApiResponse<UserFeeAllocation[]>> {
     return this.http.get<ApiResponse<UserFeeAllocation[]>>(`${this.API_URL}/portfolios/${portfolioId}/fee-allocations`);
-  }
-
-  // Enhanced investment method with fee calculation
-  investInPortfolioWithFees(portfolioId: number, userId: number, investmentAmount: number, adminUserId: number): Observable<any> {
-    const params = new HttpParams()
-      .set('investmentAmount', investmentAmount.toString())
-      .set('adminUserId', adminUserId.toString());
-    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/invest`, {}, { params });
   }
 }

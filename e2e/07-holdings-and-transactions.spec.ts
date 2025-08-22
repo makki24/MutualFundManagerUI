@@ -87,7 +87,8 @@ test.describe('Transactions Management', () => {
 
   test('should display transactions page', async ({ page }) => {
     // Check if transactions component is loaded
-    await expect(page.locator('app-transaction-list')).toBeVisible();
+    // Transactions page is implemented via TransactionsPageComponent
+    await expect(page.locator('app-transactions-page')).toBeVisible();
 
     // Check URL
     await expect(page).toHaveURL('/transactions');

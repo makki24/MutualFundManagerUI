@@ -129,7 +129,9 @@ describe('HoldingsListComponent', () => {
     activatedRoute = {
       snapshot: {
         queryParams: {}
-      }
+      },
+      // Provide an observable for queryParams to satisfy subscriptions in ngOnInit
+      queryParams: of({})
     };
 
     await TestBed.configureTestingModule({
@@ -185,6 +187,8 @@ describe('HoldingsListComponent', () => {
 
   it('should preselect portfolio from query params', () => {
     activatedRoute.snapshot.queryParams = { portfolioId: '2' };
+    // Ensure the queryParams stream aligns with snapshot so the subscription does not clear the selection
+    activatedRoute.queryParams = of({ portfolioId: '2' });
 
     component.ngOnInit();
 

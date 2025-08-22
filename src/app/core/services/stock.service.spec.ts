@@ -193,23 +193,5 @@ describe('StockService', () => {
     });
   });
 
-  describe('healthCheck', () => {
-    it('should perform health check', () => {
-      const mockResponse: ApiResponse<string> = {
-        success: true,
-        message: 'Health check successful',
-        data: 'OK',
-        timestamp: '2025-08-06T16:30:00',
-        error: null
-      };
-
-      service.healthCheck().subscribe(response => {
-        expect(response.data).toBe('OK');
-      });
-
-      const req = httpMock.expectOne(`${API_URL}/stocks/health`);
-      expect(req.request.method).toBe('GET');
-      req.flush(mockResponse);
-    });
-  });
+  
 });

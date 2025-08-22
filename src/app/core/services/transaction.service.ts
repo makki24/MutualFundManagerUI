@@ -16,11 +16,6 @@ export class TransactionService {
   private readonly http = inject(HttpClient);
   private readonly API_URL = 'http://localhost:8080/api/transactions';
 
-  getTransactionById(id: number): Observable<Transaction> {
-    return this.http.get<ApiResponse<Transaction>>(`${this.API_URL}/${id}`)
-      .pipe(map(response => response.data));
-  }
-
   getUserTransactions(userId: number, filter?: TransactionFilter): Observable<TransactionResponse> {
     let params = new HttpParams();
     if (filter) {
@@ -95,19 +90,5 @@ export class TransactionService {
         };
       })
     );
-  }
-
-  createTransaction(transaction: Partial<Transaction>): Observable<Transaction> {
-    return this.http.post<ApiResponse<Transaction>>(`${this.API_URL}`, transaction)
-      .pipe(map(response => response.data));
-  }
-
-  updateTransaction(id: number, transaction: Partial<Transaction>): Observable<Transaction> {
-    return this.http.put<ApiResponse<Transaction>>(`${this.API_URL}/${id}`, transaction)
-      .pipe(map(response => response.data));
-  }
-
-  deleteTransaction(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${id}`);
   }
 }

@@ -104,6 +104,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
       const pid = params['portfolioId'] ? Number(params['portfolioId']) : null;
       const addHolding = params['addHolding'] === 'true' || params['addHolding'] === true;
       const updatePrices = params['updatePrices'] === 'true' || params['updatePrices'] === true;
+      const updatePricesByDate: string | null = typeof params['updatePricesByDate'] === 'string' ? params['updatePricesByDate'] : null;
 
       if (pid !== (this.selectedPortfolioControl.value ?? null)) {
         // If portfolios not yet loaded, store pending id
@@ -127,6 +128,13 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
         setTimeout(() => {
           this.updateAllPrices();
           this.router.navigate([], { queryParams: { updatePrices: null }, queryParamsHandling: 'merge', replaceUrl: true });
+        });
+      }
+
+      if (updatePricesByDate) {
+        setTimeout(() => {
+          this.updatePricesByDate(updatePricesByDate);
+          this.router.navigate([], { queryParams: { updatePricesByDate: null }, queryParamsHandling: 'merge', replaceUrl: true });
         });
       }
     });
@@ -322,14 +330,11 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
         if (response.success) {
           const { data } = response;
 
-          // Update holdings with manual update flags
           this.updateHoldingsWithPriceResults(data.stockUpdates);
 
-          // Show detailed success message
           const successMessage = `Price update completed: ${data.successfulUpdates}/${data.totalStocks} stocks updated successfully`;
           this.snackBar.open(successMessage, 'Close', { duration: 5000 });
 
-          // Show warning for failed updates if any
           if (data.failedUpdates > 0) {
             const failedStocks = data.stockUpdates
               .filter(update => !update.success)
@@ -345,7 +350,6 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
             }, 2000);
           }
 
-          // Reload holdings to get updated data
           this.loadHoldings(portfolioId);
         } else {
           this.snackBar.open(response.message || 'Failed to update prices', 'Close', { duration: 5000 });
@@ -367,8 +371,64 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
     });
   }
 
+  updatePricesByDate(date: string): void {
+    const portfolioId = this.selectedPortfolioControl.value;
+    if (!portfolioId) return;
+
+    this.isUpdatingPrices = true;
+    this.snackBar.open(`Updating prices for ${date}...`, 'Close', { duration: 2000 });
+
+    this.portfolioService.updatePricesByDate(portfolioId, date).subscribe({
+      next: (response: any) => {
+        this.isUpdatingPrices = false;
+
+        if (response.success) {
+          const { data } = response;
+
+          if (data?.stockUpdates) {
+            this.updateHoldingsWithPriceResults(data.stockUpdates);
+          }
+
+          const total = data?.totalStocks ?? 0;
+          const successful = data?.successfulUpdates ?? 0;
+          const failed = data?.failedUpdates ?? 0;
+          const successMessage = `Price update for ${date}: ${successful}/${total} stocks updated successfully`;
+          this.snackBar.open(successMessage, 'Close', { duration: 5000 });
+
+          if (failed > 0 && Array.isArray(data?.stockUpdates)) {
+            const failedStocks = data.stockUpdates
+              .filter((u: any) => !u.success)
+              .map((u: any) => u.symbol)
+              .join(', ');
+            setTimeout(() => {
+              this.snackBar.open(
+                `${failed} stocks require manual update: ${failedStocks}`,
+                'Close',
+                { duration: 8000 }
+              );
+            }, 2000);
+          }
+
+          this.loadHoldings(portfolioId);
+        } else {
+          this.snackBar.open(response.message || `Failed to update prices for ${date}`, 'Close', { duration: 5000 });
+        }
+      },
+      error: (error) => {
+        this.isUpdatingPrices = false;
+        console.error('Failed to update prices by date:', error);
+        let errorMessage = `Failed to update prices for ${date}`;
+        if (error?.error?.message) {
+          errorMessage = error.error.message;
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+        this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+      }
+    });
+  }
+
   private updateHoldingsWithPriceResults(stockUpdates: any[]): void {
-    // Update holdings with manual update flags based on API response
     this.holdings = this.holdings.map(holding => {
       const updateResult = stockUpdates.find(update => update.symbol === holding.symbol);
       if (updateResult) {

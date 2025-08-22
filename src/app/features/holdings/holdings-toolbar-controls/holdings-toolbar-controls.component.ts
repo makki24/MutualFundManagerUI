@@ -5,6 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { UpdateByDateDialogComponent } from '../update-by-date-dialog/update-by-date-dialog.component';
 import { Router } from '@angular/router';
 
 import { PortfolioService } from '../../../core/services/portfolio.service';
@@ -20,6 +22,7 @@ import { Portfolio } from '../../../core/models/portfolio.model';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    MatDialogModule,
   ],
   template: `
     <mat-select
@@ -52,6 +55,17 @@ import { Portfolio } from '../../../core/models/portfolio.model';
     >
       <mat-icon>refresh</mat-icon>
       <span class="hide-sm">Update Prices</span>
+    </button>
+
+    <button
+      mat-button
+      color="primary"
+      (click)="updatePricesByDateFromToolbar()"
+      [disabled]="!selectedPortfolioId.value"
+      matTooltip="Update Prices by Date"
+    >
+      <mat-icon>event</mat-icon>
+      <span class="hide-sm">Update by Date</span>
     </button>
   `,
   styles: [
@@ -88,6 +102,7 @@ import { Portfolio } from '../../../core/models/portfolio.model';
 export class HoldingsToolbarControlsComponent implements OnInit {
   private portfolioService = inject(PortfolioService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   portfolios: Portfolio[] = [];
   selectedPortfolioId = new FormControl<number | null>(null, { nonNullable: false });
@@ -134,6 +149,19 @@ export class HoldingsToolbarControlsComponent implements OnInit {
       queryParams: { updatePrices: true },
       queryParamsHandling: 'merge',
       replaceUrl: true,
+    });
+  }
+
+  updatePricesByDateFromToolbar(): void {
+    if (!this.selectedPortfolioId.value) return;
+    const ref = this.dialog.open(UpdateByDateDialogComponent, { width: '360px' });
+    ref.afterClosed().subscribe(date => {
+      if (!date) return;
+      this.router.navigate(['/holdings'], {
+        queryParams: { updatePricesByDate: date },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
     });
   }
 }

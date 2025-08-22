@@ -19,6 +19,7 @@ import { Transaction, TransactionFilter, TransactionType, PaginationHeaders } fr
 import { TransactionService } from '../../../core/services/transaction.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvestmentService } from '../../../core/services/investment.service';
+import { TransactionsViewService, TransactionsViewMode } from '../transactions-view.service';
 
 @Component({
   selector: 'app-transactions-list',
@@ -50,6 +51,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   private readonly transactionService = inject(TransactionService);
   private readonly authService = inject(AuthService);
   private readonly investmentService = inject(InvestmentService);
+  private readonly viewService = inject(TransactionsViewService);
   private readonly router = inject(Router);
   private destroy$ = new Subject<void>();
 
@@ -60,9 +62,8 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   // Expanded row state
   expandedElement: Transaction | null = null;
 
-  // View mode with persistence
-  viewMode: 'table' | 'timeline' = 'table';
-  private readonly VIEW_MODE_KEY = 'transactions_view_mode';
+  // View mode is controlled by global toolbar
+  viewMode: TransactionsViewMode = 'table';
   
   // Pagination
   currentPage = 0;
@@ -96,9 +97,8 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     if (this.viewType === 'portfolio' && this.portfolioId) {
       this.loadPortfolioUsers();
     }
-    // Restore view mode
-    const saved = localStorage.getItem(this.VIEW_MODE_KEY) as 'table' | 'timeline' | null;
-    if (saved === 'table' || saved === 'timeline') this.viewMode = saved;
+    // Subscribe to view mode from toolbar controls
+    this.viewService.viewMode$.pipe(takeUntil(this.destroy$)).subscribe(mode => (this.viewMode = mode));
     
     this.loadTransactions();
     this.setupInfiniteScroll();
@@ -114,14 +114,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.expandedElement = this.expandedElement === row ? null : row;
   }
 
-  // Handle view mode toggle and persist
-  onViewModeChange(mode: 'table' | 'timeline'): void {
-    if (mode !== 'table' && mode !== 'timeline') return;
-    this.viewMode = mode;
-    try {
-      localStorage.setItem(this.VIEW_MODE_KEY, mode);
-    } catch {}
-  }
+  // View mode changes are handled by toolbar controls via TransactionsViewService
 
   // Navigate back to portfolio details when in portfolio view
   goBackToPortfolio(): void {

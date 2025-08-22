@@ -35,8 +35,4 @@ export class StockService {
 
     return this.http.post<ApiResponse<BuySharesResponse>>(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/buy`, {}, { params });
   }
-
-  healthCheck(): Observable<ApiResponse<string>> {
-    return this.http.get<ApiResponse<string>>(`${this.API_URL}/stocks/health`);
-  }
 }

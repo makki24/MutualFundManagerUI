@@ -1,18 +1,6 @@
 <mat-card class="transactions-container">
   <mat-card-content>
-    <!-- View Toggle -->
-    <div class="view-toggle">
-      <mat-button-toggle-group [value]="viewMode" (change)="onViewModeChange($event.value)" aria-label="View mode">
-        <mat-button-toggle value="table">
-          <mat-icon>table_chart</mat-icon>
-          Table
-        </mat-button-toggle>
-        <mat-button-toggle value="timeline">
-          <mat-icon>timeline</mat-icon>
-          Timeline
-        </mat-button-toggle>
-      </mat-button-toggle-group>
-    </div>
+    <!-- View toggle moved to global toolbar -->
     <!-- Filters Section -->
     <div class="filters-section">
       <mat-form-field appearance="outline" class="filter-field">

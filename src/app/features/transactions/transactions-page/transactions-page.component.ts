@@ -7,6 +7,7 @@ import { TransactionsListComponent } from '../transactions-list/transactions-lis
 import { PortfolioService } from '../../../core/services/portfolio.service';
 import { Portfolio } from '../../../core/models/portfolio.model';
 import { ToolbarService } from '../../../layout/toolbar/toolbar.service';
+import { TransactionsToolbarControlsComponent } from '../transactions-toolbar-controls.component';
 
 @Component({
   selector: 'app-transactions-page',
@@ -38,8 +39,10 @@ export class TransactionsPageComponent implements OnInit, OnDestroy {
         // Default to portfolio transactions tab when portfolio ID is present
         this.selectedTabIndex = 1;
         this.toolbar.setTitle('Transactions');
+        this.toolbar.setControls(TransactionsToolbarControlsComponent);
       } else {
         this.toolbar.setTitle('Transactions');
+        this.toolbar.setControls(TransactionsToolbarControlsComponent);
       }
     });
 

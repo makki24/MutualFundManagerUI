@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { User, CreateUserRequest, UpdateUserRequest, UserStats } from '../models/user.model';
-import { Investment } from '../models/portfolio.model';
-import { InvestmentSummary } from '../models/dashboard.model';
 import { ApiResponse } from '../models/api-response.model';
 
 @Injectable({
@@ -45,13 +43,5 @@ export class UserService {
 
   getUserStats(): Observable<ApiResponse<UserStats>> {
     return this.http.get<ApiResponse<UserStats>>(`${this.API_URL}/users/stats`);
-  }
-
-  getUserInvestments(userId: number): Observable<Investment[]> {
-    return this.http.get<Investment[]>(`${this.API_URL}/investments/user/${userId}`);
-  }
-
-  getUserInvestmentSummary(userId: number): Observable<InvestmentSummary> {
-    return this.http.get<InvestmentSummary>(`${this.API_URL}/investments/user/${userId}/summary`);
   }
 }

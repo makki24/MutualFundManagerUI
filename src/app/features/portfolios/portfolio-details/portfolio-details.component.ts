@@ -56,7 +56,7 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
               </div>
               <div class="stat-item">
                 <div class="stat-label">Total AUM</div>
-                <div class="stat-value">{{ portfolio.totalPortfolioValue | currency:'INR':'symbol':'1.0-0' }}</div>
+                <div class="stat-value">{{ portfolio.totalAum | currency:'INR':'symbol':'1.0-0' }}</div>
               </div>
               <div class="stat-item">
                 <div class="stat-label">Total Units</div>
