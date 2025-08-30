@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { StockService } from '../../../core/services/stock.service';
 import { Stock, StockPrice, BuySharesRequest } from '../../../core/models/stock.model';
@@ -35,6 +36,7 @@ export interface BuySharesDialogData {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatButtonToggleModule,
     StockSearchComponent
   ],
   template: `
@@ -48,22 +50,70 @@ export interface BuySharesDialogData {
         <form [formGroup]="buyForm" class="buy-form">
           @if (!data.existingHolding) {
             <div class="form-section">
-              <h3>Select Stock</h3>
-              <app-stock-search
-                placeholder="Search for stocks..."
-                (stockSelected)="onStockSelected($event)"
-              ></app-stock-search>
-              @if (selectedStock) {
+              <div class="stock-selection-header">
+                <h3>Select Stock</h3>
+                <mat-button-toggle-group 
+                  [value]="inputMode" 
+                  (change)="onInputModeChange($event.value)"
+                  class="input-mode-toggle">
+                  <mat-button-toggle value="search">
+                    <mat-icon>search</mat-icon>
+                    Search
+                  </mat-button-toggle>
+                  <mat-button-toggle value="manual">
+                    <mat-icon>edit</mat-icon>
+                    Manual
+                  </mat-button-toggle>
+                </mat-button-toggle-group>
+              </div>
+              
+              @if (inputMode === 'search') {
+                <app-stock-search
+                  placeholder="Search for stocks..."
+                  (stockSelected)="onStockSelected($event)"
+                ></app-stock-search>
+              } @else {
+                <div class="manual-input-section">
+                  <div class="form-row">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Stock Symbol</mat-label>
+                      <input matInput formControlName="manualSymbol" placeholder="e.g., RELIANCE">
+                      @if (buyForm.get('manualSymbol')?.hasError('required')) {
+                        <mat-error>Stock symbol is required</mat-error>
+                      }
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Company Name</mat-label>
+                      <input matInput formControlName="manualCompanyName" placeholder="e.g., Reliance Industries Ltd">
+                      @if (buyForm.get('manualCompanyName')?.hasError('required')) {
+                        <mat-error>Company name is required</mat-error>
+                      }
+                    </mat-form-field>
+                  </div>
+                  <div class="manual-input-note">
+                    <mat-icon>info</mat-icon>
+                    <span>Enter the stock symbol and company name manually. Price will need to be entered in the purchase details section.</span>
+                  </div>
+                </div>
+              }
+              @if (selectedStock || (inputMode === 'manual' && isManualStockValid())) {
                 <div class="selected-stock">
                   <div class="stock-info">
                     <div class="stock-header">
-                      <span class="stock-symbol">{{ selectedStock.primarySymbol }}</span>
-                      <span class="stock-name">{{ selectedStock.displayName }}</span>
+                      <span class="stock-symbol">{{ getDisplaySymbol() }}</span>
+                      <span class="stock-name">{{ getDisplayCompanyName() }}</span>
                     </div>
-                    <div class="stock-details">
-                      <span class="stock-industry">{{ selectedStock.industry }}</span>
-                      <span class="stock-sector">{{ selectedStock.sector }}</span>
-                    </div>
+                    @if (selectedStock) {
+                      <div class="stock-details">
+                        <span class="stock-industry">{{ selectedStock.industry }}</span>
+                        <span class="stock-sector">{{ selectedStock.sector }}</span>
+                      </div>
+                    } @else {
+                      <div class="manual-stock-indicator">
+                        <mat-icon>edit</mat-icon>
+                        <span>Manually entered stock</span>
+                      </div>
+                    }
                   </div>
                   @if (currentPrice) {
                     <div class="price-info">
@@ -102,7 +152,7 @@ export interface BuySharesDialogData {
             </div>
           }
 
-          @if (selectedStock || data.existingHolding) {
+          @if (selectedStock || data.existingHolding || (inputMode === 'manual' && isManualStockValid())) {
             <div class="form-section">
               <h3>Purchase Details</h3>
               <div class="form-row">
@@ -223,6 +273,71 @@ export interface BuySharesDialogData {
       font-size: 16px;
       font-weight: 500;
       color: #333;
+    }
+
+    .stock-selection-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .input-mode-toggle {
+      height: 32px;
+    }
+
+    .input-mode-toggle mat-button-toggle {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      padding: 0 12px;
+    }
+
+    .input-mode-toggle mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    .manual-input-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .manual-input-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 12px;
+      background-color: #fff3e0;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #e65100;
+      border-left: 3px solid #ff9800;
+    }
+
+    .manual-input-note mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-top: 1px;
+    }
+
+    .manual-stock-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .manual-stock-indicator mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
     }
 
     .form-row {
@@ -395,6 +510,7 @@ export class BuySharesDialogComponent implements OnInit {
   currentPrice: StockPrice | null = null;
   loadingPrice = false;
   isLoading = false;
+  inputMode: 'search' | 'manual' = 'search';
 
   constructor(
     public dialogRef: MatDialogRef<BuySharesDialogComponent>,
@@ -404,7 +520,9 @@ export class BuySharesDialogComponent implements OnInit {
       quantity: [1, [Validators.required, Validators.min(0.0001)]],
       price: [0, [Validators.required, Validators.min(0.0001)]],
       additionalCharges: [0, [Validators.min(0)]],
-      description: ['']
+      description: [''],
+      manualSymbol: [''],
+      manualCompanyName: ['']
     });
   }
 
@@ -419,6 +537,55 @@ export class BuySharesDialogComponent implements OnInit {
   onStockSelected(stock: Stock): void {
     this.selectedStock = stock;
     this.loadStockPrice(stock.primarySymbol);
+    // Clear manual input when stock is selected via search
+    this.buyForm.patchValue({
+      manualSymbol: '',
+      manualCompanyName: ''
+    });
+  }
+
+  onInputModeChange(mode: 'search' | 'manual'): void {
+    this.inputMode = mode;
+    
+    if (mode === 'manual') {
+      // Clear selected stock and add validators for manual input
+      this.selectedStock = null;
+      this.currentPrice = null;
+      this.buyForm.get('manualSymbol')?.setValidators([Validators.required]);
+      this.buyForm.get('manualCompanyName')?.setValidators([Validators.required]);
+      this.buyForm.patchValue({ price: 0 });
+    } else {
+      // Clear manual input and remove validators
+      this.buyForm.patchValue({
+        manualSymbol: '',
+        manualCompanyName: ''
+      });
+      this.buyForm.get('manualSymbol')?.clearValidators();
+      this.buyForm.get('manualCompanyName')?.clearValidators();
+    }
+    
+    this.buyForm.get('manualSymbol')?.updateValueAndValidity();
+    this.buyForm.get('manualCompanyName')?.updateValueAndValidity();
+  }
+
+  isManualStockValid(): boolean {
+    const symbol = this.buyForm.get('manualSymbol')?.value?.trim();
+    const companyName = this.buyForm.get('manualCompanyName')?.value?.trim();
+    return !!(symbol && companyName);
+  }
+
+  getDisplaySymbol(): string {
+    if (this.selectedStock) {
+      return this.selectedStock.primarySymbol;
+    }
+    return this.buyForm.get('manualSymbol')?.value?.trim() || '';
+  }
+
+  getDisplayCompanyName(): string {
+    if (this.selectedStock) {
+      return this.selectedStock.displayName;
+    }
+    return this.buyForm.get('manualCompanyName')?.value?.trim() || '';
   }
 
   loadStockPrice(symbol: string): void {
@@ -455,7 +622,8 @@ export class BuySharesDialogComponent implements OnInit {
   }
 
   canBuy(): boolean {
-    return this.buyForm.valid && !!(this.selectedStock || this.data.existingHolding);
+    const hasValidStock = this.selectedStock || this.data.existingHolding || (this.inputMode === 'manual' && this.isManualStockValid());
+    return this.buyForm.valid && !!hasValidStock;
   }
 
   onBuy(): void {
@@ -489,11 +657,14 @@ export class BuySharesDialogComponent implements OnInit {
           this.isLoading = false;
         }
       });
-    } else if (this.selectedStock) {
+    } else if (this.selectedStock || (this.inputMode === 'manual' && this.isManualStockValid())) {
       // Buy new shares
+      const symbol = this.selectedStock ? this.selectedStock.primarySymbol : formValue.manualSymbol.trim();
+      const companyName = this.selectedStock ? this.selectedStock.companyName : formValue.manualCompanyName.trim();
+      
       const request: BuySharesRequest = {
-        symbol: this.selectedStock.primarySymbol,
-        companyName: this.selectedStock.companyName,
+        symbol: symbol,
+        companyName: companyName,
         quantity: formValue.quantity,
         price: formValue.price,
         additionalCharges: formValue.additionalCharges || 0,
