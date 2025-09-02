@@ -56,7 +56,7 @@
     </div>
 
     <!-- Scroll Container for both views -->
-    <div class="table-container" #scrollContainer>
+    <div class="table-container" #scrollContainer [style.height]="'calc(100vh - 300px)'" [style.overflow-y]="'auto'">
       <div *ngIf="isLoading" class="loading-container">
         <mat-spinner diameter="50"></mat-spinner>
         <p>Loading transactions...</p>

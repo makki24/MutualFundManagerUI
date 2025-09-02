@@ -31,35 +31,6 @@ export class HoldingService {
     );
   }
 
-  createHolding(portfolioId: number, holding: CreateHoldingRequest, adminUserId: number): Observable<ApiResponse<Holding>> {
-    const params = new HttpParams().set('adminUserId', adminUserId.toString());
-
-    return this.http.post<ApiResponse<Holding>>(
-      `${this.API_URL}/portfolios/${portfolioId}/holdings`,
-      holding,
-      { params }
-    );
-  }
-
-  buyShares(
-    portfolioId: number,
-    symbol: string,
-    quantity: number,
-    buyPrice: number,
-    adminUserId: number
-  ): Observable<ApiResponse<Holding>> {
-    const params = new HttpParams()
-      .set('quantity', quantity.toString())
-      .set('buyPrice', buyPrice.toString())
-      .set('adminUserId', adminUserId.toString());
-
-    return this.http.post<ApiResponse<Holding>>(
-      `${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/buy`,
-      {},
-      { params }
-    );
-  }
-
   sellShares(
     portfolioId: number,
     symbol: string,

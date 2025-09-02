@@ -1,0 +1,176 @@
+<div class="database-management-container">
+  <div class="page-header">
+    <h1>Database Management</h1>
+    <p class="page-description">Export and restore database backups</p>
+  </div>
+
+  <!-- Database Status Card -->
+  <mat-card class="status-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>storage</mat-icon>
+        Database Status
+      </mat-card-title>
+      <div class="header-actions">
+        <button mat-icon-button (click)="refreshStatus()" matTooltip="Refresh Status">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      @if (isLoadingStatus()) {
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading database status...</p>
+        </div>
+      } @else if (databaseStatus()) {
+        <div class="status-info">
+          <div class="status-item">
+            <span class="label">Database:</span>
+            <span class="value">{{ databaseStatus()?.database }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Tables:</span>
+            <span class="value">{{ databaseStatus()?.tables }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Status:</span>
+            <mat-chip [class]="databaseStatus()?.status === 'Connected' ? 'status-connected' : 'status-disconnected'">
+              {{ databaseStatus()?.status }}
+            </mat-chip>
+          </div>
+        </div>
+      } @else {
+        <div class="error-state">
+          <mat-icon>error</mat-icon>
+          <p>Failed to load database status</p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Export Section -->
+  <mat-card class="action-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>download</mat-icon>
+        Export Database
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>Export the current database to a SQL dump file for backup purposes.</p>
+      
+      @if (exportInfo()) {
+        <mat-expansion-panel class="info-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Export Information</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="export-info">
+            <div class="info-section">
+              <h4>Format</h4>
+              <p>{{ exportInfo()?.format }}</p>
+            </div>
+            <div class="info-section">
+              <h4>Includes</h4>
+              <ul>
+                @for (item of exportInfo()?.includes; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+            <div class="info-section">
+              <h4>Features</h4>
+              <ul>
+                @for (feature of exportInfo()?.features; track feature) {
+                  <li>{{ feature }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="exportDatabase()"
+        [disabled]="isExporting()">
+        @if (isExporting()) {
+          <mat-spinner diameter="20"></mat-spinner>
+          Exporting...
+        } @else {
+          <mat-icon>download</mat-icon>
+          Export Database
+        }
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Restore Section -->
+  <mat-card class="action-card restore-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>upload</mat-icon>
+        Restore Database
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="warning-banner">
+        <mat-icon>warning</mat-icon>
+        <div>
+          <strong>Warning:</strong> This operation will DROP the current database and recreate it with the uploaded dump file. All existing data will be lost.
+        </div>
+      </div>
+      
+      <p>Upload a SQL dump file to restore the database from a backup.</p>
+      
+      @if (restoreInfo()) {
+        <mat-expansion-panel class="info-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Restore Requirements</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="restore-info">
+            <div class="info-section">
+              <h4>Supported Formats</h4>
+              <div class="format-chips">
+                @for (format of restoreInfo()?.supportedFormats; track format) {
+                  <mat-chip>{{ format }}</mat-chip>
+                }
+              </div>
+            </div>
+            <div class="info-section">
+              <h4>Maximum File Size</h4>
+              <p>{{ restoreInfo()?.maxFileSize }}</p>
+            </div>
+            <div class="info-section">
+              <h4>Requirements</h4>
+              <ul>
+                @for (requirement of restoreInfo()?.requirements; track requirement) {
+                  <li>{{ requirement }}</li>
+                }
+              </ul>
+            </div>
+            <div class="info-section">
+              <h4>Process</h4>
+              <ol>
+                @for (step of restoreInfo()?.process; track step) {
+                  <li>{{ step }}</li>
+                }
+              </ol>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <button 
+        mat-raised-button 
+        color="warn" 
+        (click)="openRestoreDialog()">
+        <mat-icon>upload</mat-icon>
+        Restore Database
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

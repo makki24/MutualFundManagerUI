@@ -54,11 +54,6 @@ export class PortfolioService {
     return this.http.delete<ApiResponse<any>>(`${this.API_URL}/portfolios/${id}`);
   }
 
-  // Development-only: Delete a portfolio by liquidating holdings and withdrawing users first
-  devDeletePortfolio(id: number, adminUserId: number): Observable<ApiResponse<any>> {
-    const params = new HttpParams().set('adminUserId', adminUserId.toString());
-    return this.http.delete<ApiResponse<any>>(`${this.API_URL}/portfolios/${id}/dev-delete`, { params });
-  }
 
   investInPortfolio(portfolioId: number, userId: number, request: InvestmentRequest): Observable<any> {
     return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/invest`, request);
@@ -70,7 +65,7 @@ export class PortfolioService {
 
 
   getPortfolioHoldings(portfolioId: number): Observable<ApiResponse<Holding[]>> {
-    return this.http.get<ApiResponse<Holding[]>>(`${this.API_URL}/portfolios/${portfolioId}/holdings`);
+    return this.http.get<ApiResponse<Holding[]>>(`${this.API_URL}/portfolios/${portfolioId}/holdings`, {params: {activeOnly: true}});
   }
 
 

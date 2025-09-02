@@ -143,14 +143,14 @@ export interface UserFeeImpact {
                  step="0.01"
                  (input)="calculateFeeImpact()"
                  required>
-          <span matPrefix>$&nbsp;</span>
+          <span matPrefix>₹&nbsp;</span>
           <mat-icon matSuffix>account_balance_wallet</mat-icon>
-          <mat-hint>Minimum investment: $1</mat-hint>
+          <mat-hint>Minimum investment: ₹1</mat-hint>
           <mat-error *ngIf="addUserForm.get('investmentAmount')?.hasError('required')">
             Investment amount is required
           </mat-error>
           <mat-error *ngIf="addUserForm.get('investmentAmount')?.hasError('min')">
-            Investment amount must be at least $1
+            Investment amount must be at least ₹1
           </mat-error>
         </mat-form-field>
 
@@ -170,17 +170,17 @@ export interface UserFeeImpact {
                 <h4>Investment Summary</h4>
                 <div class="summary-row">
                   <span>Gross Investment:</span>
-                  <span class="amount">{{ addUserForm.get('investmentAmount')?.value | currency }}</span>
+                  <span class="amount">{{ addUserForm.get('investmentAmount')?.value | currency:'INR':'symbol':'1.2-2' }}</span>
                 </div>
                 @if (feeImpact.feeAmount > 0) {
                   <div class="summary-row">
                     <span>Fee Deduction:</span>
-                    <span class="amount fee-amount">-{{ feeImpact.feeAmount | currency }}</span>
+                    <span class="amount fee-amount">-{{ feeImpact.feeAmount | currency:'INR':'symbol':'1.2-2' }}</span>
                   </div>
                 }
                 <div class="summary-row total">
                   <span>Net Investment:</span>
-                  <span class="amount">{{ feeImpact.netInvestment | currency }}</span>
+                  <span class="amount">{{ feeImpact.netInvestment | currency:'INR':'symbol':'1.2-2' }}</span>
                 </div>
                 <div class="summary-row">
                   <span>Units to be Allocated:</span>
@@ -195,7 +195,7 @@ export interface UserFeeImpact {
                   <div class="fee-info">
                     <div class="fee-row">
                       <span>Active Fee:</span>
-                      <span>{{ feeImpact.activeFee.totalFeeAmount | currency }}</span>
+                      <span>{{ feeImpact.activeFee.totalFeeAmount | currency:'INR':'symbol':'1.2-2' }}</span>
                     </div>
                     <div class="fee-row">
                       <span>Fee Period:</span>
@@ -223,7 +223,7 @@ export interface UserFeeImpact {
                         <div class="user-name">{{ userImpact.userName }}</div>
                         @if (userImpact.creditAmount > 0) {
                           <div class="credit-amount">
-                            Credit: +{{ userImpact.creditAmount | currency }}
+                            Credit: +{{ userImpact.creditAmount | currency:'INR':'symbol':'1.2-2' }}
                             ({{ userImpact.creditUnits | number:'1.4-4' }} units)
                           </div>
                         }

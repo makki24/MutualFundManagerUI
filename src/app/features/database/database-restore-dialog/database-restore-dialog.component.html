@@ -1,0 +1,127 @@
+<div class="restore-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>upload</mat-icon>
+    Restore Database
+  </h2>
+
+  <mat-dialog-content>
+    <!-- Warning Section -->
+    <div class="warning-section">
+      <div class="warning-banner">
+        <mat-icon>warning</mat-icon>
+        <div>
+          <strong>DANGER:</strong> This operation will completely replace the current database. All existing data will be permanently lost.
+        </div>
+      </div>
+      <p>Please ensure you have a backup of your current database before proceeding.</p>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Requirements Section -->
+    @if (data.restoreInfo) {
+      <div class="requirements-section">
+        <h3>Requirements</h3>
+        <div class="requirement-item">
+          <strong>Supported Formats:</strong>
+          <div class="format-chips">
+            @for (format of data.restoreInfo.supportedFormats; track format) {
+              <mat-chip>{{ format }}</mat-chip>
+            }
+          </div>
+        </div>
+        <div class="requirement-item">
+          <strong>Maximum File Size:</strong> {{ data.restoreInfo.maxFileSize }}
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+    }
+
+    <!-- File Upload Section -->
+    <div class="upload-section">
+      <h3>Select Database File</h3>
+      
+      @if (!selectedFile()) {
+        <!-- File Drop Zone -->
+        <div 
+          class="file-drop-zone"
+          [class.drag-over]="dragOver()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()">
+          <mat-icon>cloud_upload</mat-icon>
+          <p>Drag and drop your database file here</p>
+          <p class="or-text">or</p>
+          <button mat-raised-button color="primary" type="button">
+            <mat-icon>folder_open</mat-icon>
+            Browse Files
+          </button>
+        </div>
+        
+        <input 
+          #fileInput
+          type="file" 
+          accept=".sql,.dump"
+          (change)="onFileSelected($event)"
+          style="display: none">
+      } @else {
+        <!-- Selected File Display -->
+        <div class="selected-file">
+          <div class="file-info">
+            <mat-icon>description</mat-icon>
+            <div class="file-details">
+              <div class="file-name">{{ selectedFile()?.name }}</div>
+              <div class="file-size">{{ formatFileSize(selectedFile()?.size || 0) }}</div>
+            </div>
+          </div>
+          <button mat-icon-button (click)="removeFile()" matTooltip="Remove file">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      <!-- Validation Error -->
+      @if (validationError()) {
+        <div class="error-message">
+          <mat-icon>error</mat-icon>
+          {{ validationError() }}
+        </div>
+      }
+    </div>
+
+    <!-- Process Information -->
+    @if (data.restoreInfo?.process) {
+      <mat-divider></mat-divider>
+      
+      <div class="process-section">
+        <h3>Restoration Process</h3>
+        <ol class="process-list">
+          @for (step of data.restoreInfo?.process || []; track step) {
+            <li>{{ step }}</li>
+          }
+        </ol>
+      </div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="cancel()" [disabled]="isUploading()">
+      Cancel
+    </button>
+    <button 
+      mat-raised-button 
+      color="warn" 
+      (click)="restoreDatabase()"
+      [disabled]="!selectedFile() || validationError() || isUploading()">
+      @if (isUploading()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        Restoring...
+      } @else {
+        <mat-icon>upload</mat-icon>
+        Restore Database
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

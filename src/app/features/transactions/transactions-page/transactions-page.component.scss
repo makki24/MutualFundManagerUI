@@ -1,25 +1,26 @@
 .transactions-page {
-  padding: 20px;
+  padding: 16px;
+  padding-top: 0;
   height: calc(100vh - 100px);
-  
+
   mat-card {
     height: 100%;
     display: flex;
     flex-direction: column;
     // Important so inner flex children can shrink and scroll
     min-height: 0;
-    
+
     mat-card-header {
       flex-shrink: 0;
       padding-bottom: 0;
-      
+
       .portfolio-name {
         color: #666;
         font-size: 0.9em;
         font-weight: normal;
       }
     }
-    
+
     mat-card-content {
       flex: 1;
       display: flex;
@@ -28,28 +29,28 @@
       padding: 0;
       // Allow inner scroll containers to size correctly
       min-height: 0;
-      
+
       // Ensure the child list component fills height
       app-transactions-list {
         display: block;
         height: 100%;
       }
-      
+
       mat-tab-group {
         height: 100%;
         display: flex;
         flex-direction: column;
-        
+
         ::ng-deep .mat-tab-body-wrapper {
           flex: 1;
           overflow: hidden;
         }
-        
+
         .tab-content {
           height: 100%;
           padding: 16px;
           overflow: hidden;
-          
+
           app-transactions-list {
             display: block;
             height: 100%;

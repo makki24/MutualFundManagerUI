@@ -7,7 +7,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { InvestmentService } from '../../../../core/services/investment.service';
@@ -16,7 +15,6 @@ import { Investment } from '../../../../core/models/investment.model';
 
 export interface WithdrawUserForm {
   unitsToWithdraw: number;
-  confirmWithdrawal: boolean;
 }
 
 export interface WithdrawalImpact {
@@ -39,7 +37,6 @@ export interface WithdrawalImpact {
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    MatCheckboxModule,
     MatProgressSpinnerModule
   ],
   template: `
@@ -161,13 +158,6 @@ export interface WithdrawalImpact {
           </mat-card>
         }
 
-        <!-- Confirmation Checkbox -->
-        @if (withdrawalImpact) {
-          <mat-checkbox formControlName="confirmWithdrawal"
-                        class="confirmation-checkbox">
-            I confirm this withdrawal and understand the impact
-          </mat-checkbox>
-        }
 
       </form>
     </mat-dialog-content>
@@ -292,9 +282,6 @@ export interface WithdrawalImpact {
       color: #f57c00;
     }
 
-    .confirmation-checkbox {
-      margin: 16px 0;
-    }
 
     mat-dialog-actions {
       padding: 16px 24px;
@@ -336,17 +323,18 @@ export class WithdrawUserDialogComponent implements OnInit {
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { portfolioId: number; investment: Investment }) {
     this.withdrawForm = this.fb.group({
-      unitsToWithdraw: ['', [
+      unitsToWithdraw: [this.data.investment.unitsHeld, [
         Validators.required,
         Validators.min(0.0001),
         Validators.max(this.data.investment.unitsHeld)
-      ]],
-      confirmWithdrawal: [false, Validators.requiredTrue]
+      ]]
     });
   }
 
   ngOnInit() {
     this.setupFormValidation();
+    // Set default to 100% withdrawal
+    this.setWithdrawalPercentage(100);
   }
 
   private setupFormValidation() {

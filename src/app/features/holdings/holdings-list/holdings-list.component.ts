@@ -9,9 +9,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { PortfolioService } from '../../../core/services/portfolio.service';
 import { HoldingService } from '../../../core/services/holding.service';
@@ -57,6 +59,7 @@ interface PriceUpdateResult {
     MatProgressSpinnerModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatInputModule,
     MatTooltipModule
   ],
   templateUrl: './holdings-list.component.html',
@@ -75,7 +78,9 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
 
   portfolios: Portfolio[] = [];
   holdings: Holding[] = [];
+  filteredHoldings: Holding[] = [];
   selectedPortfolioControl = new FormControl<number | null>(null);
+  searchControl = new FormControl('');
   isLoading = false;
   isUpdatingPrices = false;
   private pendingPortfolioId: number | null = null;
@@ -94,6 +99,14 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Register toolbar controls for this feature
     this.toolbar.setControls(HoldingsToolbarControlsComponent);
+
+    // Setup search functionality
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(searchTerm => {
+      this.filterHoldings(searchTerm || '');
+    });
 
     // Load portfolios and preselect from URL if provided
     const portfolioIdParam = this.route.snapshot.queryParams['portfolioId'];
@@ -172,6 +185,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
       this.loadHoldings(portfolioId);
     } else {
       this.holdings = [];
+      this.filteredHoldings = [];
     }
   }
 
@@ -180,6 +194,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
     this.portfolioService.getPortfolioHoldings(portfolioId).subscribe({
       next: (holdings) => {
         this.holdings = holdings.data ?? [];
+        this.filterHoldings(this.searchControl.value || '');
         this.isLoading = false;
       },
       error: (error) => {
@@ -439,6 +454,27 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
       }
       return holding;
     });
+    // Re-apply current search filter after updating holdings
+    this.filterHoldings(this.searchControl.value || '');
+  }
+
+  private filterHoldings(searchTerm: string): void {
+    if (!searchTerm.trim()) {
+      this.filteredHoldings = [...this.holdings];
+      return;
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    this.filteredHoldings = this.holdings.filter(holding => {
+      return (
+        holding.symbol.toLowerCase().includes(term) ||
+        holding.companyName.toLowerCase().includes(term)
+      );
+    });
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('');
   }
 
   goBack(): void {

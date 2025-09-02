@@ -73,14 +73,15 @@ describe('WithdrawUserDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize form with correct validators', () => {
+  it('should initialize form with correct validators and default to 100%', () => {
     component.ngOnInit();
 
     const unitsControl = component.withdrawForm.get('unitsToWithdraw');
     const confirmControl = component.withdrawForm.get('confirmWithdrawal');
 
-    expect(unitsControl?.hasError('required')).toBe(true);
-    expect(confirmControl?.hasError('required')).toBe(true);
+    expect(unitsControl?.value).toBe(1000); // Should default to full withdrawal
+    expect(confirmControl).toBeNull(); // Confirmation control should not exist
+    expect(component.withdrawalPercentage).toBe(100); // Should be set to 100%
   });
 
   it('should calculate withdrawal impact correctly', () => {
@@ -132,8 +133,7 @@ describe('WithdrawUserDialogComponent', () => {
     );
 
     component.withdrawForm.patchValue({
-      unitsToWithdraw: 500,
-      confirmWithdrawal: true
+      unitsToWithdraw: 500
     });
 
     component.processWithdrawal();
@@ -149,8 +149,7 @@ describe('WithdrawUserDialogComponent', () => {
     );
 
     component.withdrawForm.patchValue({
-      unitsToWithdraw: 500,
-      confirmWithdrawal: true
+      unitsToWithdraw: 500
     });
 
     component.processWithdrawal();
@@ -165,8 +164,7 @@ describe('WithdrawUserDialogComponent', () => {
 
   it('should not process withdrawal with invalid form', () => {
     component.withdrawForm.patchValue({
-      unitsToWithdraw: null,
-      confirmWithdrawal: false
+      unitsToWithdraw: null
     });
 
     component.processWithdrawal();

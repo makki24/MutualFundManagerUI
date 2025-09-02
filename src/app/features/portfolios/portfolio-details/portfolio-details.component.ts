@@ -265,9 +265,12 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
   `,
   styles: [`
     .portfolio-details-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
+      width: 100%;
+      padding: 16px;
+      padding-top: 0;
+      min-height: calc(100vh - 64px); /* Full height minus toolbar */
+      display: flex;
+      flex-direction: column;
     }
 
     .loading-container, .error-container {
@@ -275,8 +278,9 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
+      padding: 40px 20px;
       text-align: center;
+      flex: 1;
     }
 
     .loading-container mat-spinner, .error-container mat-icon {
@@ -291,7 +295,8 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
     }
 
     .portfolio-header-card {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      flex-shrink: 0;
     }
 
     .header-content {
@@ -313,9 +318,9 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
 
     .portfolio-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
     }
 
     .stat-item {
@@ -340,22 +345,71 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
     }
 
     .portfolio-content-card {
-      min-height: 500px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .portfolio-content-card .mat-mdc-tab-group {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .portfolio-content-card .mat-mdc-tab-body-wrapper {
+      flex: 1;
+      display: flex;
+    }
+
+    .portfolio-content-card .mat-mdc-tab-body {
+      flex: 1;
+    }
+
+    .portfolio-content-card .mat-mdc-tab-body-content {
+      height: 100%;
+    }
+
+    /* Ensure Angular Material tab components work with flexbox */
+    ::ng-deep .portfolio-content-card .mat-mdc-tab-group {
+      height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+
+    ::ng-deep .portfolio-content-card .mat-mdc-tab-body-wrapper {
+      flex: 1 !important;
+      display: flex !important;
+    }
+
+    ::ng-deep .portfolio-content-card .mat-mdc-tab-body {
+      flex: 1 !important;
+    }
+
+    ::ng-deep .portfolio-content-card .mat-mdc-tab-body-content {
+      height: 100% !important;
+      overflow: auto !important;
     }
 
     .tab-content {
-      padding: 20px;
+      padding: 16px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .investors-section, .holdings-section {
       width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      flex-shrink: 0;
     }
 
     .section-header h3 {
@@ -366,10 +420,13 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
 
     .table-container {
       overflow-x: auto;
+      flex: 1;
+      min-height: 0; /* Allow table to shrink */
     }
 
     .investors-table {
       width: 100%;
+      min-width: 800px; /* Ensure table doesn't get too cramped */
     }
 
     .user-info {
@@ -434,11 +491,12 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 32px 20px;
       text-align: center;
       background: #f9f9f9;
       border-radius: 8px;
-      margin-top: 20px;
+      margin-top: 16px;
+      flex: 1;
     }
 
     .holdings-preview mat-icon {
@@ -494,9 +552,10 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
+      padding: 40px 20px;
       text-align: center;
       color: #666;
+      flex: 1;
     }
 
     .no-investors mat-icon, .coming-soon mat-icon {
@@ -519,7 +578,7 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
 
     @media (max-width: 768px) {
       .portfolio-details-container {
-        padding: 10px;
+        padding: 12px;
       }
 
       .header-content {
@@ -535,12 +594,14 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       .portfolio-stats {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
+        margin-top: 12px;
       }
 
       .section-header {
         flex-direction: column;
         align-items: stretch;
         gap: 12px;
+        margin-bottom: 12px;
       }
 
       .section-header h3 {

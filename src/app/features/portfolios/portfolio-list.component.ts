@@ -79,10 +79,6 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                     <mat-icon>delete</mat-icon>
                     Delete
                   </button>
-                  <button mat-button color="warn" (click)="devDeletePortfolio(portfolio.id); $event.stopPropagation()" matTooltip="Dev Delete (danger)">
-                    <mat-icon>delete_forever</mat-icon>
-                    Dev Delete
-                  </button>
                 }
               </mat-card-actions>
             </mat-card>
@@ -165,10 +161,6 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                       <button mat-icon-button color="warn" (click)="deletePortfolio(portfolio.id); $event.stopPropagation()"
                               matTooltip="Delete Portfolio">
                         <mat-icon>delete</mat-icon>
-                      </button>
-                      <button mat-icon-button color="warn" (click)="devDeletePortfolio(portfolio.id); $event.stopPropagation()"
-                              matTooltip="Dev Delete (danger)">
-                        <mat-icon>delete_forever</mat-icon>
                       </button>
                     }
                   </td>
@@ -443,26 +435,4 @@ export class PortfolioListComponent implements OnInit {
     });
   }
 
-  devDeletePortfolio(id: number): void {
-    if (!this.isAdmin) return;
-    const adminUserId = this.authService.getCurrentUserId();
-    if (!adminUserId) {
-      this.snackBar.open('Cannot determine current admin user. Please re-login.', 'Close', { duration: 5000 });
-      return;
-    }
-    const confirmed = window.confirm('This will liquidate all holdings, withdraw all users, and delete the portfolio. This is for development only. Continue?');
-    if (!confirmed) return;
-
-    this.portfolioService.devDeletePortfolio(id, adminUserId).subscribe({
-      next: () => {
-        this.snackBar.open('Portfolio dev-deleted successfully', 'Close', { duration: 4000 });
-        this.loadPortfolios();
-      },
-      error: (err) => {
-        console.error('Dev delete failed', err);
-        const msg = err?.error?.message || 'Failed to dev-delete portfolio';
-        this.snackBar.open(msg, 'Close', { duration: 6000 });
-      }
-    });
-  }
 }

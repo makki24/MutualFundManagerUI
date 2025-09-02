@@ -50,6 +50,11 @@ export const routes: Routes = [
       {
         path: 'transactions/portfolio/:portfolioId',
         loadComponent: () => import('./features/transactions/transactions-page/transactions-page.component').then(m => m.TransactionsPageComponent)
+      },
+      {
+        path: 'database',
+        loadComponent: () => import('./features/database/database-management/database-management.component').then(m => m.DatabaseManagementComponent),
+        canActivate: [adminGuard]
       }
     ]
   },

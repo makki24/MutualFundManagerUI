@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, Input, ViewChild, ElementRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
@@ -43,7 +43,7 @@ import { TransactionsViewService, TransactionsViewMode } from '../transactions-v
   templateUrl: './transactions-list.component.html',
   styleUrls: ['./transactions-list.component.scss']
 })
-export class TransactionsListComponent implements OnInit, OnDestroy {
+export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() portfolioId?: number;
   @Input() viewType: 'user' | 'portfolio' = 'user';
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
@@ -101,6 +101,10 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     this.viewService.viewMode$.pipe(takeUntil(this.destroy$)).subscribe(mode => (this.viewMode = mode));
     
     this.loadTransactions();
+  }
+
+  ngAfterViewInit(): void {
+    // Setup infinite scroll after view is initialized
     this.setupInfiniteScroll();
   }
 
@@ -124,9 +128,9 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   }
 
   private setupInfiniteScroll(): void {
-    // Wait for view to initialize
+    // Wait for view to initialize and ensure scrollContainer is available
     setTimeout(() => {
-      if (this.scrollContainer) {
+      if (this.scrollContainer?.nativeElement) {
         const scrollElement = this.scrollContainer.nativeElement;
         
         fromEvent(scrollElement, 'scroll')
@@ -135,22 +139,47 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
             takeUntil(this.destroy$)
           )
           .subscribe(() => {
-            const scrollTop = scrollElement.scrollTop;
-            const scrollHeight = scrollElement.scrollHeight;
-            const clientHeight = scrollElement.clientHeight;
-            
-            // Load more when user scrolls to bottom (with 100px threshold)
-            if (scrollTop + clientHeight >= scrollHeight - 100) {
-              if (this.hasMorePages && !this.isLoadingMore) {
-                this.loadMoreTransactions();
-              }
-            }
+            this.checkScrollPosition(scrollElement);
           });
+      } else {
+        console.warn('Scroll container not found, retrying...');
+        // Retry after a longer delay if container is not ready
+        setTimeout(() => this.setupInfiniteScroll(), 500);
       }
     }, 100);
   }
 
+  private checkScrollPosition(scrollElement: HTMLElement): void {
+    const scrollTop = scrollElement.scrollTop;
+    const scrollHeight = scrollElement.scrollHeight;
+    const clientHeight = scrollElement.clientHeight;
+    
+    // Calculate how close to bottom we are (in percentage)
+    const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
+    
+    // Debug logging
+    if (scrollPercentage > 0.8) {
+      console.log('Scroll position:', {
+        scrollTop,
+        scrollHeight,
+        clientHeight,
+        scrollPercentage: scrollPercentage.toFixed(2),
+        hasMorePages: this.hasMorePages,
+        isLoadingMore: this.isLoadingMore,
+        isLoading: this.isLoading
+      });
+    }
+    
+    // Load more when user scrolls to 90% of the content
+    if (scrollPercentage >= 0.9) {
+      if (this.hasMorePages && !this.isLoadingMore && !this.isLoading) {
+        this.loadMoreTransactions();
+      }
+    }
+  }
+
   loadTransactions(): void {
+    console.log('Loading initial transactions...');
     this.isLoading = true;
     this.currentPage = 0;
     this.filter.page = 0;
@@ -158,6 +187,11 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
     
     this.fetchTransactions().subscribe({
       next: (response) => {
+        console.log('Loaded', response.transactions.length, 'initial transactions');
+        console.log('Raw pagination response:', response.pagination);
+        console.log('Total transactions loaded:', response.transactions.length);
+        console.log('Expected total count:', response.pagination.totalCount);
+        
         this.transactions = response.transactions;
         this.updatePaginationInfo(response.pagination);
         this.isLoading = false;
@@ -170,18 +204,36 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   }
 
   private loadMoreTransactions(): void {
-    if (!this.hasMorePages || this.isLoadingMore) {
+    if (this.isLoadingMore) {
+      console.log('Skipping load more - already loading');
       return;
     }
     
+    if (!this.hasMorePages) {
+      console.log('Skipping load more - hasMorePages is false');
+      // TEMPORARY DEBUG: Try to load anyway to test if backend has more data
+      console.log('DEBUG: Attempting to load next page anyway to test backend response');
+    }
+    
+    console.log('Loading more transactions - current page:', this.currentPage, 'total pages:', this.totalPages);
     this.isLoadingMore = true;
     this.currentPage++;
     this.filter.page = this.currentPage;
     
     this.fetchTransactions().subscribe({
       next: (response) => {
-        this.transactions = [...this.transactions, ...response.transactions];
-        this.updatePaginationInfo(response.pagination);
+        console.log('Loaded', response.transactions.length, 'more transactions');
+        console.log('Response pagination:', response.pagination);
+        
+        if (response.transactions.length > 0) {
+          this.transactions = [...this.transactions, ...response.transactions];
+          this.updatePaginationInfo(response.pagination);
+        } else {
+          console.log('No more transactions returned from backend');
+          this.currentPage--; // Revert page increment if no data
+          this.filter.page = this.currentPage;
+          this.hasMorePages = false;
+        }
         this.isLoadingMore = false;
       },
       error: (error) => {
@@ -215,9 +267,30 @@ export class TransactionsListComponent implements OnInit, OnDestroy {
   }
 
   private updatePaginationInfo(pagination: PaginationHeaders): void {
+    console.log('Updating pagination info:', {
+      received: pagination,
+      currentPage: this.currentPage,
+      previousHasMorePages: this.hasMorePages
+    });
+    
     this.totalCount = pagination.totalCount;
     this.totalPages = pagination.totalPages;
     this.hasMorePages = pagination.hasNext;
+    
+    // TEMPORARY DEBUG: Force hasMorePages to true if we have transactions and currentPage < 3
+    // This will help us test if the infinite scroll mechanism works
+    if (this.transactions.length > 0 && this.currentPage < 3 && !this.hasMorePages) {
+      console.log('DEBUG: Forcing hasMorePages to true for testing');
+      this.hasMorePages = true;
+    }
+    
+    console.log('Updated pagination state:', {
+      totalCount: this.totalCount,
+      totalPages: this.totalPages,
+      currentPage: this.currentPage,
+      hasMorePages: this.hasMorePages,
+      transactionsCount: this.transactions.length
+    });
   }
 
   // Group transactions by day for timeline view
