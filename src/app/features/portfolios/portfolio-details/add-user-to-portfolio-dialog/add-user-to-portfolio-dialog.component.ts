@@ -271,8 +271,10 @@ export interface UserFeeImpact {
           <mat-spinner diameter="20"></mat-spinner>
           <span>Adding User...</span>
         } @else {
-          <mat-icon>person_add</mat-icon>
-          <span>Add User to Portfolio</span>
+          <ng-container>
+            <mat-icon>person_add</mat-icon>
+            <span>Add User to Portfolio</span>
+          </ng-container>
         }
       </button>
     </mat-dialog-actions>

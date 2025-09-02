@@ -119,8 +119,10 @@
         <mat-spinner diameter="20"></mat-spinner>
         Restoring...
       } @else {
-        <mat-icon>upload</mat-icon>
-        Restore Database
+        <ng-container>
+          <mat-icon>upload</mat-icon>
+          Restore Database
+        </ng-container>
       }
     </button>
   </mat-dialog-actions>

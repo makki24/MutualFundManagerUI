@@ -100,8 +100,10 @@
           <mat-spinner diameter="20"></mat-spinner>
           Exporting...
         } @else {
-          <mat-icon>download</mat-icon>
-          Export Database
+          <ng-container>
+            <mat-icon>download</mat-icon>
+            Export Database
+          </ng-container>
         }
       </button>
     </mat-card-actions>

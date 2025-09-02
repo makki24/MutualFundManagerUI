@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, RouterModule, NavigationEnd } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -37,8 +37,6 @@ import { ToolbarService } from '../toolbar/toolbar.service';
     MatMenuModule,
     MatTooltipModule,
     MatDividerModule,
-    PortfolioFormDialogComponent,
-    UserFormDialogComponent
   ],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
@@ -54,6 +52,7 @@ export class MainLayoutComponent implements OnInit {
 
   currentUser: User | null = null;
   isAdmin = false;
+  isSidebarCollapsed = false;
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
@@ -135,7 +134,38 @@ export class MainLayoutComponent implements OnInit {
     if (url.includes('/users')) return 'Users';
     if (url.includes('/holdings')) return 'Holdings';
     if (url.includes('/transactions')) return 'Transactions';
+    if (url.includes('/database')) return 'Database Management';
     return 'Mutual Fund Manager';
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    // Check if user is not typing in an input field
+    const target = event.target as HTMLElement;
+    const isInputField = target.tagName === 'INPUT' || 
+                       target.tagName === 'TEXTAREA' || 
+                       target.contentEditable === 'true' ||
+                       target.closest('[contenteditable="true"]') !== null;
+    
+    // Only handle keyboard shortcuts if not in input field and on desktop
+    if (!isInputField) {
+      // Use current value instead of subscribing each time
+      const isHandset = this.breakpointObserver.isMatched(Breakpoints.Handset);
+      
+      if (!isHandset) {
+        if (event.key === '[') {
+          event.preventDefault();
+          this.isSidebarCollapsed = true;
+        } else if (event.key === ']') {
+          event.preventDefault();
+          this.isSidebarCollapsed = false;
+        }
+      }
+    }
   }
 
   changePassword(): void {
