@@ -16,6 +16,7 @@ import { PortfolioService } from '../../core/services/portfolio.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Portfolio } from '../../core/models/portfolio.model';
 import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component';
+import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.component';
 
 @Component({
   selector: 'app-portfolio-list',
@@ -75,6 +76,10 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                 @if (isAdmin) {
                   <button mat-button (click)="managePortfolio(portfolio.id); $event.stopPropagation()">Manage</button>
                   <button mat-button color="warn" (click)="manageFees(portfolio.id); $event.stopPropagation()">Fees</button>
+                  <button mat-button color="accent" (click)="clonePortfolio(portfolio); $event.stopPropagation()">
+                    <mat-icon>content_copy</mat-icon>
+                    Clone
+                  </button>
                   <button mat-button color="warn" (click)="deletePortfolio(portfolio.id); $event.stopPropagation()">
                     <mat-icon>delete</mat-icon>
                     Delete
@@ -157,6 +162,10 @@ import { PortfolioFormDialogComponent } from './portfolio-form-dialog.component'
                       <button mat-icon-button color="warn" (click)="manageFees(portfolio.id)"
                               matTooltip="Manage Fees">
                         <mat-icon>account_balance_wallet</mat-icon>
+                      </button>
+                      <button mat-icon-button color="primary" (click)="clonePortfolio(portfolio); $event.stopPropagation()"
+                              matTooltip="Clone Portfolio">
+                        <mat-icon>content_copy</mat-icon>
                       </button>
                       <button mat-icon-button color="warn" (click)="deletePortfolio(portfolio.id); $event.stopPropagation()"
                               matTooltip="Delete Portfolio">
@@ -410,6 +419,62 @@ export class PortfolioListComponent implements OnInit {
 
   manageFees(portfolioId: number): void {
     this.router.navigate(['/portfolios', portfolioId, 'fees']);
+  }
+
+  clonePortfolio(portfolio: Portfolio): void {
+    const dialogRef = this.dialog.open(ClonePortfolioDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: {
+        portfolioName: portfolio.name,
+        portfolioId: portfolio.id
+      },
+      disableClose: false,
+      autoFocus: true,
+      restoreFocus: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.newPortfolioName) {
+        this.performClone(portfolio.id, result.newPortfolioName);
+      }
+    });
+  }
+
+  private performClone(portfolioId: number, newPortfolioName: string): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      this.snackBar.open('User not authenticated', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.portfolioService.clonePortfolio(portfolioId, newPortfolioName, currentUser.id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.snackBar.open(
+            `Portfolio cloned successfully as "${response.data?.name}"`,
+            'Close',
+            { duration: 5000, panelClass: ['success-snackbar'] }
+          );
+          this.loadPortfolios();
+        } else {
+          this.snackBar.open(
+            response.message || 'Failed to clone portfolio',
+            'Close',
+            { duration: 5000, panelClass: ['error-snackbar'] }
+          );
+        }
+      },
+      error: (error) => {
+        const message = error?.error?.message || 'Failed to clone portfolio';
+        this.snackBar.open(message, 'Close', {
+          duration: 6000,
+          panelClass: ['error-snackbar']
+        });
+        console.error('Clone portfolio failed:', error);
+      }
+    });
   }
 
   deletePortfolio(portfolioId: number): void {

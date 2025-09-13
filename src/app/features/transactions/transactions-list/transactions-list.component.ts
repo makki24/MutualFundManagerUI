@@ -64,20 +64,20 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
 
   // View mode is controlled by global toolbar
   viewMode: TransactionsViewMode = 'table';
-  
+
   // Pagination
   currentPage = 0;
   pageSize = 20;
   hasMorePages = true;
   isLoading = false;
   isLoadingMore = false;
-  
+
   // Filters
   filter: TransactionFilter = {
     page: 0,
     size: this.pageSize
   };
-  
+
   transactionTypes = Object.values(TransactionType);
   selectedType?: TransactionType;
   selectedSymbol?: string;
@@ -99,7 +99,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     }
     // Subscribe to view mode from toolbar controls
     this.viewService.viewMode$.pipe(takeUntil(this.destroy$)).subscribe(mode => (this.viewMode = mode));
-    
+
     this.loadTransactions();
   }
 
@@ -132,7 +132,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     setTimeout(() => {
       if (this.scrollContainer?.nativeElement) {
         const scrollElement = this.scrollContainer.nativeElement;
-        
+
         fromEvent(scrollElement, 'scroll')
           .pipe(
             debounceTime(200),
@@ -153,12 +153,12 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     const scrollTop = scrollElement.scrollTop;
     const scrollHeight = scrollElement.scrollHeight;
     const clientHeight = scrollElement.clientHeight;
-    
+
     // Calculate how close to bottom we are (in percentage)
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
-    
+
     // Check if we should load more when near bottom
-    
+
     // Load more when user scrolls to 90% of the content
     if (scrollPercentage >= 0.9) {
       if (this.hasMorePages && !this.isLoadingMore && !this.isLoading) {
@@ -172,7 +172,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     this.currentPage = 0;
     this.filter.page = 0;
     this.transactions = [];
-    
+
     this.fetchTransactions().subscribe({
       next: (response) => {
         this.transactions = response.transactions;
@@ -190,7 +190,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     if (this.isLoadingMore) {
       return;
     }
-    
+
     if (!this.hasMorePages) {
       // Try to load anyway to test if backend has more data
       // This helps handle cases where pagination info might be inconsistent
@@ -198,7 +198,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     this.isLoadingMore = true;
     this.currentPage++;
     this.filter.page = this.currentPage;
-    
+
     this.fetchTransactions().subscribe({
       next: (response) => {
         if (response.transactions.length > 0) {
@@ -270,7 +270,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     // Reset pagination
     this.currentPage = 0;
     this.filter.page = 0;
-    
+
     // Apply filter values
     this.filter.type = this.selectedType;
     this.filter.symbol = this.selectedSymbol;
@@ -280,7 +280,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     if (this.viewType === 'portfolio' && this.portfolioId) {
       this.filter.portfolioId = this.selectedUserId ? this.portfolioId : undefined;
     }
-    
+
     this.loadTransactions();
   }
 
@@ -290,16 +290,16 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     this.startDate = undefined;
     this.endDate = undefined;
     // Do not clear selectedUserId here so user filter persists unless explicitly changed
-    
+
     this.filter = {
       page: 0,
       size: this.pageSize
     };
-    
+
     if (this.portfolioId && this.viewType === 'user') {
       this.filter.portfolioId = this.portfolioId;
     }
-    
+
     this.loadTransactions();
   }
 

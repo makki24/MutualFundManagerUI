@@ -41,7 +41,7 @@ export class TransactionService {
           totalPages: parseInt(headers.get('X-Total-Pages') || '0', 10),
           currentPage: parseInt(headers.get('X-Current-Page') || '0', 10),
           pageSize: parseInt(headers.get('X-Page-Size') || '20', 10),
-          hasNext: headers.get('X-Has-Next') === 'true'
+          hasNext: response.body?.data.length === 20
         };
 
         return {
@@ -81,7 +81,7 @@ export class TransactionService {
           totalPages: parseInt(headers.get('X-Total-Pages') || '0', 10),
           currentPage: parseInt(headers.get('X-Current-Page') || '0', 10),
           pageSize: parseInt(headers.get('X-Page-Size') || '20', 10),
-          hasNext: headers.get('X-Has-Next') === 'true'
+          hasNext: response.body?.data.length === 20,
         };
 
         return {

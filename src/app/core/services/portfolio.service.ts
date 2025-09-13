@@ -118,4 +118,12 @@ export class PortfolioService {
   getPortfolioFeeAllocations(portfolioId: number): Observable<ApiResponse<UserFeeAllocation[]>> {
     return this.http.get<ApiResponse<UserFeeAllocation[]>>(`${this.API_URL}/portfolios/${portfolioId}/fee-allocations`);
   }
+
+  clonePortfolio(portfolioId: number, newPortfolioName: string, clonedByUserId: number): Observable<ApiResponse<Portfolio>> {
+    const request = {
+      newPortfolioName: newPortfolioName,
+      clonedByUserId: clonedByUserId
+    };
+    return this.http.post<ApiResponse<Portfolio>>(`${this.API_URL}/portfolios/${portfolioId}/clone`, request);
+  }
 }
