@@ -59,10 +59,15 @@ export class MainLayoutComponent implements OnInit {
       shareReplay()
     );
 
+  private readonly SIDEBAR_STORAGE_KEY = 'sidebar-collapsed';
+
   private lastUrl: string | null = null;
   private prevUrl: string | null = null;
 
   ngOnInit(): void {
+    // Load sidebar state from localStorage
+    this.loadSidebarState();
+
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       this.isAdmin = user?.role === 'ADMIN';
@@ -140,6 +145,7 @@ export class MainLayoutComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    this.saveSidebarState();
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -160,9 +166,11 @@ export class MainLayoutComponent implements OnInit {
         if (event.key === '[') {
           event.preventDefault();
           this.isSidebarCollapsed = true;
+          this.saveSidebarState();
         } else if (event.key === ']') {
           event.preventDefault();
           this.isSidebarCollapsed = false;
+          this.saveSidebarState();
         }
       }
     }
@@ -195,5 +203,26 @@ export class MainLayoutComponent implements OnInit {
         this.router.navigate(['/login']);
       }
     });
+  }
+
+  private loadSidebarState(): void {
+    try {
+      const savedState = localStorage.getItem(this.SIDEBAR_STORAGE_KEY);
+      if (savedState !== null) {
+        this.isSidebarCollapsed = JSON.parse(savedState);
+      }
+    } catch (error) {
+      // If there's an error parsing the saved state, default to expanded
+      this.isSidebarCollapsed = false;
+    }
+  }
+
+  private saveSidebarState(): void {
+    try {
+      localStorage.setItem(this.SIDEBAR_STORAGE_KEY, JSON.stringify(this.isSidebarCollapsed));
+    } catch (error) {
+      // Silently fail if localStorage is not available
+      console.warn('Could not save sidebar state to localStorage:', error);
+    }
   }
 }

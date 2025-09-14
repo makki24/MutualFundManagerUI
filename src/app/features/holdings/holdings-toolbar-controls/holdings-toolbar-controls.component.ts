@@ -37,7 +37,6 @@ import { Portfolio } from '../../../core/models/portfolio.model';
 
     <button
       mat-button
-      color="accent"
       (click)="addHoldingFromToolbar()"
       [disabled]="!selectedPortfolioId.value"
       matTooltip="Add Holding"
@@ -48,7 +47,6 @@ import { Portfolio } from '../../../core/models/portfolio.model';
 
     <button
       mat-button
-      color="primary"
       (click)="updatePricesFromToolbar()"
       [disabled]="!selectedPortfolioId.value"
       matTooltip="Update Prices"
@@ -59,7 +57,6 @@ import { Portfolio } from '../../../core/models/portfolio.model';
 
     <button
       mat-button
-      color="primary"
       (click)="updatePricesByDateFromToolbar()"
       [disabled]="!selectedPortfolioId.value"
       matTooltip="Update Prices by Date"

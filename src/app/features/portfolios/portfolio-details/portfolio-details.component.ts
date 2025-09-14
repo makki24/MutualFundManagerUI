@@ -20,6 +20,7 @@ import { Portfolio } from '../../../core/models/portfolio.model';
 import { Investment } from '../../../core/models/investment.model';
 import { AddUserToPortfolioDialogComponent } from './add-user-to-portfolio-dialog/add-user-to-portfolio-dialog.component';
 import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-user-dialog.component';
+import { InvestMoreDialogComponent } from './invest-more-dialog/invest-more-dialog.component';
 import { ToolbarService } from '../../../layout/toolbar/toolbar.service';
 import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-toolbar-controls.component';
 
@@ -174,6 +175,10 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
                                 View Details
                               </button>
                               @if (isAdmin) {
+                                <button mat-menu-item (click)="openInvestMoreDialog(investment)">
+                                  <mat-icon>add_circle</mat-icon>
+                                  Invest More
+                                </button>
                                 <button mat-menu-item (click)="openWithdrawDialog(investment)">
                                   <mat-icon>remove_circle</mat-icon>
                                   Withdraw
@@ -703,6 +708,25 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
         this.loadPortfolioInvestments();
         this.loadPortfolioDetails(); // Refresh portfolio data
         this.snackBar.open('User added to portfolio successfully', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  openInvestMoreDialog(investment: Investment): void {
+    const dialogRef = this.dialog.open(InvestMoreDialogComponent, {
+      width: '600px',
+      maxHeight: '90vh',
+      data: {
+        portfolioId: this.portfolioId,
+        investment: investment
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadPortfolioInvestments();
+        this.loadPortfolioDetails();
+        // Success message is handled by the dialog component
       }
     });
   }

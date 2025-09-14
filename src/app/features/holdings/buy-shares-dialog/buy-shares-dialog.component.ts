@@ -52,8 +52,8 @@ export interface BuySharesDialogData {
             <div class="form-section">
               <div class="stock-selection-header">
                 <h3>Select Stock</h3>
-                <mat-button-toggle-group 
-                  [value]="inputMode" 
+                <mat-button-toggle-group
+                  [value]="inputMode"
                   (change)="onInputModeChange($event.value)"
                   class="input-mode-toggle">
                   <mat-button-toggle value="search">
@@ -66,7 +66,7 @@ export interface BuySharesDialogData {
                   </mat-button-toggle>
                 </mat-button-toggle-group>
               </div>
-              
+
               @if (inputMode === 'search') {
                 <app-stock-search
                   placeholder="Search for stocks..."
@@ -563,7 +563,7 @@ export class BuySharesDialogComponent implements OnInit {
 
   onInputModeChange(mode: 'search' | 'manual'): void {
     this.inputMode = mode;
-    
+
     if (mode === 'manual') {
       // Clear selected stock and add validators for manual input
       this.selectedStock = null;
@@ -577,7 +577,7 @@ export class BuySharesDialogComponent implements OnInit {
       });
       this.buyForm.get('manualCompanyName')?.clearValidators();
     }
-    
+
     this.buyForm.get('manualCompanyName')?.updateValueAndValidity();
   }
 
@@ -603,7 +603,7 @@ export class BuySharesDialogComponent implements OnInit {
   getGeneratedSymbol(): string {
     const companyName = this.buyForm.get('manualCompanyName')?.value?.trim();
     if (!companyName) return '';
-    
+
     // Remove all whitespace and convert to uppercase
     return companyName.replace(/\s+/g, '').toUpperCase();
   }
@@ -680,8 +680,8 @@ export class BuySharesDialogComponent implements OnInit {
     } else if (this.selectedStock || (this.inputMode === 'manual' && this.isManualStockValid())) {
       // Buy new shares
       const symbol = this.selectedStock ? this.selectedStock.primarySymbol : this.getGeneratedSymbol();
-      const companyName = this.selectedStock ? this.selectedStock.companyName : formValue.manualCompanyName.trim();
-      
+      const companyName = (this.selectedStock ? this.selectedStock.companyName : formValue.manualCompanyName.trim() ) ?? this.selectedStock?.displayName
+
       const request: BuySharesRequest = {
         symbol: symbol,
         companyName: companyName,

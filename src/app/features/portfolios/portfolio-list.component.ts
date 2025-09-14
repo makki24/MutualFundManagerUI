@@ -35,7 +35,7 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
   ],
   template: `
     <div class="portfolio-container">
-      
+
 
       @if (isLoading) {
         <div class="loading-container">
@@ -150,19 +150,7 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
                 <ng-container matColumnDef="actions">
                   <th mat-header-cell *matHeaderCellDef>Actions</th>
                   <td mat-cell *matCellDef="let portfolio">
-                    <button mat-icon-button color="primary" (click)="viewPortfolio(portfolio.id)"
-                            matTooltip="View Details">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
                     @if (isAdmin) {
-                      <button mat-icon-button color="accent" (click)="managePortfolio(portfolio.id)"
-                              matTooltip="Manage Portfolio">
-                        <mat-icon>settings</mat-icon>
-                      </button>
-                      <button mat-icon-button color="warn" (click)="manageFees(portfolio.id)"
-                              matTooltip="Manage Fees">
-                        <mat-icon>account_balance_wallet</mat-icon>
-                      </button>
                       <button mat-icon-button color="primary" (click)="clonePortfolio(portfolio); $event.stopPropagation()"
                               matTooltip="Clone Portfolio">
                         <mat-icon>content_copy</mat-icon>
@@ -202,7 +190,7 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
       max-width: 1200px;
       margin: 0 auto;
     }
-    
+
 
     .loading-container {
       display: flex;

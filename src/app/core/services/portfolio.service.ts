@@ -55,10 +55,6 @@ export class PortfolioService {
   }
 
 
-  investInPortfolio(portfolioId: number, userId: number, request: InvestmentRequest): Observable<any> {
-    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/invest`, request);
-  }
-
   withdrawFromPortfolio(portfolioId: number, userId: number, request: WithdrawalRequest): Observable<any> {
     return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/withdraw`, request);
   }
