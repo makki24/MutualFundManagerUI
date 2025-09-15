@@ -123,7 +123,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     this.route.queryParams.subscribe(params => {
-      this.portfolioId = params['portfolio']
+      this.portfolioId = this.portfolioId  || params['portfolio']
     });
 
     // Subscribe to breakpoint changes
