@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Transaction, TransactionFilter, TransactionResponse, PaginationHeaders } from '../models/transaction.model';
+import { environment } from '../../../environments/environment';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -14,7 +15,7 @@ interface ApiResponse<T> {
 })
 export class TransactionService {
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api/transactions';
+  private readonly API_URL = `${environment.apiUrl}/transactions`;
 
   getUserTransactions(userId: number, filter?: TransactionFilter): Observable<TransactionResponse> {
     let params = new HttpParams();

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface DatabaseStatus {
   database: string;
@@ -34,7 +35,7 @@ export interface ApiResponse<T> {
 })
 export class DatabaseService {
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api/admin/database';
+  private readonly API_URL = `${environment.apiUrl}/admin/database`;
 
   /**
    * Get current database status information

@@ -40,3 +40,33 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment and secrets (for other frameworks - Angular uses .ts files)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Angular environment files are committed (they contain configuration, not secrets)
+# If you need to ignore production environment file with sensitive URLs, uncomment:
+# src/environments/environment.prod.ts
+
+# Logs and test results
+*.log
+test-results/
+playwright-report/
+e2e-results.json
+unit-test-results.log
+e2e-test-results.log
+quick-e2e-results.log
+
+# Deployment and build scripts (optional - keep if you want to version them)
+# *.sh
+
+# Netlify
+.netlify/
+
+# Local development
+.vscode/settings.json
