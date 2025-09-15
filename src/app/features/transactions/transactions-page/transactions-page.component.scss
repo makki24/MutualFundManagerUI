@@ -1,5 +1,4 @@
 .transactions-page {
-  padding: 16px;
   padding-top: 0;
   height: calc(100vh - 100px);
 
@@ -63,7 +62,6 @@
 
 @media (max-width: 768px) {
   .transactions-page {
-    padding: 10px;
-    height: calc(100vh - 80px);
+    //height: calc(100vh - 80px);
   }
 }

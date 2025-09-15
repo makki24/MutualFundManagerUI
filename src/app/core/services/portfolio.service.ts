@@ -37,6 +37,14 @@ export class PortfolioService {
     return this.http.get<ApiResponse<Portfolio[]>>(`${this.API_URL}/portfolios`, { params: httpParams });
   }
 
+  getUserPortfolios(userId: number, activeOnly: boolean = true): Observable<ApiResponse<Portfolio[]>> {
+    let httpParams = new HttpParams();
+    if (activeOnly) {
+      httpParams = httpParams.set('activeOnly', activeOnly.toString());
+    }
+    return this.http.get<ApiResponse<Portfolio[]>>(`${this.API_URL}/portfolios/user/${userId}`, { params: httpParams });
+  }
+
   getPortfolioDetails(id: number): Observable<ApiResponse<PortfolioDetails>> {
     return this.http.get<ApiResponse<PortfolioDetails>>(`${this.API_URL}/portfolios/${id}`);
   }

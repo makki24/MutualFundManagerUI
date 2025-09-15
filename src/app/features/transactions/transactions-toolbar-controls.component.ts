@@ -28,6 +28,12 @@ import { TransactionsViewService, TransactionsViewMode } from './transactions-vi
   styles: [`
     :host { display: inline-flex; align-items: center; }
     .label { margin-left: 6px; }
+    
+    @media (max-width: 768px) {
+      :host {
+        display: none;
+      }
+    }
   `]
 })
 export class TransactionsToolbarControlsComponent {

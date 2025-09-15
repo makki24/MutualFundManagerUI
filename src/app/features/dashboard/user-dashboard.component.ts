@@ -6,11 +6,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
-import { RouterModule } from '@angular/router';
+import { MatRippleModule } from '@angular/material/core';
+import { MatDividerModule } from '@angular/material/divider';
+import { RouterModule, Router } from '@angular/router';
 
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
-import { UserDashboard } from '../../core/models/dashboard.model';
+import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.model';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -23,6 +25,8 @@ import { UserDashboard } from '../../core/models/dashboard.model';
     MatTableModule,
     MatProgressSpinnerModule,
     MatChipsModule,
+    MatRippleModule,
+    MatDividerModule,
     RouterModule
   ],
   template: `

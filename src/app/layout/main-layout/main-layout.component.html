@@ -1,91 +1,104 @@
-<mat-sidenav-container class="sidenav-container" [class.sidebar-collapsed]="isSidebarCollapsed && (isHandset$ | async) === false">
-  <mat-sidenav #drawer class="sidenav" fixedInViewport
-      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-      [mode]="(isHandset$ | async) ? 'over' : 'side'"
-      [opened]="(isHandset$ | async) === false"
-      [class.collapsed]="isSidebarCollapsed && (isHandset$ | async) === false">
+<!-- Mobile Navigation Component -->
+@if (isHandset$ | async) {
+  <app-mobile-nav 
+    [isOpen]="isMobileNavOpen"
+    (closeNavigation)="closeMobileNav()"
+    (changePasswordRequest)="onMobileChangePassword()"
+    (logoutRequest)="onMobileLogout()">
+  </app-mobile-nav>
+}
 
-    <mat-toolbar class="sidenav-header">
-      <div class="header-content">
-        <mat-icon class="logo-icon">account_balance</mat-icon>
-        <span class="logo-text" [class.hidden]="isSidebarCollapsed">MF Manager</span>
-      </div>
-      @if ((isHandset$ | async) === false) {
-        <button mat-icon-button 
-                (click)="toggleSidebar()" 
+<mat-sidenav-container class="sidenav-container" [class.sidebar-collapsed]="isSidebarCollapsed && (isHandset$ | async) === false">
+  <!-- Hide sidebar completely on mobile -->
+  @if ((isHandset$ | async) === false) {
+    <mat-sidenav #drawer class="sidenav" fixedInViewport
+        role="navigation"
+        mode="side"
+        [opened]="true"
+        [class.collapsed]="isSidebarCollapsed">
+
+      <mat-toolbar class="sidenav-header">
+        <div class="header-content">
+          <mat-icon class="logo-icon">account_balance</mat-icon>
+          <span class="logo-text" [class.hidden]="isSidebarCollapsed">MF Manager</span>
+        </div>
+        <button mat-icon-button
+                (click)="toggleSidebar()"
                 [matTooltip]="isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
                 class="collapse-button">
           <mat-icon>{{ isSidebarCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
         </button>
-      }
-    </mat-toolbar>
+      </mat-toolbar>
 
-    <mat-nav-list>
-      <a mat-list-item routerLink="/dashboard" routerLinkActive="active"
-         [matTooltip]="isSidebarCollapsed ? 'Dashboard' : ''"
-         matTooltipPosition="right">
-        <mat-icon matListItemIcon>dashboard</mat-icon>
-        <span matListItemTitle [class.hidden]="isSidebarCollapsed">Dashboard</span>
-      </a>
-
-      @if (isAdmin) {
-        <a mat-list-item routerLink="/portfolios" routerLinkActive="active"
-           [matTooltip]="isSidebarCollapsed ? 'Portfolios' : ''"
+      <mat-nav-list>
+        <a mat-list-item routerLink="/dashboard" routerLinkActive="active"
+           [matTooltip]="isSidebarCollapsed ? 'Dashboard' : ''"
            matTooltipPosition="right">
-          <mat-icon matListItemIcon>pie_chart</mat-icon>
-          <span matListItemTitle [class.hidden]="isSidebarCollapsed">Portfolios</span>
+          <mat-icon matListItemIcon>dashboard</mat-icon>
+          <span matListItemTitle [class.hidden]="isSidebarCollapsed">Dashboard</span>
         </a>
 
-        <a mat-list-item routerLink="/users" routerLinkActive="active"
-           [matTooltip]="isSidebarCollapsed ? 'Users' : ''"
+        @if (isAdmin) {
+          <a mat-list-item routerLink="/portfolios" routerLinkActive="active"
+             [matTooltip]="isSidebarCollapsed ? 'Portfolios' : ''"
+             matTooltipPosition="right">
+            <mat-icon matListItemIcon>pie_chart</mat-icon>
+            <span matListItemTitle [class.hidden]="isSidebarCollapsed">Portfolios</span>
+          </a>
+
+          <a mat-list-item routerLink="/users" routerLinkActive="active"
+             [matTooltip]="isSidebarCollapsed ? 'Users' : ''"
+             matTooltipPosition="right">
+            <mat-icon matListItemIcon>people</mat-icon>
+            <span matListItemTitle [class.hidden]="isSidebarCollapsed">Users</span>
+          </a>
+
+          <a mat-list-item routerLink="/holdings" routerLinkActive="active"
+             [matTooltip]="isSidebarCollapsed ? 'Holdings' : ''"
+             matTooltipPosition="right">
+            <mat-icon matListItemIcon>trending_up</mat-icon>
+            <span matListItemTitle [class.hidden]="isSidebarCollapsed">Holdings</span>
+          </a>
+
+          <a mat-list-item routerLink="/database" routerLinkActive="active"
+             [matTooltip]="isSidebarCollapsed ? 'Database' : ''"
+             matTooltipPosition="right">
+            <mat-icon matListItemIcon>storage</mat-icon>
+            <span matListItemTitle [class.hidden]="isSidebarCollapsed">Database</span>
+          </a>
+        }
+
+        <a mat-list-item routerLink="/transactions" routerLinkActive="active"
+           [matTooltip]="isSidebarCollapsed ? 'Transactions' : ''"
            matTooltipPosition="right">
-          <mat-icon matListItemIcon>people</mat-icon>
-          <span matListItemTitle [class.hidden]="isSidebarCollapsed">Users</span>
+          <mat-icon matListItemIcon>receipt_long</mat-icon>
+          <span matListItemTitle [class.hidden]="isSidebarCollapsed">Transactions</span>
         </a>
 
-        <a mat-list-item routerLink="/holdings" routerLinkActive="active"
-           [matTooltip]="isSidebarCollapsed ? 'Holdings' : ''"
+        <mat-divider></mat-divider>
+
+        <a mat-list-item (click)="logout()"
+           [matTooltip]="isSidebarCollapsed ? 'Logout' : ''"
            matTooltipPosition="right">
-          <mat-icon matListItemIcon>trending_up</mat-icon>
-          <span matListItemTitle [class.hidden]="isSidebarCollapsed">Holdings</span>
+          <mat-icon matListItemIcon>logout</mat-icon>
+          <span matListItemTitle [class.hidden]="isSidebarCollapsed">Logout</span>
         </a>
-
-        <a mat-list-item routerLink="/database" routerLinkActive="active"
-           [matTooltip]="isSidebarCollapsed ? 'Database' : ''"
-           matTooltipPosition="right">
-          <mat-icon matListItemIcon>storage</mat-icon>
-          <span matListItemTitle [class.hidden]="isSidebarCollapsed">Database</span>
-        </a>
-      }
-
-      <a mat-list-item routerLink="/transactions" routerLinkActive="active"
-         [matTooltip]="isSidebarCollapsed ? 'Transactions' : ''"
-         matTooltipPosition="right">
-        <mat-icon matListItemIcon>receipt_long</mat-icon>
-        <span matListItemTitle [class.hidden]="isSidebarCollapsed">Transactions</span>
-      </a>
-
-      <mat-divider></mat-divider>
-
-      <a mat-list-item (click)="logout()"
-         [matTooltip]="isSidebarCollapsed ? 'Logout' : ''"
-         matTooltipPosition="right">
-        <mat-icon matListItemIcon>logout</mat-icon>
-        <span matListItemTitle [class.hidden]="isSidebarCollapsed">Logout</span>
-      </a>
-    </mat-nav-list>
-  </mat-sidenav>
+      </mat-nav-list>
+    </mat-sidenav>
+  }
 
   <mat-sidenav-content [class.sidebar-collapsed]="isSidebarCollapsed && (isHandset$ | async) === false">
     <mat-toolbar color="primary" class="main-toolbar">
-      <button
-        type="button"
-        aria-label="Toggle sidenav"
-        mat-icon-button
-        (click)="drawer.toggle()"
-        *ngIf="isHandset$ | async">
-        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-      </button>
+      <!-- Mobile hamburger menu -->
+      @if (isHandset$ | async) {
+        <button
+          type="button"
+          aria-label="Toggle mobile navigation"
+          mat-icon-button
+          (click)="toggleMobileNav()">
+          <mat-icon aria-label="Mobile nav toggle icon">menu</mat-icon>
+        </button>
+      }
 
       <!-- Back button visibility controlled by logic -->
       @if (showBackButton()) {

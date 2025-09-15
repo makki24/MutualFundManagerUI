@@ -21,6 +21,7 @@ import { ChangePasswordDialogComponent } from '../../features/auth/change-passwo
 import { PortfolioFormDialogComponent } from '../../features/portfolios/portfolio-form-dialog.component';
 import { UserFormDialogComponent } from '../../features/users/user-form-dialog.component';
 import { ToolbarService } from '../toolbar/toolbar.service';
+import { MobileNavComponent } from '../mobile-nav/mobile-nav.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -37,6 +38,7 @@ import { ToolbarService } from '../toolbar/toolbar.service';
     MatMenuModule,
     MatTooltipModule,
     MatDividerModule,
+    MobileNavComponent,
   ],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
@@ -53,6 +55,7 @@ export class MainLayoutComponent implements OnInit {
   currentUser: User | null = null;
   isAdmin = false;
   isSidebarCollapsed = false;
+  isMobileNavOpen = false;
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
@@ -152,16 +155,16 @@ export class MainLayoutComponent implements OnInit {
   handleKeyboardEvent(event: KeyboardEvent): void {
     // Check if user is not typing in an input field
     const target = event.target as HTMLElement;
-    const isInputField = target.tagName === 'INPUT' || 
-                       target.tagName === 'TEXTAREA' || 
+    const isInputField = target.tagName === 'INPUT' ||
+                       target.tagName === 'TEXTAREA' ||
                        target.contentEditable === 'true' ||
                        target.closest('[contenteditable="true"]') !== null;
-    
+
     // Only handle keyboard shortcuts if not in input field and on desktop
     if (!isInputField) {
       // Use current value instead of subscribing each time
       const isHandset = this.breakpointObserver.isMatched(Breakpoints.Handset);
-      
+
       if (!isHandset) {
         if (event.key === '[') {
           event.preventDefault();
@@ -190,6 +193,22 @@ export class MainLayoutComponent implements OnInit {
         }
       });
     }
+  }
+
+  toggleMobileNav(): void {
+    this.isMobileNavOpen = !this.isMobileNavOpen;
+  }
+
+  closeMobileNav(): void {
+    this.isMobileNavOpen = false;
+  }
+
+  onMobileChangePassword(): void {
+    this.changePassword();
+  }
+
+  onMobileLogout(): void {
+    this.logout();
   }
 
   logout(): void {

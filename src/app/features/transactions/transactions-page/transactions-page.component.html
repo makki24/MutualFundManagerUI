@@ -1,10 +1,17 @@
 <div class="transactions-page">
   <mat-card>
     <mat-card-content>
+      <!-- Portfolio transactions view (for admin users) -->
       <app-transactions-list
         *ngIf="portfolioId"
         [viewType]="'portfolio'"
         [portfolioId]="portfolioId">
+      </app-transactions-list>
+      
+      <!-- User transactions view (for non-admin users or general transactions page) -->
+      <app-transactions-list
+        *ngIf="!portfolioId"
+        [viewType]="'user'">
       </app-transactions-list>
     </mat-card-content>
   </mat-card>

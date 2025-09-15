@@ -1,6 +1,6 @@
 .sidenav-container {
   height: 100vh;
-  
+
   // CSS variables for sidebar widths
   --sidebar-expanded-width: 250px;
   --sidebar-collapsed-width: 64px;
@@ -86,11 +86,11 @@
   display: grid !important;
   grid-template-columns: var(--sidebar-expanded-width) 1fr;
   transition: grid-template-columns 0.3s ease;
-  
+
   &.sidebar-collapsed {
     grid-template-columns: var(--sidebar-collapsed-width) 1fr;
   }
-  
+
   // On mobile, use overlay mode (single column)
   @media (max-width: 768px) {
     display: block !important;
@@ -105,14 +105,14 @@
   grid-column: 1;
 }
 
-// Reset Material sidenav content positioning for grid layout  
+// Reset Material sidenav content positioning for grid layout
 mat-sidenav-content {
   position: relative !important;
   margin-left: 0 !important;
   transform: none !important;
   grid-column: 2;
   transition: all 0.3s ease;
-  
+
   &.sidebar-collapsed {
     // Add subtle visual feedback for the expanded content area
     .main-content {
@@ -120,14 +120,14 @@ mat-sidenav-content {
       background: #f8f9fa;
       transition: background-color 0.3s ease;
     }
-    
+
     .main-toolbar {
       // Add subtle shadow when content is expanded
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       transition: box-shadow 0.3s ease;
     }
   }
-  
+
   // On mobile, reset to normal Material behavior
   @media (max-width: 768px) {
     position: static !important;
@@ -182,7 +182,7 @@ mat-nav-list a.active mat-icon {
 
   .sidenav-header {
     padding: 0 8px;
-    
+
     .header-content {
       justify-content: center;
       gap: 0;
@@ -290,7 +290,7 @@ span.hidden {
 
 @media (max-width: 768px) {
   .main-content {
-    padding: 16px;
+    padding: 0px;
   }
 
   .hide-sm {

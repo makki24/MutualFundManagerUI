@@ -2,7 +2,7 @@
   <mat-card-content>
     <!-- View toggle moved to global toolbar -->
     <!-- Filters Section -->
-    <div class="filters-section">
+    <div class="filters-section" *ngIf="showFilters">
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Transaction Type</mat-label>
         <mat-select [(ngModel)]="selectedType">
@@ -62,8 +62,62 @@
         <p>Loading transactions...</p>
       </div>
 
+      <!-- Mobile Card View for Non-Admin Users -->
+      <div class="mobile-transactions" *ngIf="!isLoading && isMobile && !isAdmin && viewMode === 'table'">
+        <div class="transaction-card" *ngFor="let transaction of transactions"
+             (click)="toggleExpand(transaction)"
+             [class.expanded]="expandedElement === transaction">
+          <div class="card-header">
+            <div class="date-info">
+              <span class="date">{{ formatDate(transaction.createdAt) }}</span>
+
+            </div>
+            <div class="amount" [ngClass]="amountClass(bestAmount(transaction))">
+              {{ bestAmount(transaction) | currency }}
+            </div>
+          </div>
+
+          <div class="card-content">
+            <div class="units-info">
+              <span class="label">Units:</span>
+              <span class="value" [ngClass]="deltaClass(unitsDelta(transaction))">
+                {{ unitsDelta(transaction) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Expanded Details -->
+          <div class="expanded-content" *ngIf="expandedElement === transaction">
+            <div class="detail-row" *ngIf="transaction.description">
+              <span class="detail-label">Description:</span>
+              <span class="detail-value">{{ transaction.description }}</span>
+            </div>
+            <div class="detail-row" *ngIf="transaction.symbol">
+              <span class="detail-label">Symbol:</span>
+              <span class="detail-value">{{ transaction.symbol }}</span>
+            </div>
+            <div class="detail-row" *ngIf="transaction.quantity">
+              <span class="detail-label">Quantity:</span>
+              <span class="detail-value">{{ transaction.quantity | number:'1.2-2' }}</span>
+            </div>
+            <div class="detail-row" *ngIf="transaction.pricePerUnit">
+              <span class="detail-label">Price/Unit:</span>
+              <span class="detail-value">{{ transaction.pricePerUnit | currency }}</span>
+            </div>
+            <div class="detail-row" *ngIf="transaction.charges">
+              <span class="detail-label">Charges:</span>
+              <span class="detail-value">{{ transaction.charges | currency }}</span>
+            </div>
+          </div>
+
+          <div class="expand-indicator">
+            <mat-icon>{{ expandedElement === transaction ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </div>
+        </div>
+      </div>
+
       <!-- Table view -->
-      <table mat-table [dataSource]="transactions" class="transactions-table" *ngIf="!isLoading && viewMode === 'table'" multiTemplateDataRows>
+      <table mat-table [dataSource]="transactions" class="transactions-table" *ngIf="!isLoading && viewMode === 'table' && !(isMobile && !isAdmin)" multiTemplateDataRows>
         <!-- Date Column -->
         <ng-container matColumnDef="date">
           <th mat-header-cell *matHeaderCellDef>Date</th>

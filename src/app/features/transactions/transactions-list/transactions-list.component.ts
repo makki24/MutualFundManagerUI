@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, Input, ViewChild, ElementRef, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -14,12 +14,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Subject, fromEvent, debounceTime, takeUntil } from 'rxjs';
 import { Transaction, TransactionFilter, TransactionType, PaginationHeaders } from '../../../core/models/transaction.model';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { InvestmentService } from '../../../core/services/investment.service';
+import { PortfolioService } from '../../../core/services/portfolio.service';
 import { TransactionsViewService, TransactionsViewMode } from '../transactions-view.service';
+import { Portfolio } from '../../../core/models/portfolio.model';
 
 @Component({
   selector: 'app-transactions-list',
@@ -51,8 +54,11 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
   private readonly transactionService = inject(TransactionService);
   private readonly authService = inject(AuthService);
   private readonly investmentService = inject(InvestmentService);
+  private readonly portfolioService = inject(PortfolioService);
   private readonly viewService = inject(TransactionsViewService);
   private readonly router = inject(Router);
+  private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly route = inject(ActivatedRoute);
   private destroy$ = new Subject<void>();
 
   transactions: Transaction[] = [];
@@ -92,7 +98,54 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
   totalCount = 0;
   totalPages = 0;
 
+  // Mobile and user role detection
+  isMobile = false;
+  isAdmin = false;
+  showFilters = true;
+  mobileDisplayedColumns: string[] = ['date', 'units', 'net', 'expand'];
+
+  // Mobile portfolio filtering
+  userPortfolios: Portfolio[] = [];
+  selectedMobilePortfolioId?: number;
+  loadingPortfolios = false;
+
   ngOnInit(): void {
+    // Detect mobile and user role
+    this.isMobile = this.breakpointObserver.isMatched(Breakpoints.Handset);
+    this.isAdmin = this.authService.isAdmin();
+
+    // Hide filters for non-admin users in mobile view
+    this.showFilters = !(this.isMobile && !this.isAdmin);
+
+    // Set appropriate columns for mobile non-admin users
+    if (this.isMobile && !this.isAdmin) {
+      this.displayedColumns = this.mobileDisplayedColumns;
+    }
+
+    this.route.queryParams.subscribe(params => {
+      this.portfolioId = params['portfolio']
+    });
+
+    // Subscribe to breakpoint changes
+    this.breakpointObserver.observe([Breakpoints.Handset])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.isMobile = result.matches;
+        this.showFilters = !(this.isMobile && !this.isAdmin);
+
+        // Update columns based on mobile state and user role
+        if (this.isMobile && !this.isAdmin) {
+          this.displayedColumns = this.mobileDisplayedColumns;
+        } else {
+          this.displayedColumns = ['date', 'type', 'symbol', 'qty', 'units', 'nav', 'cash', 'net', 'description', 'expand'];
+        }
+      });
+
+    // Load user portfolios for mobile filtering (non-admin users only)
+    if (this.isMobile && !this.isAdmin && this.viewType === 'user') {
+      this.loadUserPortfolios();
+    }
+
     // Load users for portfolio filter if applicable
     if (this.viewType === 'portfolio' && this.portfolioId) {
       this.loadPortfolioUsers();
@@ -231,8 +284,10 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     } else {
       const userId = this.authService.getCurrentUserId();
       if (userId) {
-        // If viewing user transactions but with a specific portfolio filter
-        if (this.portfolioId) {
+        // Include portfolio filter for mobile users or existing portfolio filter
+        if (this.selectedMobilePortfolioId) {
+          this.filter.portfolioId = this.selectedMobilePortfolioId;
+        } else if (this.portfolioId) {
           this.filter.portfolioId = this.portfolioId;
         }
         return this.transactionService.getUserTransactions(userId, this.filter);
@@ -448,6 +503,34 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
   fmtCurrency(val: any, currency: string = 'INR'): string {
     const n = this.numOrNull(val);
     return n === null ? '—' : new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n);
+  }
+
+  onMobilePortfolioChange(): void {
+    // Reset pagination and reload transactions with selected portfolio filter
+    this.currentPage = 0;
+    this.filter.page = 0;
+    this.loadTransactions();
+  }
+
+  private loadUserPortfolios(): void {
+    const userId = this.authService.getCurrentUserId();
+    if (!userId) return;
+
+    this.loadingPortfolios = true;
+    this.portfolioService.getUserPortfolios(userId, true)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response?.success && Array.isArray(response.data)) {
+            this.userPortfolios = response.data;
+          }
+          this.loadingPortfolios = false;
+        },
+        error: (error) => {
+          console.error('Failed to load user portfolios:', error);
+          this.loadingPortfolios = false;
+        }
+      });
   }
 
   private loadPortfolioUsers(): void {

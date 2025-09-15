@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AdminDashboard, UserDashboard, MarketOverview } from '../models/dashboard.model';
+import { map } from 'rxjs/operators';
+import { AdminDashboard, UserDashboard, MarketOverview, NavHistoryResponse } from '../models/dashboard.model';
 
 @Injectable({
   providedIn: 'root'
@@ -25,5 +26,17 @@ export class DashboardService {
 
   getMarketOverview(): Observable<MarketOverview> {
     return this.http.get<MarketOverview>(`${this.API_URL}/dashboard/market`);
+  }
+
+  getNavHistory(portfolioId: number, startDate?: string, endDate?: string): Observable<NavHistoryResponse> {
+    let params = new HttpParams();
+    if (startDate) {
+      params = params.set('startDate', startDate);
+    }
+    if (endDate) {
+      params = params.set('endDate', endDate);
+    }
+    
+    return this.http.get<NavHistoryResponse>(`${this.API_URL}/portfolios/${portfolioId}/nav-history`, { params });
   }
 }
