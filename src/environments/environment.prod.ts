@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://129.213.146.93:8085/api',
+  apiUrl: 'https://myfund24.duckdns.org/api',
   appName: 'Mutual Fund Manager',
   version: '1.0.0',
   enableLogging: false,
