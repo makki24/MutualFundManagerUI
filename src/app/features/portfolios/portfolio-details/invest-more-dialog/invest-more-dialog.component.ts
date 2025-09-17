@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 import { PortfolioService } from '../../../../core/services/portfolio.service';
 import { Investment } from '../../../../core/models/investment.model';
@@ -30,7 +32,9 @@ export interface InvestMoreDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   template: `
     <div class="invest-more-dialog">
@@ -85,6 +89,27 @@ export interface InvestMoreDialogData {
               <mat-error>Investment amount must be greater than 0</mat-error>
             }
           </mat-form-field>
+
+          <div class="datetime-container">
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>Transaction Date (Optional)</mat-label>
+              <input matInput
+                     [matDatepicker]="transactionDatePicker"
+                     formControlName="transactionDate"
+                     placeholder="Select transaction date">
+              <mat-datepicker-toggle matIconSuffix [for]="transactionDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #transactionDatePicker></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="time-field">
+              <mat-label>Time (Optional)</mat-label>
+              <input matInput
+                     type="time"
+                     formControlName="transactionTime"
+                     placeholder="Select time">
+              <mat-hint>Leave empty to use current date and time</mat-hint>
+            </mat-form-field>
+          </div>
 
 
           @if (investForm.get('amount')?.value > 0) {
@@ -205,6 +230,20 @@ export interface InvestMoreDialogData {
       width: 100%;
     }
 
+    .datetime-container {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .date-field {
+      flex: 2;
+    }
+
+    .time-field {
+      flex: 1;
+    }
+
     .investment-preview {
       background: #e3f2fd;
       border-radius: 8px;
@@ -293,7 +332,9 @@ export class InvestMoreDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: InvestMoreDialogData
   ) {
     this.investForm = this.fb.group({
-      amount: ['', [Validators.required, Validators.min(1)]]
+      amount: ['', [Validators.required, Validators.min(1)]],
+      transactionDate: [null], // Optional transaction date
+      transactionTime: [null] // Optional transaction time
     });
   }
 
@@ -307,6 +348,37 @@ export class InvestMoreDialogComponent implements OnInit {
     }, 100);
   }
 
+  private combineDateTime(): Date | undefined {
+    const dateValue = this.investForm.get('transactionDate')?.value;
+    const timeValue = this.investForm.get('transactionTime')?.value;
+
+    if (!dateValue && !timeValue) {
+      return undefined; // No date or time specified, use current datetime
+    }
+
+    if (dateValue && !timeValue) {
+      // Date specified but no time, use current time
+      const now = new Date();
+      const combinedDate = new Date(dateValue);
+      combinedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+      return combinedDate;
+    }
+
+    if (!dateValue && timeValue) {
+      // Time specified but no date, use current date
+      const now = new Date();
+      const [hours, minutes] = timeValue.split(':');
+      now.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      return now;
+    }
+
+    // Both date and time specified
+    const combinedDate = new Date(dateValue);
+    const [hours, minutes] = timeValue.split(':');
+    combinedDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+    return combinedDate;
+  }
+
   onInvest(): void {
     if (this.investForm.valid) {
       this.isLoading = true;
@@ -315,11 +387,14 @@ export class InvestMoreDialogComponent implements OnInit {
         investmentAmount: this.investForm.get('amount')?.value
       };
 
+      const transactionDate = this.combineDateTime();
+      
       this.investmentService.investInPortfolio(
         this.data.portfolioId,
         this.data.investment.user.id,
         this.investForm.get('amount')?.value,
         1,
+        transactionDate
       ).subscribe({
         next: (response) => {
           this.isLoading = false;

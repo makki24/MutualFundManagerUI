@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 import { Holding } from '../../../core/models/portfolio.model';
 import { HoldingService } from '../../../core/services/holding.service';
@@ -29,7 +31,9 @@ export interface SellSharesDialogData {
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   template: `
     <div class="sell-shares-dialog">
@@ -91,6 +95,28 @@ export interface SellSharesDialogData {
                 <mat-error>Additional charges cannot be negative</mat-error>
               }
             </mat-form-field>
+
+            <!-- Transaction Date and Time -->
+            <div class="datetime-container">
+              <mat-form-field appearance="outline" class="date-field">
+                <mat-label>Transaction Date (Optional)</mat-label>
+                <input matInput
+                       [matDatepicker]="transactionDatePicker"
+                       formControlName="transactionDate"
+                       placeholder="Select transaction date">
+                <mat-datepicker-toggle matIconSuffix [for]="transactionDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #transactionDatePicker></mat-datepicker>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="time-field">
+                <mat-label>Time (Optional)</mat-label>
+                <input matInput
+                       type="time"
+                       formControlName="transactionTime"
+                       placeholder="Select time">
+                <mat-hint>Leave empty to use current date and time</mat-hint>
+              </mat-form-field>
+            </div>
 
             <div class="calculation-summary">
               <h3>Sale Summary</h3>
@@ -170,7 +196,9 @@ export class SellSharesDialogComponent implements OnInit {
     this.sellForm = this.fb.group({
       quantity: [1, [Validators.required, Validators.min(0.0001), Validators.max(this.data.holding.quantity || 0)]],
       price: [this.data.holding.currentPrice || 0, [Validators.required, Validators.min(0.0001)]],
-      additionalCharges: [0, [Validators.min(0)]]
+      additionalCharges: [0, [Validators.min(0)]],
+      transactionDate: [null], // Optional transaction date
+      transactionTime: [null] // Optional transaction time
     });
   }
 
@@ -192,12 +220,45 @@ export class SellSharesDialogComponent implements OnInit {
     return this.sellForm.valid;
   }
 
+  private combineDateTime(): Date | undefined {
+    const dateValue = this.sellForm.get('transactionDate')?.value;
+    const timeValue = this.sellForm.get('transactionTime')?.value;
+
+    if (!dateValue && !timeValue) {
+      return undefined; // No date or time specified, use current datetime
+    }
+
+    if (dateValue && !timeValue) {
+      // Date only - use current time
+      const now = new Date();
+      const combinedDate = new Date(dateValue);
+      combinedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+      return combinedDate;
+    }
+
+    if (!dateValue && timeValue) {
+      // Time only - use current date
+      const now = new Date();
+      const [hours, minutes] = timeValue.split(':');
+      now.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      return now;
+    }
+
+    // Both date and time specified
+    const combinedDate = new Date(dateValue);
+    const [hours, minutes] = timeValue.split(':');
+    combinedDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+    return combinedDate;
+  }
+
   onSell(): void {
     if (!this.canSell()) return;
 
     this.isLoading = true;
     const { quantity, price, additionalCharges } = this.sellForm.value;
 
+    const transactionDate = this.combineDateTime();
+    
     this.holdingService
       .sellShares(
         this.data.portfolioId,
@@ -205,7 +266,8 @@ export class SellSharesDialogComponent implements OnInit {
         quantity,
         price,
         this.data.adminUserId,
-        additionalCharges || 0
+        additionalCharges || 0,
+        transactionDate
       )
       .subscribe({
         next: (response) => {

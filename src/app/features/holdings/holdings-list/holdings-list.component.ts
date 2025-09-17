@@ -304,7 +304,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result: UpdatePriceDialogResult) => {
       if (result) {
-        this.portfolioService.updateStockPrice(portfolioId, holding.symbol, result.newPrice).subscribe({
+        this.portfolioService.updateStockPrice(portfolioId, holding.symbol, result.newPrice, result.transactionDate).subscribe({
           next: (response) => {
             if (response.success) {
               this.snackBar.open(

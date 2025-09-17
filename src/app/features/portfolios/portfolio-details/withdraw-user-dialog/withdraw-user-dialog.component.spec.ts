@@ -138,7 +138,7 @@ describe('WithdrawUserDialogComponent', () => {
 
     component.processWithdrawal();
 
-    expect(mockInvestmentService.withdrawFromPortfolio).toHaveBeenCalledWith(1, 1, 500, 1);
+    expect(mockInvestmentService.withdrawFromPortfolio).toHaveBeenCalledWith(1, 1, 500, 1, undefined);
     expect(mockDialogRef.close).toHaveBeenCalled();
   });
 

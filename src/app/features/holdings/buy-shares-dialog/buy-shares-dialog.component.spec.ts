@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
@@ -55,7 +56,7 @@ describe('BuySharesDialogComponent', () => {
     const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
     await TestBed.configureTestingModule({
-      imports: [BuySharesDialogComponent, NoopAnimationsModule],
+      imports: [BuySharesDialogComponent, NoopAnimationsModule, HttpClientTestingModule],
       providers: [
         { provide: StockService, useValue: stockServiceSpy },
         { provide: MatDialogRef, useValue: dialogRefSpy },
@@ -244,12 +245,12 @@ describe('BuySharesDialogComponent', () => {
 
     component.onBuy();
 
-    expect(mockStockService.buyMoreShares).toHaveBeenCalledWith(1, 'RELIANCE', 5, 2550, 50, 1);
+    expect(mockStockService.buyMoreShares).toHaveBeenCalledWith(1, 'RELIANCE', 5, 2550, 50, 1, undefined);
     expect(mockSnackBar.open).toHaveBeenCalledWith('Shares purchased successfully!', 'Close', { duration: 3000 });
     expect(mockDialogRef.close).toHaveBeenCalledWith(mockResponse.data);
   });
 
-  it('should handle buy shares error', () => {
+  it('should handle buy shares error', (done) => {
     mockStockService.buyShares.and.returnValue(throwError(() => new Error('API Error')));
 
     component.selectedStock = mockStock;
@@ -260,8 +261,12 @@ describe('BuySharesDialogComponent', () => {
 
     component.onBuy();
 
-    expect(mockSnackBar.open).toHaveBeenCalledWith('Failed to purchase shares', 'Close', { duration: 5000 });
-    expect(component.isLoading).toBeFalse();
+    // Use setTimeout to allow the async error handling to complete
+    setTimeout(() => {
+      expect(mockSnackBar.open).toHaveBeenCalledWith('Failed to purchase shares', 'Close', { duration: 5000 });
+      expect(component.isLoading).toBeFalse();
+      done();
+    }, 0);
   });
 
   it('should handle unsuccessful buy response', () => {

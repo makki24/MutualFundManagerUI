@@ -345,7 +345,7 @@ describe('HoldingsListComponent', () => {
 
       component.updatePrice(holding);
 
-      expect(portfolioService.updateStockPrice).toHaveBeenCalledWith(1, 'AAPL', 165);
+      expect(portfolioService.updateStockPrice).toHaveBeenCalledWith(1, 'AAPL', 165, undefined);
       expect(snackBar.open).toHaveBeenCalledWith('Price updated for AAPL: $165', 'Close', { duration: 3000 });
       expect(portfolioService.getPortfolioHoldings).toHaveBeenCalledWith(1);
     });

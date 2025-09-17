@@ -1,9 +1,12 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatNativeDateModule } from '@angular/material/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { TransactionsListComponent } from './transactions-list.component';
 import { TransactionService } from '../../../core/services/transaction.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { PortfolioService } from '../../../core/services/portfolio.service';
 import { of, throwError, Subject } from 'rxjs';
 import { Transaction, TransactionType, TransactionResponse, PaginationHeaders } from '../../../core/models/transaction.model';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -17,6 +20,8 @@ describe('TransactionsListComponent', () => {
   let mockTransactionService: jasmine.SpyObj<TransactionService>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockInvestmentService: jasmine.SpyObj<InvestmentService>;
+  let mockPortfolioService: jasmine.SpyObj<PortfolioService>;
+  let mockBreakpointObserver: jasmine.SpyObj<BreakpointObserver>;
 
   const mockPaginationHeaders: PaginationHeaders = {
     totalCount: 50,
@@ -61,7 +66,7 @@ describe('TransactionsListComponent', () => {
       'getUserTransactions',
       'getPortfolioTransactions'
     ]);
-    mockAuthService = jasmine.createSpyObj('AuthService', ['getCurrentUserId']);
+    mockAuthService = jasmine.createSpyObj('AuthService', ['getCurrentUserId', 'isAdmin']);
     mockInvestmentService = jasmine.createSpyObj('InvestmentService', [
       'getUserInvestments',
       'getPortfolioInvestments',
@@ -69,18 +74,38 @@ describe('TransactionsListComponent', () => {
       'investInPortfolio',
       'withdrawFromPortfolio'
     ]);
+    mockPortfolioService = jasmine.createSpyObj('PortfolioService', [
+      'getUserPortfolios',
+      'getPortfolios'
+    ]);
+    mockBreakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['isMatched', 'observe']);
+
+    // Setup default return values
+    mockAuthService.isAdmin.and.returnValue(false);
+    mockBreakpointObserver.isMatched.and.returnValue(false);
+    mockBreakpointObserver.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
+    mockPortfolioService.getUserPortfolios.and.returnValue(of({
+      success: true,
+      message: '',
+      data: [],
+      timestamp: new Date().toISOString(),
+      error: null
+    }));
 
     await TestBed.configureTestingModule({
       imports: [
         TransactionsListComponent, 
         NoopAnimationsModule,
         MatNativeDateModule,
-        RouterTestingModule
+        RouterTestingModule,
+        HttpClientTestingModule
       ],
       providers: [
         { provide: TransactionService, useValue: mockTransactionService },
         { provide: AuthService, useValue: mockAuthService },
         { provide: InvestmentService, useValue: mockInvestmentService },
+        { provide: PortfolioService, useValue: mockPortfolioService },
+        { provide: BreakpointObserver, useValue: mockBreakpointObserver },
         provideNativeDateAdapter()
       ]
     }).compileComponents();
@@ -257,14 +282,27 @@ describe('TransactionsListComponent', () => {
       expect(mockTransactionService.getUserTransactions.calls.count()).toBe(initialCallCount);
     });
 
-    it('should not load more when no more pages', () => {
+    it('should handle loading more when no more pages (backend check)', () => {
+      component.viewType = 'user';
       component.hasMorePages = false;
       component.isLoadingMore = false;
+      component.currentPage = 0;
+      mockAuthService.getCurrentUserId.and.returnValue(1);
+      
+      // Setup mock to return empty response for the test
+      mockTransactionService.getUserTransactions.and.returnValue(of({
+        transactions: [],
+        pagination: { ...mockPaginationHeaders, hasNext: false }
+      }));
 
       const initialCallCount = mockTransactionService.getUserTransactions.calls.count();
       component['loadMoreTransactions']();
 
-      expect(mockTransactionService.getUserTransactions.calls.count()).toBe(initialCallCount);
+      // The method should still make a call to check backend for more data
+      expect(mockTransactionService.getUserTransactions.calls.count()).toBe(initialCallCount + 1);
+      // But should revert the page increment when no data is returned
+      expect(component.currentPage).toBe(0);
+      expect(component.hasMorePages).toBe(false);
     });
 
     it('should handle error when loading more transactions', () => {

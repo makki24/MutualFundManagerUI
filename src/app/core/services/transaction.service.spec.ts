@@ -31,6 +31,18 @@ describe('TransactionService', () => {
     }
   ];
 
+  // Create a mock array with exactly 20 transactions for hasNext testing
+  const mock20Transactions: Transaction[] = Array.from({ length: 20 }, (_, i) => ({
+    id: i + 1,
+    portfolioId: 1,
+    transactionType: TransactionType.BUY,
+    symbol: `STOCK${i + 1}`,
+    quantity: 10,
+    pricePerUnit: 100 + i,
+    totalAmount: (100 + i) * 10,
+    createdAt: `2024-01-${String(i + 1).padStart(2, '0')}T10:00:00Z`
+  }));
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -67,8 +79,7 @@ describe('TransactionService', () => {
           'X-Total-Count': '50',
           'X-Total-Pages': '3',
           'X-Current-Page': '0',
-          'X-Page-Size': '20',
-          'X-Has-Next': 'true'
+          'X-Page-Size': '20'
         }
       });
 
@@ -78,7 +89,34 @@ describe('TransactionService', () => {
       expect(result!.pagination.totalPages).toBe(3);
       expect(result!.pagination.currentPage).toBe(0);
       expect(result!.pagination.pageSize).toBe(20);
-      expect(result!.pagination.hasNext).toBe(true);
+      expect(result!.pagination.hasNext).toBe(false); // hasNext is calculated based on data.length === 20, mockTransactions has only 2 items
+    });
+
+    it('should set hasNext to true when data length equals 20', () => {
+      const userId = 1;
+      const filter: TransactionFilter = { page: 0, size: 20 };
+      let result: TransactionResponse | undefined;
+
+      service.getUserTransactions(userId, filter).subscribe(response => {
+        result = response;
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/user/${userId}?page=0&size=20`);
+      expect(req.request.method).toBe('GET');
+
+      // Simulate response with exactly 20 transactions
+      req.flush({ success: true, message: 'Success', data: mock20Transactions }, {
+        headers: {
+          'X-Total-Count': '50',
+          'X-Total-Pages': '3',
+          'X-Current-Page': '0',
+          'X-Page-Size': '20'
+        }
+      });
+
+      expect(result).toBeDefined();
+      expect(result!.transactions).toEqual(mock20Transactions);
+      expect(result!.pagination.hasNext).toBe(true); // hasNext should be true when data.length === 20
     });
 
     it('should handle missing pagination headers with defaults', () => {

@@ -37,15 +37,30 @@ export class InvestmentService {
     );
   }
 
+  private formatDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
   investInPortfolio(
     portfolioId: number,
     userId: number,
     investmentAmount: number,
-    adminUserId: number
+    adminUserId: number,
+    transactionDate?: Date
   ): Observable<ApiResponse<any>> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('investmentAmount', investmentAmount.toString())
       .set('adminUserId', adminUserId.toString());
+
+    if (transactionDate) {
+      params = params.set('transactionDate', this.formatDateTime(transactionDate));
+    }
 
     return this.http.post<ApiResponse<any>>(
       `${this.API_URL}/portfolios/${portfolioId}/users/${userId}/invest`,
@@ -58,11 +73,16 @@ export class InvestmentService {
     portfolioId: number,
     userId: number,
     unitsToWithdraw: number,
-    adminUserId: number
+    adminUserId: number,
+    transactionDate?: Date
   ): Observable<ApiResponse<any>> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('unitsToWithdraw', unitsToWithdraw.toString())
       .set('adminUserId', adminUserId.toString());
+
+    if (transactionDate) {
+      params = params.set('transactionDate', this.formatDateTime(transactionDate));
+    }
 
     return this.http.post<ApiResponse<any>>(
       `${this.API_URL}/portfolios/${portfolioId}/users/${userId}/withdraw`,

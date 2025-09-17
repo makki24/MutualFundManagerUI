@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { InvestmentService } from '../../../../core/services/investment.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { Investment } from '../../../../core/models/investment.model';
@@ -37,7 +39,9 @@ export interface WithdrawalImpact {
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   template: `
     <h2 mat-dialog-title>Withdraw User from Portfolio</h2>
@@ -115,6 +119,28 @@ export interface WithdrawalImpact {
             <button mat-button type="button" (click)="setWithdrawalPercentage(50)">50%</button>
             <button mat-button type="button" (click)="setWithdrawalPercentage(75)">75%</button>
             <button mat-button type="button" (click)="setWithdrawalPercentage(100)">100%</button>
+          </div>
+
+          <!-- Transaction Date and Time -->
+          <div class="datetime-container">
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>Transaction Date (Optional)</mat-label>
+              <input matInput
+                     [matDatepicker]="transactionDatePicker"
+                     formControlName="transactionDate"
+                     placeholder="Select transaction date">
+              <mat-datepicker-toggle matIconSuffix [for]="transactionDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #transactionDatePicker></mat-datepicker>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="time-field">
+              <mat-label>Time (Optional)</mat-label>
+              <input matInput
+                     type="time"
+                     formControlName="transactionTime"
+                     placeholder="Select time">
+              <mat-hint>Leave empty to use current date and time</mat-hint>
+            </mat-form-field>
           </div>
         </div>
 
@@ -282,6 +308,31 @@ export interface WithdrawalImpact {
       color: #f57c00;
     }
 
+    .datetime-container {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .date-field {
+      flex: 1;
+    }
+
+    .time-field {
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      .datetime-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .date-field,
+      .time-field {
+        width: 100%;
+      }
+    }
 
     mat-dialog-actions {
       padding: 16px 24px;
@@ -327,7 +378,9 @@ export class WithdrawUserDialogComponent implements OnInit {
         Validators.required,
         Validators.min(0.0001),
         Validators.max(this.data.investment.unitsHeld)
-      ]]
+      ]],
+      transactionDate: [null], // Optional transaction date
+      transactionTime: [null] // Optional transaction time
     });
   }
 
@@ -384,6 +437,37 @@ export class WithdrawUserDialogComponent implements OnInit {
     this.calculateWithdrawalImpact();
   }
 
+  private combineDateTime(): Date | undefined {
+    const dateValue = this.withdrawForm.get('transactionDate')?.value;
+    const timeValue = this.withdrawForm.get('transactionTime')?.value;
+
+    if (!dateValue && !timeValue) {
+      return undefined; // No date or time specified, use current datetime
+    }
+
+    if (dateValue && !timeValue) {
+      // Date only - use current time
+      const now = new Date();
+      const combinedDate = new Date(dateValue);
+      combinedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+      return combinedDate;
+    }
+
+    if (!dateValue && timeValue) {
+      // Time only - use current date
+      const now = new Date();
+      const [hours, minutes] = timeValue.split(':');
+      now.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      return now;
+    }
+
+    // Both date and time specified
+    const combinedDate = new Date(dateValue);
+    const [hours, minutes] = timeValue.split(':');
+    combinedDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+    return combinedDate;
+  }
+
   processWithdrawal() {
     if (this.withdrawForm.invalid) {
       return;
@@ -393,11 +477,14 @@ export class WithdrawUserDialogComponent implements OnInit {
     const unitsToWithdraw = this.withdrawForm.get('unitsToWithdraw')?.value;
     const adminUserId = this.authService.getCurrentUser()?.id || 1;
 
+    const transactionDate = this.combineDateTime();
+    
     this.investmentService.withdrawFromPortfolio(
       this.data.portfolioId,
       this.data.investment.user.id,
       unitsToWithdraw,
-      adminUserId
+      adminUserId,
+      transactionDate
     ).subscribe({
       next: (response) => {
         if (response.success) {

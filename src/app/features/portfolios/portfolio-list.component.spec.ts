@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 
 import { PortfolioListComponent } from './portfolio-list.component';
@@ -92,7 +93,8 @@ describe('PortfolioListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         PortfolioListComponent,
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        HttpClientTestingModule
       ],
       providers: [
         { provide: PortfolioService, useValue: portfolioServiceSpy },

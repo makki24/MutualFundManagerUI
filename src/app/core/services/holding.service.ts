@@ -32,13 +32,24 @@ export class HoldingService {
     );
   }
 
+  private formatDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
   sellShares(
     portfolioId: number,
     symbol: string,
     quantity: number,
     sellPrice: number,
     adminUserId: number,
-    additionalCharges?: number
+    additionalCharges?: number,
+    transactionDate?: Date
   ): Observable<ApiResponse<Holding>> {
     let params = new HttpParams()
       .set('quantity', quantity.toString())
@@ -47,6 +58,10 @@ export class HoldingService {
 
     if (additionalCharges !== undefined && additionalCharges !== null) {
       params = params.set('additionalCharges', additionalCharges.toString());
+    }
+
+    if (transactionDate) {
+      params = params.set('transactionDate', this.formatDateTime(transactionDate));
     }
 
     return this.http.post<ApiResponse<Holding>>(

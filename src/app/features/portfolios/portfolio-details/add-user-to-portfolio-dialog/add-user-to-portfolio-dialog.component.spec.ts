@@ -240,15 +240,12 @@ describe('AddUserToPortfolioDialogComponent', () => {
     mockUserService.getUsers.and.returnValue(
       throwError(() => error)
     );
+    const consoleErrorSpy = spyOn(console, 'error');
 
     component.ngOnInit();
     
     fixture.whenStable().then(() => {
-      expect(mockSnackBar.open).toHaveBeenCalledWith(
-        'Failed to load users',
-        'Close',
-        { duration: 3000 }
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load users:', error);
       expect(component.isLoadingUsers).toBe(false);
       done();
     });

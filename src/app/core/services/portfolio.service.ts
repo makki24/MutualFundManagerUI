@@ -64,8 +64,22 @@ export class PortfolioService {
   }
 
 
-  withdrawFromPortfolio(portfolioId: number, userId: number, request: WithdrawalRequest): Observable<any> {
-    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/withdraw`, request);
+  private formatDateTime(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  }
+
+  withdrawFromPortfolio(portfolioId: number, userId: number, request: WithdrawalRequest, transactionDate?: Date): Observable<any> {
+    let params = new HttpParams();
+    if (transactionDate) {
+      params = params.set('transactionDate', this.formatDateTime(transactionDate));
+    }
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/users/${userId}/withdraw`, request, { params });
   }
 
 
@@ -74,12 +88,54 @@ export class PortfolioService {
   }
 
 
-  buyShares(portfolioId: number, symbol: string, request: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/buy`, request);
+  buyShares(portfolioId: number, symbol: string, request: any, transactionDate?: Date): Observable<any> {
+    let params = new HttpParams();
+    if (transactionDate) {
+      params = params.set('transactionDate', this.formatDateTime(transactionDate));
+    }
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/buy`, request, { params });
   }
 
-  sellShares(portfolioId: number, symbol: string, request: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/sell`, request);
+  sellShares(portfolioId: number, symbol: string, request: any, transactionDate?: Date): Observable<any> {
+    let params = new HttpParams();
+    if (transactionDate) {
+      params = params.set('transactionDate', this.formatDateTime(transactionDate));
+    }
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/sell`, request, { params });
+  }
+
+  // New shares purchase method (for new holdings)
+  buyNewShares(portfolioId: number, request: any, transactionDate?: Date): Observable<any> {
+    let params = new HttpParams();
+    if (transactionDate) {
+      params = params.set('transactionDate', transactionDate.toISOString());
+    }
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/holdings/buy`, request, { params });
+  }
+
+  // Cash operations methods
+  addCash(portfolioId: number, amount: number, adminUserId: number, transactionDate?: Date): Observable<any> {
+    let params = new HttpParams()
+      .set('amount', amount.toString())
+      .set('adminUserId', adminUserId.toString());
+    
+    if (transactionDate) {
+      params = params.set('transactionDate', transactionDate.toISOString());
+    }
+    
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/cash`, {}, { params });
+  }
+
+  withdrawCash(portfolioId: number, amount: number, adminUserId: number, transactionDate?: Date): Observable<any> {
+    let params = new HttpParams()
+      .set('amount', (-Math.abs(amount)).toString()) // Ensure negative amount for withdrawal
+      .set('adminUserId', adminUserId.toString());
+    
+    if (transactionDate) {
+      params = params.set('transactionDate', transactionDate.toISOString());
+    }
+    
+    return this.http.post(`${this.API_URL}/portfolios/${portfolioId}/cash`, {}, { params });
   }
 
 
@@ -96,8 +152,13 @@ export class PortfolioService {
     );
   }
 
-  updateStockPrice(portfolioId: number, symbol: string, newPrice: number): Observable<ApiResponse<any>> {
-    const params = new HttpParams().set('newPrice', newPrice.toString());
+  updateStockPrice(portfolioId: number, symbol: string, newPrice: number, transactionDate?: Date): Observable<ApiResponse<any>> {
+    let params = new HttpParams().set('newPrice', newPrice.toString());
+    
+    if (transactionDate) {
+      params = params.set('transactionDate', this.formatDateTime(transactionDate));
+    }
+    
     return this.http.put<ApiResponse<any>>(
       `${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/price`,
       {},
