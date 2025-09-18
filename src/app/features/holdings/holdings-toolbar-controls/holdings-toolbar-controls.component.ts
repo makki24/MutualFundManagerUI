@@ -48,7 +48,7 @@ import { Portfolio } from '../../../core/models/portfolio.model';
     <button
       mat-button
       (click)="updatePricesFromToolbar()"
-      [disabled]="!selectedPortfolioId.value"
+      [disabled]="true || !selectedPortfolioId.value"
       matTooltip="Update Prices"
     >
       <mat-icon>refresh</mat-icon>

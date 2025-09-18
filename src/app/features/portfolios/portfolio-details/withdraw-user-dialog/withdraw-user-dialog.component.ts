@@ -361,6 +361,9 @@ export interface WithdrawalImpact {
   `]
 })
 export class WithdrawUserDialogComponent implements OnInit {
+  // LocalStorage key for datetime preferences
+  private readonly DATETIME_STORAGE_KEY = 'withdrawUser_datetime_preferences';
+  
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<WithdrawUserDialogComponent>);
   private investmentService = inject(InvestmentService);
@@ -373,19 +376,23 @@ export class WithdrawUserDialogComponent implements OnInit {
   withdrawalPercentage = 0;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { portfolioId: number; investment: Investment }) {
+    // Load saved datetime preferences from localStorage
+    const savedDatetime = this.loadDatetimePreferences();
+    
     this.withdrawForm = this.fb.group({
       unitsToWithdraw: [this.data.investment.unitsHeld, [
         Validators.required,
         Validators.min(0.0001),
         Validators.max(this.data.investment.unitsHeld)
       ]],
-      transactionDate: [null], // Optional transaction date
-      transactionTime: [null] // Optional transaction time
+      transactionDate: [savedDatetime.date || null], // Optional transaction date
+      transactionTime: [savedDatetime.time || null] // Optional transaction time
     });
   }
 
   ngOnInit() {
     this.setupFormValidation();
+    this.setupDatetimeListeners();
     // Set default to 100% withdrawal
     this.setWithdrawalPercentage(100);
   }
@@ -394,6 +401,59 @@ export class WithdrawUserDialogComponent implements OnInit {
     this.withdrawForm.get('unitsToWithdraw')?.valueChanges.subscribe(() => {
       this.calculateWithdrawalImpact();
     });
+  }
+
+  /**
+   * Setup listeners for datetime changes to save to localStorage
+   */
+  private setupDatetimeListeners(): void {
+    this.withdrawForm.get('transactionDate')?.valueChanges.subscribe(() => {
+      this.saveDatetimePreferences();
+    });
+
+    this.withdrawForm.get('transactionTime')?.valueChanges.subscribe(() => {
+      this.saveDatetimePreferences();
+    });
+  }
+
+  /**
+   * Load datetime preferences from localStorage
+   */
+  private loadDatetimePreferences(): { date: string; time: string } {
+    try {
+      const saved = localStorage.getItem(this.DATETIME_STORAGE_KEY);
+      if (saved) {
+        const preferences = JSON.parse(saved);
+        return {
+          date: preferences.date || '',
+          time: preferences.time || ''
+        };
+      }
+    } catch (error) {
+      console.warn('Failed to load datetime preferences from localStorage:', error);
+    }
+    
+    return { date: '', time: '' };
+  }
+
+  /**
+   * Save current datetime preferences to localStorage
+   */
+  private saveDatetimePreferences(): void {
+    try {
+      const dateValue = this.withdrawForm.get('transactionDate')?.value;
+      const timeValue = this.withdrawForm.get('transactionTime')?.value;
+      
+      const preferences = {
+        date: dateValue || '',
+        time: timeValue || '',
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorage.setItem(this.DATETIME_STORAGE_KEY, JSON.stringify(preferences));
+    } catch (error) {
+      console.warn('Failed to save datetime preferences to localStorage:', error);
+    }
   }
 
   calculateWithdrawalImpact() {

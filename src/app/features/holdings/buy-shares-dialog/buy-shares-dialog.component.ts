@@ -546,6 +546,9 @@ export interface BuySharesDialogData {
   `]
 })
 export class BuySharesDialogComponent implements OnInit {
+  // LocalStorage key for datetime preferences
+  private readonly DATETIME_STORAGE_KEY = 'buyShares_datetime_preferences';
+  
   private fb = inject(FormBuilder);
   private stockService = inject(StockService);
   private snackBar = inject(MatSnackBar);
@@ -561,22 +564,80 @@ export class BuySharesDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<BuySharesDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: BuySharesDialogData
   ) {
+    // Load saved datetime preferences from localStorage
+    const savedDatetime = this.loadDatetimePreferences();
+    
     this.buyForm = this.fb.group({
       quantity: [1, [Validators.required, Validators.min(0.0001)]],
       price: [0, [Validators.required, Validators.min(0.0001)]],
       additionalCharges: [0, [Validators.min(0)]],
       description: [''],
       manualCompanyName: [''],
-      transactionDate: [null], // Optional transaction date
-      transactionTime: [null] // Optional transaction time
+      transactionDate: [savedDatetime.date || null], // Optional transaction date
+      transactionTime: [savedDatetime.time || null] // Optional transaction time
     });
   }
 
   ngOnInit(): void {
+    this.setupDatetimeListeners();
+    
     if (this.data.existingHolding) {
       this.buyForm.patchValue({
         price: this.data.existingHolding.currentPrice
       });
+    }
+  }
+
+  /**
+   * Setup listeners for datetime changes to save to localStorage
+   */
+  private setupDatetimeListeners(): void {
+    this.buyForm.get('transactionDate')?.valueChanges.subscribe(() => {
+      this.saveDatetimePreferences();
+    });
+
+    this.buyForm.get('transactionTime')?.valueChanges.subscribe(() => {
+      this.saveDatetimePreferences();
+    });
+  }
+
+  /**
+   * Load datetime preferences from localStorage
+   */
+  private loadDatetimePreferences(): { date: string; time: string } {
+    try {
+      const saved = localStorage.getItem(this.DATETIME_STORAGE_KEY);
+      if (saved) {
+        const preferences = JSON.parse(saved);
+        return {
+          date: preferences.date || '',
+          time: preferences.time || ''
+        };
+      }
+    } catch (error) {
+      console.warn('Failed to load datetime preferences from localStorage:', error);
+    }
+    
+    return { date: '', time: '' };
+  }
+
+  /**
+   * Save current datetime preferences to localStorage
+   */
+  private saveDatetimePreferences(): void {
+    try {
+      const dateValue = this.buyForm.get('transactionDate')?.value;
+      const timeValue = this.buyForm.get('transactionTime')?.value;
+      
+      const preferences = {
+        date: dateValue || '',
+        time: timeValue || '',
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorage.setItem(this.DATETIME_STORAGE_KEY, JSON.stringify(preferences));
+    } catch (error) {
+      console.warn('Failed to save datetime preferences to localStorage:', error);
     }
   }
 

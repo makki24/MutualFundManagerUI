@@ -601,6 +601,9 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
   private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
 
+  // LocalStorage keys for datetime preferences
+  private readonly DATETIME_STORAGE_KEY = 'addUserPortfolio_datetime_preferences';
+
   addUserForm: FormGroup;
   availableUsers: User[] = [];
   allUsers: User[] = [];
@@ -613,12 +616,15 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
   portfolioNavValue = 10; // Default NAV value, should be loaded from portfolio details
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { portfolioId: number }) {
+    // Load saved datetime preferences from localStorage
+    const savedDatetime = this.loadDatetimePreferences();
+    
     this.addUserForm = this.fb.group({
       userId: ['', Validators.required],
       investmentAmount: ['', [Validators.required, Validators.min(1)]],
       confirmFeeImpact: [false],
-      transactionDate: [''],
-      transactionTime: ['']
+      transactionDate: [savedDatetime.date || ''],
+      transactionTime: [savedDatetime.time || '']
     });
   }
 
@@ -788,6 +794,55 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     ).subscribe(() => {
       this.calculateFeeImpact();
     });
+
+    // Watch for datetime changes and save to localStorage
+    this.addUserForm.get('transactionDate')?.valueChanges.subscribe(() => {
+      this.saveDatetimePreferences();
+    });
+
+    this.addUserForm.get('transactionTime')?.valueChanges.subscribe(() => {
+      this.saveDatetimePreferences();
+    });
+  }
+
+  /**
+   * Load datetime preferences from localStorage
+   */
+  private loadDatetimePreferences(): { date: string; time: string } {
+    try {
+      const saved = localStorage.getItem(this.DATETIME_STORAGE_KEY);
+      if (saved) {
+        const preferences = JSON.parse(saved);
+        return {
+          date: preferences.date || '',
+          time: preferences.time || ''
+        };
+      }
+    } catch (error) {
+      console.warn('Failed to load datetime preferences from localStorage:', error);
+    }
+    
+    return { date: '', time: '' };
+  }
+
+  /**
+   * Save current datetime preferences to localStorage
+   */
+  private saveDatetimePreferences(): void {
+    try {
+      const dateValue = this.addUserForm.get('transactionDate')?.value;
+      const timeValue = this.addUserForm.get('transactionTime')?.value;
+      
+      const preferences = {
+        date: dateValue || '',
+        time: timeValue || '',
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorage.setItem(this.DATETIME_STORAGE_KEY, JSON.stringify(preferences));
+    } catch (error) {
+      console.warn('Failed to save datetime preferences to localStorage:', error);
+    }
   }
 
   private combineDateTime(): Date | undefined {
