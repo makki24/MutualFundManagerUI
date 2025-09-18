@@ -10,6 +10,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, of, debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs';
 
@@ -57,7 +59,9 @@ export interface UserFeeImpact {
     MatSelectModule,
     MatCardModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   template: `
     <h2 mat-dialog-title>Add User to Portfolio</h2>
@@ -153,6 +157,29 @@ export interface UserFeeImpact {
             Investment amount must be at least ₹1
           </mat-error>
         </mat-form-field>
+
+        <!-- Transaction DateTime -->
+        <div class="datetime-container">
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Transaction Date</mat-label>
+            <input matInput 
+                   [matDatepicker]="picker" 
+                   formControlName="transactionDate"
+                   placeholder="Select date">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-hint>Optional: Leave blank for current date</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="time-field">
+            <mat-label>Transaction Time</mat-label>
+            <input matInput 
+                   type="time" 
+                   formControlName="transactionTime"
+                   placeholder="Select time">
+            <mat-hint>Optional: Leave blank for current time</mat-hint>
+          </mat-form-field>
+        </div>
 
         <!-- Fee Impact Preview -->
         @if (feeImpact && selectedUser) {
@@ -507,6 +534,20 @@ export interface UserFeeImpact {
       gap: 8px;
     }
 
+    .datetime-container {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .date-field {
+      flex: 1;
+    }
+
+    .time-field {
+      flex: 1;
+    }
+
     // Fix dropdown z-index issues
     ::ng-deep .mat-mdc-select-panel {
       z-index: 10000 !important;
@@ -543,6 +584,11 @@ export interface UserFeeImpact {
         align-items: flex-start;
         gap: 4px;
       }
+
+      .datetime-container {
+        flex-direction: column;
+        gap: 8px;
+      }
     }
   `]
 })
@@ -570,7 +616,9 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     this.addUserForm = this.fb.group({
       userId: ['', Validators.required],
       investmentAmount: ['', [Validators.required, Validators.min(1)]],
-      confirmFeeImpact: [false]
+      confirmFeeImpact: [false],
+      transactionDate: [''],
+      transactionTime: ['']
     });
   }
 
@@ -742,6 +790,37 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     });
   }
 
+  private combineDateTime(): Date | undefined {
+    const dateValue = this.addUserForm.get('transactionDate')?.value;
+    const timeValue = this.addUserForm.get('transactionTime')?.value;
+
+    if (!dateValue && !timeValue) {
+      return undefined; // No date or time specified, use current datetime
+    }
+
+    if (dateValue && !timeValue) {
+      // Date specified, use current time
+      const now = new Date();
+      const combinedDate = new Date(dateValue);
+      combinedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+      return combinedDate;
+    }
+
+    if (!dateValue && timeValue) {
+      // Time specified, use current date
+      const now = new Date();
+      const [hours, minutes] = timeValue.split(':');
+      now.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+      return now;
+    }
+
+    // Both date and time specified
+    const combinedDate = new Date(dateValue);
+    const [hours, minutes] = timeValue.split(':');
+    combinedDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+    return combinedDate;
+  }
+
   addUserToPortfolio() {
     if (this.addUserForm.invalid || !this.selectedUser) {
       this.snackBar.open('Please fill in all required fields', 'Close', { duration: 3000 });
@@ -752,12 +831,14 @@ export class AddUserToPortfolioDialogComponent implements OnInit {
     const userId = this.addUserForm.get('userId')?.value;
     const investmentAmount = this.addUserForm.get('investmentAmount')?.value;
     const adminUserId = this.authService.getCurrentUser()?.id || 1;
+    const transactionDate = this.combineDateTime();
 
     this.investmentService.investInPortfolio(
       this.data.portfolioId,
       userId,
       investmentAmount,
-      adminUserId
+      adminUserId,
+      transactionDate
     ).subscribe({
       next: (response) => {
         if (response.success) {

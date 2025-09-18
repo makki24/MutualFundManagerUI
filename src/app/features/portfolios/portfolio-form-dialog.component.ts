@@ -74,11 +74,11 @@ interface DialogData {
           <div class="details-grid">
             <div class="detail-item">
               <label>NAV Value</label>
-              <span>{{ data.portfolio?.navValue | currency:'USD':'symbol':'1.4-4' }}</span>
+              <span>{{ data.portfolio?.navValue | currency:'INR':'symbol':'1.4-4' }}</span>
             </div>
             <div class="detail-item">
               <label>Total AUM</label>
-              <span>{{ data.portfolio?.totalAum | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span>{{ data.portfolio?.totalAum | currency:'INR':'symbol':'1.2-2' }}</span>
             </div>
             <div class="detail-item">
               <label>Total Units</label>
@@ -86,7 +86,7 @@ interface DialogData {
             </div>
             <div class="detail-item">
               <label>Remaining Cash</label>
-              <span>{{ data.portfolio?.remainingCash | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span>{{ data.portfolio?.remainingCash | currency:'INR':'symbol':'1.2-2' }}</span>
             </div>
             <div class="detail-item">
               <label>Total Investors</label>
@@ -107,7 +107,7 @@ interface DialogData {
             @if (data.portfolio?.currentFeeAmount) {
               <div class="detail-item">
                 <label>Current Fee Amount</label>
-                <span>{{ data.portfolio?.currentFeeAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+                <span>{{ data.portfolio?.currentFeeAmount | currency:'INR':'symbol':'1.2-2' }}</span>
               </div>
             }
             @if (data.portfolio?.feeFromDate && data.portfolio?.feeToDate) {
