@@ -65,7 +65,7 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
               <div class="card-header">
                 <mat-icon class="card-icon aum">account_balance</mat-icon>
                 <div class="card-info">
-                  <h3>{{ dashboardData.totalAum | currency:'USD':'symbol':'1.0-0' }}</h3>
+                  <h3>{{ dashboardData.totalAum | currency:'INR':'symbol':'1.0-0' }}</h3>
                   <p>Total AUM</p>
                 </div>
               </div>
@@ -124,7 +124,7 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
                     <ng-container matColumnDef="amount">
                       <th mat-header-cell *matHeaderCellDef>Amount</th>
                       <td mat-cell *matCellDef="let transaction">
-                        {{ transaction.amount | currency:'USD':'symbol':'1.2-2' }}
+                        {{ transaction.amount | currency:'INR':'symbol':'1.2-2' }}
                       </td>
                     </ng-container>
 

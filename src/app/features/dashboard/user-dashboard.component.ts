@@ -50,17 +50,17 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
                   <div class="summary-label">Active Portfolios</div>
                 </div>
                 <div class="summary-item">
-                  <div class="summary-value">{{ dashboardData.investmentSummary.totalInvested | currency:'USD':'symbol':'1.2-2' }}</div>
+                  <div class="summary-value">{{ dashboardData.investmentSummary.totalInvested | currency:'INR':'symbol':'1.2-2' }}</div>
                   <div class="summary-label">Total Invested</div>
                 </div>
                 <div class="summary-item">
-                  <div class="summary-value">{{ dashboardData.investmentSummary.currentValue | currency:'USD':'symbol':'1.2-2' }}</div>
+                  <div class="summary-value">{{ dashboardData.investmentSummary.currentValue | currency:'INR':'symbol':'1.2-2' }}</div>
                   <div class="summary-label">Current Value</div>
                 </div>
                 <div class="summary-item">
                   <div class="summary-value" [class.positive]="dashboardData.investmentSummary.totalReturns >= 0"
                        [class.negative]="dashboardData.investmentSummary.totalReturns < 0">
-                    {{ dashboardData.investmentSummary.totalReturns | currency:'USD':'symbol':'1.2-2' }}
+                    {{ dashboardData.investmentSummary.totalReturns | currency:'INR':'symbol':'1.2-2' }}
                   </div>
                   <div class="summary-label">Total Returns</div>
                 </div>
@@ -72,7 +72,7 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
                   <div class="summary-label">Return %</div>
                 </div>
                 <div class="summary-item">
-                  <div class="summary-value">{{ dashboardData.investmentSummary.totalCharges | currency:'USD':'symbol':'1.2-2' }}</div>
+                  <div class="summary-value">{{ dashboardData.investmentSummary.totalCharges | currency:'INR':'symbol':'1.2-2' }}</div>
                   <div class="summary-label">Total Charges</div>
                 </div>
               </div>
@@ -112,14 +112,14 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
                     <ng-container matColumnDef="invested">
                       <th mat-header-cell *matHeaderCellDef>Invested</th>
                       <td mat-cell *matCellDef="let investment">
-                        {{ investment.totalInvested | currency:'USD':'symbol':'1.2-2' }}
+                        {{ investment.totalInvested | currency:'INR':'symbol':'1.2-2' }}
                       </td>
                     </ng-container>
 
                     <ng-container matColumnDef="current">
                       <th mat-header-cell *matHeaderCellDef>Current Value</th>
                       <td mat-cell *matCellDef="let investment">
-                        {{ investment.currentValue | currency:'USD':'symbol':'1.2-2' }}
+                        {{ investment.currentValue | currency:'INR':'symbol':'1.2-2' }}
                       </td>
                     </ng-container>
 
@@ -129,7 +129,7 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
                         <div class="returns-info">
                           <div class="return-amount" [class.positive]="investment.totalReturns >= 0"
                                [class.negative]="investment.totalReturns < 0">
-                            {{ investment.totalReturns | currency:'USD':'symbol':'1.2-2' }}
+                            {{ investment.totalReturns | currency:'INR':'symbol':'1.2-2' }}
                           </div>
                           <div class="return-percentage" [class.positive]="investment.returnPercentage >= 0"
                                [class.negative]="investment.returnPercentage < 0">

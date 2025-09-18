@@ -49,17 +49,17 @@ export interface UpdatePriceDialogResult {
           <div class="stock-symbol">{{ data.holding.symbol }}</div>
           <div class="stock-name">{{ data.holding.companyName }}</div>
           <div class="current-price">
-            Current Price: {{ data.holding.currentPrice | currency:'USD':'symbol':'1.2-2' }}
+            Current Price: {{ data.holding.currentPrice | currency:'INR':'symbol':'1.2-2' }}
           </div>
         </div>
 
         <form [formGroup]="priceForm" class="price-form">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>New Price (USD)</mat-label>
-            <input matInput 
-                   type="number" 
-                   formControlName="newPrice" 
-                   min="0.01" 
+            <mat-label>New Price (INR)</mat-label>
+            <input matInput
+                   type="number"
+                   formControlName="newPrice"
+                   min="0.01"
                    step="0.01"
                    placeholder="Enter new price">
             <mat-hint>Enter the new price for {{ data.holding.symbol }}</mat-hint>
@@ -74,8 +74,8 @@ export interface UpdatePriceDialogResult {
           <div class="datetime-container">
             <mat-form-field appearance="outline" class="date-field">
               <mat-label>Transaction Date</mat-label>
-              <input matInput 
-                     [matDatepicker]="picker" 
+              <input matInput
+                     [matDatepicker]="picker"
                      formControlName="transactionDate"
                      placeholder="Select date">
               <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
@@ -85,8 +85,8 @@ export interface UpdatePriceDialogResult {
 
             <mat-form-field appearance="outline" class="time-field">
               <mat-label>Transaction Time</mat-label>
-              <input matInput 
-                     type="time" 
+              <input matInput
+                     type="time"
                      formControlName="transactionTime"
                      placeholder="Select time">
               <mat-hint>Optional: Leave blank for current time</mat-hint>
@@ -97,9 +97,9 @@ export interface UpdatePriceDialogResult {
 
       <mat-dialog-actions align="end">
         <button mat-button (click)="onCancel()">Cancel</button>
-        <button mat-raised-button 
-                color="primary" 
-                (click)="onUpdate()" 
+        <button mat-raised-button
+                color="primary"
+                (click)="onUpdate()"
                 [disabled]="priceForm.invalid || isUpdating">
           @if (isUpdating) {
             <mat-spinner diameter="16" style="margin-right: 8px;"></mat-spinner>

@@ -445,7 +445,7 @@ export class NavHistoryChartComponent implements OnInit, OnChanges, OnDestroy {
             const dataIndex = context.dataIndex;
             const item = this.filteredHistory[dataIndex];
             const lines = [
-              `NAV: $${value.toFixed(4)}`,
+              `NAV: ₹${value.toFixed(4)}`,
             ];
             if (item) {
               if (item.changeAmount !== 0) {
@@ -483,7 +483,7 @@ export class NavHistoryChartComponent implements OnInit, OnChanges, OnDestroy {
         },
         ticks: {
           callback: function(value) {
-            return '$' + (value as number).toFixed(2);
+            return '₹' + (value as number).toFixed(2);
           }
         }
       }

@@ -58,7 +58,7 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
               </div>
               <div class="card-content">
                 <div class="card-label">Total Value</div>
-                <div class="card-value">{{ dashboardData.investmentSummary.currentValue | currency:'USD':'symbol':'1.0-0' }}</div>
+                <div class="card-value">{{ dashboardData.investmentSummary.currentValue | currency:'INR':'symbol':'1.0-0' }}</div>
                 <div class="card-change" [class.positive]="dashboardData.investmentSummary.totalReturns >= 0"
                      [class.negative]="dashboardData.investmentSummary.totalReturns < 0">
                   <mat-icon>{{ dashboardData.investmentSummary.totalReturns >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
@@ -76,13 +76,13 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
                 <span class="stat-label">Portfolios</span>
               </div>
               <div class="stat-item">
-                <span class="stat-value">{{ dashboardData.investmentSummary.totalInvested | currency:'USD':'symbol':'1.0-0' }}</span>
+                <span class="stat-value">{{ dashboardData.investmentSummary.totalInvested | currency:'INR':'symbol':'1.0-0' }}</span>
                 <span class="stat-label">Invested</span>
               </div>
               <div class="stat-item">
                 <span class="stat-value" [class.positive]="dashboardData.investmentSummary.totalReturns >= 0"
                      [class.negative]="dashboardData.investmentSummary.totalReturns < 0">
-                  {{ dashboardData.investmentSummary.totalReturns | currency:'USD':'symbol':'1.0-0' }}
+                  {{ dashboardData.investmentSummary.totalReturns | currency:'INR':'symbol':'1.0-0' }}
                 </span>
                 <span class="stat-label">Returns</span>
               </div>
