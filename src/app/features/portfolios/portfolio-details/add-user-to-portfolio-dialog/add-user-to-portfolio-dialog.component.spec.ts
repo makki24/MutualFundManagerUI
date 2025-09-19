@@ -369,7 +369,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
 
     component.addUserToPortfolio();
 
-    expect(mockInvestmentService.investInPortfolio).toHaveBeenCalledWith(1, 1, 1000, 1);
+    expect(mockInvestmentService.investInPortfolio).toHaveBeenCalledWith(1, 1, 1000, 1, jasmine.any(String));
     expect(mockDialogRef.close).toHaveBeenCalled();
   });
 

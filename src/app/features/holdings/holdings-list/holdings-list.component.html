@@ -30,6 +30,50 @@
           }
         </div>
 
+        <!-- Update Messages Section -->
+        @if (updatePricesErrorMessage || updatePricesSuccessMessage || updatePricesFailedStocks) {
+          <div class="update-messages-section">
+            <!-- Error Message -->
+            @if (updatePricesErrorMessage) {
+              <div class="message-card error-message">
+                <div class="message-content">
+                  <mat-icon>error</mat-icon>
+                  <span>{{ updatePricesErrorMessage }}</span>
+                </div>
+                <button mat-icon-button (click)="clearErrorMessage()" matTooltip="Clear error message">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+
+            <!-- Success Message -->
+            @if (updatePricesSuccessMessage) {
+              <div class="message-card success-message">
+                <div class="message-content">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>{{ updatePricesSuccessMessage }}</span>
+                </div>
+                <button mat-icon-button (click)="clearSuccessMessage()" matTooltip="Clear success message">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+
+            <!-- Failed Stocks Message -->
+            @if (updatePricesFailedStocks) {
+              <div class="message-card warning-message">
+                <div class="message-content">
+                  <mat-icon>warning</mat-icon>
+                  <span>{{ updatePricesFailedStocks }}</span>
+                </div>
+                <button mat-icon-button (click)="clearFailedStocksMessage()" matTooltip="Clear warning message">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
         <div class="table-container">
           <table mat-table [dataSource]="filteredHoldings" class="holdings-table">
             <ng-container matColumnDef="symbol">

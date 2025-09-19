@@ -84,6 +84,11 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
   isLoading = false;
   isUpdatingPrices = false;
   private pendingPortfolioId: number | null = null;
+  
+  // Error message properties for template display
+  updatePricesErrorMessage: string | null = null;
+  updatePricesSuccessMessage: string | null = null;
+  updatePricesFailedStocks: string | null = null;
   displayedColumns = [
     'symbol',
     'quantity',
@@ -390,8 +395,9 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
     const portfolioId = this.selectedPortfolioControl.value;
     if (!portfolioId) return;
 
+    // Clear previous messages
+    this.clearUpdateMessages();
     this.isUpdatingPrices = true;
-    this.snackBar.open(`Updating prices for ${date}...`, 'Close', { duration: 2000 });
 
     this.portfolioService.updatePricesByDate(portfolioId, date).subscribe({
       next: (response: any) => {
@@ -407,26 +413,24 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
           const total = data?.totalStocks ?? 0;
           const successful = data?.successfulUpdates ?? 0;
           const failed = data?.failedUpdates ?? 0;
-          const successMessage = `Price update for ${date}: ${successful}/${total} stocks updated successfully`;
-          this.snackBar.open(successMessage, 'Close', { duration: 5000 });
+          
+          // Set success message for template display
+          this.updatePricesSuccessMessage = `Price update for ${date}: ${successful}/${total} stocks updated successfully`;
 
           if (failed > 0 && Array.isArray(data?.stockUpdates)) {
             const failedStocks = data.stockUpdates
               .filter((u: any) => !u.success)
               .map((u: any) => u.symbol)
               .join(', ');
-            setTimeout(() => {
-              this.snackBar.open(
-                `${failed} stocks require manual update: ${failedStocks}`,
-                'Close',
-                { duration: 8000 }
-              );
-            }, 2000);
+            
+            // Set failed stocks message for template display
+            this.updatePricesFailedStocks = `${failed} stocks require manual update: ${failedStocks}`;
           }
 
           this.loadHoldings(portfolioId);
         } else {
-          this.snackBar.open(response.message || `Failed to update prices for ${date}`, 'Close', { duration: 5000 });
+          // Set error message for template display
+          this.updatePricesErrorMessage = response.message || `Failed to update prices for ${date}`;
         }
       },
       error: (error) => {
@@ -438,9 +442,41 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
         } else if (error?.message) {
           errorMessage = error.message;
         }
-        this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
+        
+        // Set error message for template display
+        this.updatePricesErrorMessage = errorMessage;
       }
     });
+  }
+
+  /**
+   * Clear all update-related messages
+   */
+  clearUpdateMessages(): void {
+    this.updatePricesErrorMessage = null;
+    this.updatePricesSuccessMessage = null;
+    this.updatePricesFailedStocks = null;
+  }
+
+  /**
+   * Clear specific error message
+   */
+  clearErrorMessage(): void {
+    this.updatePricesErrorMessage = null;
+  }
+
+  /**
+   * Clear specific success message
+   */
+  clearSuccessMessage(): void {
+    this.updatePricesSuccessMessage = null;
+  }
+
+  /**
+   * Clear failed stocks message
+   */
+  clearFailedStocksMessage(): void {
+    this.updatePricesFailedStocks = null;
   }
 
   private updateHoldingsWithPriceResults(stockUpdates: any[]): void {

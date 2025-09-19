@@ -72,8 +72,8 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
 
             <div class="summary-stats">
               <div class="stat-item">
-                <span class="stat-value">{{ dashboardData.investmentSummary.portfolioCount }}</span>
-                <span class="stat-label">Portfolios</span>
+                <span class="stat-value">{{ dashboardData.activeInvestments[0].unitsHeld | number:'1.2-2' }}</span>
+                <span class="stat-label">Units</span>
               </div>
               <div class="stat-item">
                 <span class="stat-value">{{ dashboardData.investmentSummary.totalInvested | currency:'INR':'symbol':'1.0-0' }}</span>

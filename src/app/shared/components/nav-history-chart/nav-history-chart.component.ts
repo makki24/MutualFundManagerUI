@@ -35,9 +35,7 @@ Chart.register(...registerables);
             <div class="nav-header-container">
               <span class="nav-current">
                 Current NAV: <strong>{{ getCurrentNav() | currency:'INR':'symbol':'1.4-4' }}</strong>
-                @if (units > 0) {
-                  <span class="units-info"> • {{ units | number:'1.2-2' }} units</span>
-                }
+
               </span>
               <span class="nav-change" [class.positive]="getOverallChange() >= 0" [class.negative]="getOverallChange() < 0">
                 {{ getOverallChange() >= 0 ? '+' : '' }}{{ getOverallChangePercentage() | number:'1.2-2' }}%
