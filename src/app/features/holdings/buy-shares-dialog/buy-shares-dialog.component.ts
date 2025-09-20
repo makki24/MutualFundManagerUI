@@ -543,6 +543,151 @@ export interface BuySharesDialogData {
     mat-dialog-actions button {
       margin-left: 8px;
     }
+
+    .datetime-container {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .date-field {
+      flex: 2;
+    }
+
+    .time-field {
+      flex: 1;
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .buy-shares-dialog {
+        width: 95vw;
+        max-width: 95vw;
+        margin: 8px;
+      }
+
+      .buy-form {
+        gap: 20px;
+      }
+
+      .form-section {
+        gap: 12px;
+      }
+
+      .form-section h3 {
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+
+      .stock-selection-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .input-mode-toggle {
+        width: 100%;
+      }
+
+      .input-mode-toggle .mat-button-toggle {
+        flex: 1;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .form-row mat-form-field {
+        flex: none;
+        width: 100%;
+      }
+
+      .datetime-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .date-field,
+      .time-field {
+        flex: none;
+        width: 100%;
+      }
+
+      .selected-stock, .existing-holding {
+        padding: 12px;
+      }
+
+      .stock-info {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .price-info {
+        align-self: flex-start;
+        margin-top: 8px;
+      }
+
+      .calculation-summary {
+        padding: 12px;
+        margin-top: 8px;
+      }
+
+      .calculation-summary h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      .summary-row {
+        padding: 6px 0;
+        font-size: 14px;
+      }
+
+      .summary-row.total {
+        font-size: 16px;
+        padding-top: 12px;
+        margin-top: 12px;
+      }
+
+      mat-dialog-actions {
+        flex-direction: column;
+        gap: 8px;
+        padding: 20px 0 0 0;
+      }
+
+      mat-dialog-actions button {
+        margin-left: 0;
+        width: 100%;
+        height: 48px;
+        font-size: 16px;
+      }
+
+      mat-dialog-actions button:first-child {
+        order: 2;
+      }
+
+      mat-dialog-actions button:last-child {
+        order: 1;
+      }
+
+      .manual-input-note,
+      .generated-symbol-display,
+      .summary-note {
+        font-size: 13px;
+        padding: 10px;
+      }
+
+      .stock-details {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .stock-industry, .stock-sector {
+        font-size: 10px;
+        padding: 3px 6px;
+      }
+    }
   `]
 })
 export class BuySharesDialogComponent implements OnInit {

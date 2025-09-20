@@ -122,12 +122,14 @@ describe('BuySharesDialogComponent', () => {
   });
 
   it('should handle stock price loading error', () => {
+    spyOn(console, 'error');
     mockStockService.getStockPrice.and.returnValue(throwError(() => new Error('API Error')));
 
     component.onStockSelected(mockStock);
 
     expect(component.loadingPrice).toBeFalse();
     expect(component.currentPrice).toBeNull();
+    expect(console.error).toHaveBeenCalledWith('Failed to load stock price:', jasmine.any(Error));
   });
 
   it('should calculate subtotal correctly', () => {
@@ -251,6 +253,7 @@ describe('BuySharesDialogComponent', () => {
   });
 
   it('should handle buy shares error', (done) => {
+    spyOn(console, 'error');
     mockStockService.buyShares.and.returnValue(throwError(() => new Error('API Error')));
 
     component.selectedStock = mockStock;
@@ -263,6 +266,7 @@ describe('BuySharesDialogComponent', () => {
 
     // Use setTimeout to allow the async error handling to complete
     setTimeout(() => {
+      expect(console.error).toHaveBeenCalledWith('Failed to buy shares:', jasmine.any(Error));
       expect(mockSnackBar.open).toHaveBeenCalledWith('Failed to purchase shares', 'Close', { duration: 5000 });
       expect(component.isLoading).toBeFalse();
       done();

@@ -12,6 +12,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 import { PortfolioService } from '../../../core/services/portfolio.service';
 import { InvestmentService } from '../../../core/services/investment.service';
@@ -37,7 +40,9 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
     MatTabsModule,
     MatMenuModule,
     MatTooltipModule,
-    MatChipsModule
+    MatChipsModule,
+    MatDividerModule,
+    MatExpansionModule
   ],
   template: `
     <div class="portfolio-details-container">
@@ -47,37 +52,101 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
           <p>Loading portfolio details...</p>
         </div>
       } @else if (portfolio) {
-        <!-- Portfolio Stats card (header moved to global toolbar) -->
-        <mat-card class="portfolio-header-card">
-          <mat-card-content>
-            <div class="portfolio-stats">
-              <div class="stat-item">
-                <div class="stat-label">NAV</div>
-                <div class="stat-value">{{ portfolio.navValue | currency:'INR':'symbol':'1.4-4' }}</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">Total AUM</div>
-                <div class="stat-value">{{ portfolio.totalAum | currency:'INR':'symbol':'1.0-0' }}</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">Total Units</div>
-                <div class="stat-value">{{ portfolio.totalUnits | number:'1.4-4' }}</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">Available Cash</div>
-                <div class="stat-value">{{ portfolio.remainingCash | currency:'INR':'symbol':'1.2-2' }}</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">Investors</div>
-                <div class="stat-value">{{ portfolio.totalInvestors }}</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">Holdings value</div>
-                <div class="stat-value">{{ portfolio.totalHoldingsValue | currency:'INR':'symbol':'1.0-0' }}</div>
+        <!-- Portfolio Stats card -->
+        @if (isMobile) {
+          <!-- Mobile Collapsible Stats -->
+          <mat-expansion-panel class="mobile-stats-panel" [expanded]="statsExpanded">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <div class="mobile-stats-header">
+                  <div class="key-stats">
+                    <span class="nav-value">₹{{ portfolio.navValue | number:'1.2-2' }}</span>
+                    <span class="aum-value">AUM: {{ portfolio.totalAum | currency:'INR':'symbol':'1.0-0' }}</span>
+                  </div>
+                  <mat-icon>{{ statsExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="mobile-stats-content">
+              <div class="stats-grid-mobile">
+                <div class="stat-card-mobile">
+                  <mat-icon class="stat-icon">account_balance</mat-icon>
+                  <div class="stat-info">
+                    <div class="stat-label">NAV</div>
+                    <div class="stat-value">{{ portfolio.navValue | currency:'INR':'symbol':'1.4-4' }}</div>
+                  </div>
+                </div>
+                <div class="stat-card-mobile">
+                  <mat-icon class="stat-icon">account_balance_wallet</mat-icon>
+                  <div class="stat-info">
+                    <div class="stat-label">Total AUM</div>
+                    <div class="stat-value">{{ portfolio.totalAum | currency:'INR':'symbol':'1.0-0' }}</div>
+                  </div>
+                </div>
+                <div class="stat-card-mobile">
+                  <mat-icon class="stat-icon">trending_up</mat-icon>
+                  <div class="stat-info">
+                    <div class="stat-label">Total Units</div>
+                    <div class="stat-value">{{ portfolio.totalUnits | number:'1.4-4' }}</div>
+                  </div>
+                </div>
+                <div class="stat-card-mobile">
+                  <mat-icon class="stat-icon">savings</mat-icon>
+                  <div class="stat-info">
+                    <div class="stat-label">Available Cash</div>
+                    <div class="stat-value">{{ portfolio.remainingCash | currency:'INR':'symbol':'1.2-2' }}</div>
+                  </div>
+                </div>
+                <div class="stat-card-mobile">
+                  <mat-icon class="stat-icon">people</mat-icon>
+                  <div class="stat-info">
+                    <div class="stat-label">Investors</div>
+                    <div class="stat-value">{{ portfolio.totalInvestors }}</div>
+                  </div>
+                </div>
+                <div class="stat-card-mobile">
+                  <mat-icon class="stat-icon">pie_chart</mat-icon>
+                  <div class="stat-info">
+                    <div class="stat-label">Holdings Value</div>
+                    <div class="stat-value">{{ portfolio.totalHoldingsValue | currency:'INR':'symbol':'1.0-0' }}</div>
+                  </div>
+                </div>
               </div>
             </div>
-          </mat-card-content>
-        </mat-card>
+          </mat-expansion-panel>
+        } @else {
+          <!-- Desktop Stats Card -->
+          <mat-card class="portfolio-header-card">
+            <mat-card-content>
+              <div class="portfolio-stats">
+                <div class="stat-item">
+                  <div class="stat-label">NAV</div>
+                  <div class="stat-value">{{ portfolio.navValue | currency:'INR':'symbol':'1.4-4' }}</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Total AUM</div>
+                  <div class="stat-value">{{ portfolio.totalAum | currency:'INR':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Total Units</div>
+                  <div class="stat-value">{{ portfolio.totalUnits | number:'1.4-4' }}</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Available Cash</div>
+                  <div class="stat-value">{{ portfolio.remainingCash | currency:'INR':'symbol':'1.2-2' }}</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Investors</div>
+                  <div class="stat-value">{{ portfolio.totalInvestors }}</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">Holdings value</div>
+                  <div class="stat-value">{{ portfolio.totalHoldingsValue | currency:'INR':'symbol':'1.0-0' }}</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
 
         <!-- Portfolio Tabs -->
         <mat-card class="portfolio-content-card">
@@ -94,7 +163,7 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
                   <div class="investors-section">
                     <div class="section-header">
                       <h3>Portfolio Investors ({{ portfolioInvestments.length }})</h3>
-                      @if (isAdmin) {
+                      @if (isAdmin && !isMobile) {
                         <button mat-raised-button color="primary" (click)="openAddUserDialog()">
                           <mat-icon>person_add</mat-icon>
                           Add User
@@ -102,96 +171,199 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
                       }
                     </div>
 
-                    <div class="table-container">
-                      <table mat-table [dataSource]="portfolioInvestments" class="investors-table">
-
-                        <!-- User Column -->
-                        <ng-container matColumnDef="user">
-                          <th mat-header-cell *matHeaderCellDef>Investor</th>
-                          <td mat-cell *matCellDef="let investment">
-                            <div class="user-info">
-                              <div class="user-name">{{ investment.user.username }}</div>
-                              <div class="user-id">ID: {{ investment.user.id }}</div>
-                            </div>
-                          </td>
-                        </ng-container>
-
-                        <!-- Investment Column -->
-                        <ng-container matColumnDef="investment">
-                          <th mat-header-cell *matHeaderCellDef>Investment</th>
-                          <td mat-cell *matCellDef="let investment">
-                            <div class="investment-info">
-                              <div class="amount">{{ investment.totalInvested | currency:'INR':'symbol':'1.2-2' }}</div>
-                              <div class="units">{{ investment.unitsHeld | number:'1.4-4' }} units</div>
-                              <div class="avg-nav">Avg NAV: {{ investment.averageNav | currency:'INR':'symbol':'1.4-4' }}</div>
-                            </div>
-                          </td>
-                        </ng-container>
-
-                        <!-- Current Value Column -->
-                        <ng-container matColumnDef="currentValue">
-                          <th mat-header-cell *matHeaderCellDef>Current Value</th>
-                          <td mat-cell *matCellDef="let investment">
-                            <div class="value-info">
-                              <div class="current-value">{{ investment.currentValue | currency:'INR':'symbol':'1.2-2' }}</div>
-                              <div class="returns"
-                                   [class.positive]="investment.totalReturns >= 0"
-                                   [class.negative]="investment.totalReturns < 0">
-                                {{ investment.totalReturns >= 0 ? '+' : '' }}{{ investment.totalReturns | currency:'INR':'symbol':'1.2-2' }}
-                                ({{ investment.returnPercentage | number:'1.2-2' }}%)
+                    @if (isMobile) {
+                      <!-- Mobile Investor Cards -->
+                      <div class="investors-mobile">
+                        @for (investment of portfolioInvestments; track investment.id) {
+                          <mat-card class="investor-card-mobile" [class.expanded]="expandedInvestor === investment.id">
+                            <mat-card-header (click)="toggleInvestor(investment.id)">
+                              <div class="investor-header-content">
+                                <div class="investor-info">
+                                  <h4>{{ investment.user.username }}</h4>
+                                  <span class="investor-id">ID: {{ investment.user.id }}</span>
+                                </div>
+                                <div class="investor-summary">
+                                  <div class="current-value">{{ investment.currentValue | currency:'INR':'symbol':'1.0-0' }}</div>
+                                  <div class="returns" 
+                                       [class.positive]="investment.totalReturns >= 0"
+                                       [class.negative]="investment.totalReturns < 0">
+                                    {{ investment.totalReturns >= 0 ? '+' : '' }}{{ investment.returnPercentage | number:'1.1-1' }}%
+                                  </div>
+                                </div>
+                                <div class="header-actions">
+                                  <mat-chip class="aum-chip">{{ investment.aumPercentage | number:'1.1-1' }}%</mat-chip>
+                                  <button mat-icon-button [matMenuTriggerFor]="mobileInvestmentMenu" (click)="$event.stopPropagation()">
+                                    <mat-icon>more_vert</mat-icon>
+                                  </button>
+                                  <mat-menu #mobileInvestmentMenu="matMenu">
+                                    <button mat-menu-item (click)="viewInvestmentDetails(investment)">
+                                      <mat-icon>visibility</mat-icon>
+                                      <span>View Details</span>
+                                    </button>
+                                    @if (isAdmin) {
+                                      <button mat-menu-item (click)="openInvestMoreDialog(investment)">
+                                        <mat-icon>add_circle</mat-icon>
+                                        <span>Invest More</span>
+                                      </button>
+                                      <button mat-menu-item (click)="openWithdrawDialog(investment)">
+                                        <mat-icon>remove_circle</mat-icon>
+                                        <span>Withdraw</span>
+                                      </button>
+                                    }
+                                  </mat-menu>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                        </ng-container>
+                              <mat-icon class="expand-icon" [class.rotated]="expandedInvestor === investment.id">expand_more</mat-icon>
+                            </mat-card-header>
+                            
+                            <mat-card-content class="expandable-content" [class.expanded]="expandedInvestor === investment.id">
+                              <div class="investment-details-mobile">
+                                <div class="detail-row">
+                                  <div class="detail-item">
+                                    <mat-icon class="detail-icon">account_balance</mat-icon>
+                                    <div class="detail-info">
+                                      <span class="detail-label">Total Invested</span>
+                                      <span class="detail-value">{{ investment.totalInvested | currency:'INR':'symbol':'1.2-2' }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="detail-item">
+                                    <mat-icon class="detail-icon">trending_up</mat-icon>
+                                    <div class="detail-info">
+                                      <span class="detail-label">Units Held</span>
+                                      <span class="detail-value">{{ investment.unitsHeld | number:'1.4-4' }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="detail-row">
+                                  <div class="detail-item">
+                                    <mat-icon class="detail-icon">analytics</mat-icon>
+                                    <div class="detail-info">
+                                      <span class="detail-label">Average NAV</span>
+                                      <span class="detail-value">{{ investment.averageNav | currency:'INR':'symbol':'1.4-4' }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="detail-item">
+                                    <mat-icon class="detail-icon">receipt</mat-icon>
+                                    <div class="detail-info">
+                                      <span class="detail-label">Fees Paid</span>
+                                      <span class="detail-value">{{ investment.totalChargesPaid | currency:'INR':'symbol':'1.2-2' }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="detail-row">
+                                  <div class="detail-item full-width">
+                                    <mat-icon class="detail-icon" [class.positive]="investment.totalReturns >= 0" [class.negative]="investment.totalReturns < 0">
+                                      {{ investment.totalReturns >= 0 ? 'trending_up' : 'trending_down' }}
+                                    </mat-icon>
+                                    <div class="detail-info">
+                                      <span class="detail-label">Total Returns</span>
+                                      <span class="detail-value" 
+                                            [class.positive]="investment.totalReturns >= 0"
+                                            [class.negative]="investment.totalReturns < 0">
+                                        {{ investment.totalReturns >= 0 ? '+' : '' }}{{ investment.totalReturns | currency:'INR':'symbol':'1.2-2' }}
+                                        ({{ investment.returnPercentage | number:'1.2-2' }}%)
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </mat-card-content>
+                          </mat-card>
+                        }
+                      </div>
+                    } @else {
+                      <!-- Desktop Table -->
+                      <div class="table-container">
+                        <table mat-table [dataSource]="portfolioInvestments" class="investors-table">
 
-                        <!-- AUM Share Column -->
-                        <ng-container matColumnDef="aumShare">
-                          <th mat-header-cell *matHeaderCellDef>AUM Share</th>
-                          <td mat-cell *matCellDef="let investment">
-                            <div class="aum-share">
-                              <mat-chip>{{ investment.aumPercentage | number:'1.2-2' }}%</mat-chip>
-                            </div>
-                          </td>
-                        </ng-container>
+                          <!-- User Column -->
+                          <ng-container matColumnDef="user">
+                            <th mat-header-cell *matHeaderCellDef>Investor</th>
+                            <td mat-cell *matCellDef="let investment">
+                              <div class="user-info">
+                                <div class="user-name">{{ investment.user.username }}</div>
+                                <div class="user-id">ID: {{ investment.user.id }}</div>
+                              </div>
+                            </td>
+                          </ng-container>
 
-                        <!-- Fees Column -->
-                        <ng-container matColumnDef="fees">
-                          <th mat-header-cell *matHeaderCellDef>Fees Paid</th>
-                          <td mat-cell *matCellDef="let investment">
-                            {{ investment.totalChargesPaid | currency:'INR':'symbol':'1.2-2' }}
-                          </td>
-                        </ng-container>
+                          <!-- Investment Column -->
+                          <ng-container matColumnDef="investment">
+                            <th mat-header-cell *matHeaderCellDef>Investment</th>
+                            <td mat-cell *matCellDef="let investment">
+                              <div class="investment-info">
+                                <div class="amount">{{ investment.totalInvested | currency:'INR':'symbol':'1.2-2' }}</div>
+                                <div class="units">{{ investment.unitsHeld | number:'1.4-4' }} units</div>
+                                <div class="avg-nav">Avg NAV: {{ investment.averageNav | currency:'INR':'symbol':'1.4-4' }}</div>
+                              </div>
+                            </td>
+                          </ng-container>
 
-                        <!-- Actions Column -->
-                        <ng-container matColumnDef="actions">
-                          <th mat-header-cell *matHeaderCellDef>Actions</th>
-                          <td mat-cell *matCellDef="let investment">
-                            <button mat-icon-button [matMenuTriggerFor]="investmentMenu">
-                              <mat-icon>more_vert</mat-icon>
-                            </button>
-                            <mat-menu #investmentMenu="matMenu">
-                              <button mat-menu-item (click)="viewInvestmentDetails(investment)">
-                                <mat-icon>visibility</mat-icon>
-                                View Details
+                          <!-- Current Value Column -->
+                          <ng-container matColumnDef="currentValue">
+                            <th mat-header-cell *matHeaderCellDef>Current Value</th>
+                            <td mat-cell *matCellDef="let investment">
+                              <div class="value-info">
+                                <div class="current-value">{{ investment.currentValue | currency:'INR':'symbol':'1.2-2' }}</div>
+                                <div class="returns"
+                                     [class.positive]="investment.totalReturns >= 0"
+                                     [class.negative]="investment.totalReturns < 0">
+                                  {{ investment.totalReturns >= 0 ? '+' : '' }}{{ investment.totalReturns | currency:'INR':'symbol':'1.2-2' }}
+                                  ({{ investment.returnPercentage | number:'1.2-2' }}%)
+                                </div>
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <!-- AUM Share Column -->
+                          <ng-container matColumnDef="aumShare">
+                            <th mat-header-cell *matHeaderCellDef>AUM Share</th>
+                            <td mat-cell *matCellDef="let investment">
+                              <div class="aum-share">
+                                <mat-chip>{{ investment.aumPercentage | number:'1.2-2' }}%</mat-chip>
+                              </div>
+                            </td>
+                          </ng-container>
+
+                          <!-- Fees Column -->
+                          <ng-container matColumnDef="fees">
+                            <th mat-header-cell *matHeaderCellDef>Fees Paid</th>
+                            <td mat-cell *matCellDef="let investment">
+                              {{ investment.totalChargesPaid | currency:'INR':'symbol':'1.2-2' }}
+                            </td>
+                          </ng-container>
+
+                          <!-- Actions Column -->
+                          <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef>Actions</th>
+                            <td mat-cell *matCellDef="let investment">
+                              <button mat-icon-button [matMenuTriggerFor]="investmentMenu">
+                                <mat-icon>more_vert</mat-icon>
                               </button>
-                              @if (isAdmin) {
-                                <button mat-menu-item (click)="openInvestMoreDialog(investment)">
-                                  <mat-icon>add_circle</mat-icon>
-                                  Invest More
+                              <mat-menu #investmentMenu="matMenu">
+                                <button mat-menu-item (click)="viewInvestmentDetails(investment)">
+                                  <mat-icon>visibility</mat-icon>
+                                  View Details
                                 </button>
-                                <button mat-menu-item (click)="openWithdrawDialog(investment)">
-                                  <mat-icon>remove_circle</mat-icon>
-                                  Withdraw
-                                </button>
-                              }
-                            </mat-menu>
-                          </td>
-                        </ng-container>
+                                @if (isAdmin) {
+                                  <button mat-menu-item (click)="openInvestMoreDialog(investment)">
+                                    <mat-icon>add_circle</mat-icon>
+                                    Invest More
+                                  </button>
+                                  <button mat-menu-item (click)="openWithdrawDialog(investment)">
+                                    <mat-icon>remove_circle</mat-icon>
+                                    Withdraw
+                                  </button>
+                                }
+                              </mat-menu>
+                            </td>
+                          </ng-container>
 
-                        <tr mat-header-row *matHeaderRowDef="investorColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: investorColumns;"></tr>
-                      </table>
-                    </div>
+                          <tr mat-header-row *matHeaderRowDef="investorColumns"></tr>
+                          <tr mat-row *matRowDef="let row; columns: investorColumns;"></tr>
+                        </table>
+                      </div>
+                    }
                   </div>
                 } @else {
                   <div class="no-investors">
@@ -256,6 +428,18 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
             </mat-tab>
           </mat-tab-group>
         </mat-card>
+        
+        <!-- Floating Action Buttons for Mobile -->
+        @if (isMobile && isAdmin) {
+          <div class="fab-container">
+            <button mat-fab color="primary" class="fab-add-user" (click)="openAddUserDialog()" matTooltip="Add User">
+              <mat-icon>person_add</mat-icon>
+            </button>
+            <button mat-fab color="accent" class="fab-manage-holdings" (click)="manageHoldings()" matTooltip="Manage Holdings">
+              <mat-icon>pie_chart</mat-icon>
+            </button>
+          </div>
+        }
       } @else {
         <div class="error-container">
           <mat-icon>error_outline</mat-icon>
@@ -273,11 +457,12 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       width: 100%;
       padding: 16px;
       padding-top: 0;
-      min-height: calc(100vh - 64px); /* Full height minus toolbar */
+      min-height: calc(100vh - 64px);
       display: flex;
       flex-direction: column;
     }
 
+    /* Loading and Error States */
     .loading-container, .error-container {
       display: flex;
       flex-direction: column;
@@ -299,26 +484,85 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       opacity: 0.5;
     }
 
-    .portfolio-header-card {
+    /* Mobile Stats Panel */
+    .mobile-stats-panel {
       margin-bottom: 16px;
-      flex-shrink: 0;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .header-content {
+    .mobile-stats-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       width: 100%;
     }
 
-    .portfolio-info {
-      flex: 1;
+    .key-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
-    .header-actions {
-      display: flex;
+    .nav-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1976d2;
+    }
+
+    .aum-value {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .mobile-stats-content {
+      padding: 16px 0;
+    }
+
+    .stats-grid-mobile {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
+    }
+
+    .stat-card-mobile {
+      display: flex;
       align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1976d2;
+    }
+
+    .stat-icon {
+      color: #1976d2;
+      font-size: 20px;
+    }
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-top: 2px;
+    }
+
+    /* Desktop Stats */
+    .portfolio-header-card {
+      margin-bottom: 16px;
+      flex-shrink: 0;
     }
 
     .portfolio-stats {
@@ -335,20 +579,205 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       border-radius: 8px;
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
+    /* Mobile Investor Cards */
+    .investors-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    .stat-value {
+    .investor-card-mobile {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .investor-card-mobile.expanded {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .investor-card-mobile mat-card-header {
+      padding: 16px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .investor-header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .investor-info h4 {
+      margin: 0 0 4px 0;
       font-size: 18px;
       font-weight: 600;
-      color: #333;
+      color: #212529;
     }
 
+    .investor-id {
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    .investor-summary {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .investor-summary .current-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #212529;
+    }
+
+    .investor-summary .returns {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .aum-chip {
+      background: #1976d2 !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
+    .expand-icon {
+      transition: transform 0.3s ease;
+      color: #6c757d;
+    }
+
+    .expand-icon.rotated {
+      transform: rotate(180deg);
+    }
+
+    /* Expandable Content */
+    .expandable-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0;
+    }
+
+    .expandable-content.expanded {
+      max-height: 500px;
+      padding: 16px;
+    }
+
+    /* Override Angular Material's default card content padding when collapsed */
+    .expandable-content:not(.expanded) {
+      padding: 0 !important;
+    }
+
+    .expandable-content:not(.expanded).mat-mdc-card-content {
+      padding-bottom: 0 !important;
+    }
+
+    .investment-details-mobile {
+      margin-bottom: 16px;
+    }
+
+    .detail-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .detail-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1976d2;
+    }
+
+    .detail-item.full-width {
+      flex: 1;
+    }
+
+    .detail-icon {
+      color: #1976d2;
+      font-size: 20px;
+    }
+
+    .detail-icon.positive {
+      color: #4caf50;
+    }
+
+    .detail-icon.negative {
+      color: #f44336;
+    }
+
+    .detail-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-label {
+      font-size: 12px;
+      color: #6c757d;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #212529;
+      margin-top: 2px;
+    }
+
+    .detail-value.positive {
+      color: #4caf50;
+    }
+
+    .detail-value.negative {
+      color: #f44336;
+    }
+
+    .returns.positive {
+      color: #4caf50;
+    }
+
+    .returns.negative {
+      color: #f44336;
+    }
+
+    /* Floating Action Buttons */
+    .fab-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 1000;
+    }
+
+    .fab-add-user {
+      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+    }
+
+    .fab-manage-holdings {
+      box-shadow: 0 4px 12px rgba(255, 64, 129, 0.4);
+    }
+
+    /* Desktop Content */
     .portfolio-content-card {
       flex: 1;
       display: flex;
@@ -426,12 +855,12 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
     .table-container {
       overflow-x: auto;
       flex: 1;
-      min-height: 0; /* Allow table to shrink */
+      min-height: 0;
     }
 
     .investors-table {
       width: 100%;
-      min-width: 800px; /* Ensure table doesn't get too cramped */
+      min-width: 800px;
     }
 
     .user-info {
@@ -476,14 +905,6 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
 
     .returns {
       font-size: 12px;
-    }
-
-    .returns.positive {
-      color: #4caf50;
-    }
-
-    .returns.negative {
-      color: #f44336;
     }
 
     .aum-share {
@@ -581,41 +1002,42 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       opacity: 0.7;
     }
 
-    @media (max-width: 768px) {
+    /* Responsive Design */
+    @media (max-width: 480px) {
       .portfolio-details-container {
         padding: 12px;
       }
 
-      .header-content {
+      .stats-grid-mobile {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .detail-row {
         flex-direction: column;
-        gap: 16px;
+        gap: 8px;
       }
 
-      .header-actions {
-        width: 100%;
-        justify-content: center;
+      .investor-card-mobile mat-card-header {
+        padding: 12px;
       }
 
-      .portfolio-stats {
-        grid-template-columns: repeat(2, 1fr);
+      .expandable-content.expanded {
+        padding: 12px;
+      }
+
+      .fab-container {
+        bottom: 16px;
+        right: 16px;
         gap: 12px;
-        margin-top: 12px;
       }
+    }
 
-      .section-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
-
-      .section-header h3 {
-        text-align: center;
-      }
-
-      .holdings-stats {
-        flex-direction: column;
-        gap: 12px;
+    @media (min-width: 769px) {
+      .portfolio-details-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px;
       }
     }
   `]
@@ -629,6 +1051,7 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private toolbar = inject(ToolbarService);
+  private breakpointObserver = inject(BreakpointObserver);
 
   portfolioId!: number;
   portfolio: Portfolio | null = null;
@@ -636,11 +1059,19 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   isLoading = true;
   investmentsLoading = true;
   isAdmin = false;
+  isMobile = false;
+  expandedInvestor: number | null = null;
+  statsExpanded = false;
   investorColumns = ['user', 'investment', 'currentValue', 'aumShare', 'fees', 'actions'];
 
   ngOnInit(): void {
     this.isAdmin = this.authService.isAdmin();
     this.portfolioId = Number(this.route.snapshot.paramMap.get('id'));
+
+    // Setup mobile detection
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile = result.matches;
+    });
 
     if (this.portfolioId) {
       this.loadPortfolioDetails();
@@ -650,6 +1081,14 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['/portfolios']);
     }
+  }
+
+  toggleInvestor(investmentId: number): void {
+    this.expandedInvestor = this.expandedInvestor === investmentId ? null : investmentId;
+  }
+
+  toggleStats(): void {
+    this.statsExpanded = !this.statsExpanded;
   }
 
   ngOnDestroy(): void {

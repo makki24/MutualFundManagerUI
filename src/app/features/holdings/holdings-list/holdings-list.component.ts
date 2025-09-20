@@ -12,6 +12,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -23,6 +27,7 @@ import { Portfolio, Holding } from '../../../core/models/portfolio.model';
 import { BuySharesDialogComponent, BuySharesDialogData } from '../buy-shares-dialog/buy-shares-dialog.component';
 import { SellSharesDialogComponent, SellSharesDialogData } from '../sell-shares-dialog/sell-shares-dialog.component';
 import { UpdatePriceDialogComponent, UpdatePriceDialogData, UpdatePriceDialogResult } from '../update-price-dialog/update-price-dialog.component';
+import { UpdateByDateDialogComponent } from '../update-by-date-dialog/update-by-date-dialog.component';
 import { ToolbarService } from '../../../layout/toolbar/toolbar.service';
 import { HoldingsToolbarControlsComponent } from '../holdings-toolbar-controls/holdings-toolbar-controls.component';
 
@@ -60,7 +65,11 @@ interface PriceUpdateResult {
     MatSelectModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatMenuModule,
+    MatChipsModule,
+    MatDividerModule,
+    HoldingsToolbarControlsComponent
   ],
   templateUrl: './holdings-list.component.html',
   styleUrls: ['./holdings-list.component.css']
@@ -75,6 +84,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private toolbar = inject(ToolbarService);
+  private breakpointObserver = inject(BreakpointObserver);
 
   portfolios: Portfolio[] = [];
   holdings: Holding[] = [];
@@ -84,6 +94,10 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
   isLoading = false;
   isUpdatingPrices = false;
   private pendingPortfolioId: number | null = null;
+  
+  // Mobile detection and UI state
+  isMobile = false;
+  expandedCard: string | null = null;
   
   // Error message properties for template display
   updatePricesErrorMessage: string | null = null;
@@ -102,8 +116,16 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    // Register toolbar controls for this feature
-    this.toolbar.setControls(HoldingsToolbarControlsComponent);
+    // Setup mobile detection and responsive toolbar
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile = result.matches;
+      // Desktop: Show toolbar in header, Mobile: Hide from header (show inline)
+      if (!this.isMobile) {
+        this.toolbar.setControls(HoldingsToolbarControlsComponent);
+      } else {
+        this.toolbar.setControls(null);
+      }
+    });
 
     // Setup search functionality
     this.searchControl.valueChanges.pipe(
@@ -520,5 +542,62 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
     } else {
       this.router.navigate(['/portfolios']);
     }
+  }
+
+  // Mobile UI helper methods
+  toggleCard(holdingSymbol: string): void {
+    this.expandedCard = this.expandedCard === holdingSymbol ? null : holdingSymbol;
+  }
+
+  isCardExpanded(holdingSymbol: string): boolean {
+    return this.expandedCard === holdingSymbol;
+  }
+
+  getGainLossClass(gainLoss: number): string {
+    return gainLoss >= 0 ? 'positive' : 'negative';
+  }
+
+  getReturnPercentageClass(returnPercentage: number): string {
+    return returnPercentage >= 0 ? 'positive' : 'negative';
+  }
+
+  // Mobile toolbar methods
+  openAddHoldingDialog(): void {
+    if (!this.selectedPortfolioControl.value) return;
+    
+    const selectedPortfolio = this.portfolios.find(p => p.id === this.selectedPortfolioControl.value);
+    if (!selectedPortfolio) return;
+    
+    const dialogRef = this.dialog.open(BuySharesDialogComponent, {
+      width: this.isMobile ? '95vw' : '600px',
+      maxWidth: this.isMobile ? '95vw' : '800px',
+      data: {
+        portfolioId: this.selectedPortfolioControl.value,
+        portfolioName: selectedPortfolio.name,
+        mode: 'add'
+      } as BuySharesDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.selectedPortfolioControl.value) {
+        this.loadHoldings(this.selectedPortfolioControl.value);
+        this.snackBar.open('Holding added successfully!', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  openUpdateByDateDialog(): void {
+    if (!this.selectedPortfolioControl.value) return;
+    
+    const dialogRef = this.dialog.open(UpdateByDateDialogComponent, {
+      width: this.isMobile ? '90vw' : '360px',
+      maxWidth: this.isMobile ? '90vw' : '500px'
+    });
+
+    dialogRef.afterClosed().subscribe(date => {
+      if (date && this.selectedPortfolioControl.value) {
+        this.updatePricesByDate(date);
+      }
+    });
   }
 }

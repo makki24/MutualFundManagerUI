@@ -213,6 +213,7 @@ describe('CreatePortfolioFeeDialogComponent', () => {
   });
 
   it('should handle fee creation error', () => {
+    spyOn(console, 'error');
     component.ngOnInit();
 
     component.createFeeForm.patchValue({
@@ -227,6 +228,7 @@ describe('CreatePortfolioFeeDialogComponent', () => {
 
     component.createFee();
 
+    expect(console.error).toHaveBeenCalledWith('Failed to create portfolio fee:', jasmine.any(Object));
     expect(component.isSubmitting).toBe(false);
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Creation failed',

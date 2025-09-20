@@ -1,5 +1,11 @@
 .holdings-container {
   margin: 0 auto;
+  width: 100%;
+  padding: 16px;
+  padding-top: 0;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Replaced page-header with compact actions row */
@@ -171,7 +177,233 @@
   opacity: 0.7;
 }
 
+/* Mobile Holdings Cards */
+.holdings-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.holding-card-mobile {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.holding-card-mobile.expanded {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.holding-card-mobile mat-card-header {
+  padding: 16px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #dee2e6;
+}
+
+.holding-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.holding-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.company-name {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.holding-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.holding-summary .current-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.holding-summary .returns {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.warning-chip {
+  background: #fff3e0 !important;
+  color: #f57c00 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  border: 1px solid #ffcc02 !important;
+}
+
+.warning-chip mat-icon {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.expand-icon {
+  transition: transform 0.3s ease;
+  color: #6c757d;
+}
+
+.expand-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* Expandable Content */
+.expandable-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0;
+}
+
+.expandable-content.expanded {
+  max-height: 800px;
+  padding: 16px;
+}
+
+/* Override Angular Material's default card content padding when collapsed */
+.expandable-content:not(.expanded) {
+  padding: 0 !important;
+}
+
+.expandable-content:not(.expanded).mat-mdc-card-content {
+  padding-bottom: 0 !important;
+}
+
+.holding-details-mobile {
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.detail-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #1976d2;
+}
+
+.detail-item.full-width {
+  flex: 1;
+}
+
+.detail-icon {
+  color: #1976d2;
+  font-size: 20px;
+}
+
+.detail-icon.positive {
+  color: #4caf50;
+}
+
+.detail-icon.negative {
+  color: #f44336;
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin-top: 2px;
+}
+
+.detail-value.positive {
+  color: #4caf50;
+}
+
+.detail-value.negative {
+  color: #f44336;
+}
+
+.returns.positive {
+  color: #4caf50;
+}
+
+.returns.negative {
+  color: #f44336;
+}
+
+.mobile-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 16px;
+  flex-wrap: wrap;
+}
+
+.primary-action {
+  min-width: 140px;
+  height: 40px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.secondary-action {
+  min-width: 100px;
+  height: 40px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+/* Floating Action Button */
+.fab-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+}
+
+.fab-add-holding {
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+}
+
 @media (max-width: 768px) {
+  .holdings-container {
+    padding: 12px;
+  }
+
   .actions-row {
     flex-direction: column;
     align-items: stretch;
@@ -188,6 +420,47 @@
 
   .search-section {
     margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .holdings-container {
+    padding: 8px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .holding-card-mobile mat-card-header {
+    padding: 12px;
+  }
+
+  .expandable-content.expanded {
+    padding: 12px;
+  }
+
+  .mobile-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .primary-action, .secondary-action {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .fab-container {
+    bottom: 16px;
+    right: 16px;
+  }
+}
+
+@media (min-width: 769px) {
+  .holdings-container {
+    margin: 0 auto;
+    padding: 24px;
   }
 }
 
@@ -290,12 +563,78 @@
   .message-card {
     padding: 10px 12px;
   }
-  
+
   .message-content {
     gap: 8px;
   }
-  
+
   .message-content span {
     font-size: 13px;
   }
+}
+
+/* Mobile Toolbar Styles */
+.mobile-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  justify-content: space-between;
+}
+
+.portfolio-selector-mobile {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 56px);
+  flex-shrink: 1;
+}
+
+.portfolio-selector-mobile .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.portfolio-selector-mobile .mat-mdc-form-field-infix {
+  min-height: 40px;
+}
+
+.mobile-menu-trigger {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  margin-left: auto;
+}
+
+.mobile-menu-trigger:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.mobile-actions-menu {
+  margin-top: 8px;
+}
+
+.mobile-actions-menu .mat-mdc-menu-item {
+  min-height: 48px;
+  padding: 0 16px;
+}
+
+.mobile-actions-menu .mat-mdc-menu-item mat-icon {
+  margin-right: 16px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.mobile-actions-menu .mat-mdc-menu-item:hover mat-icon {
+  color: #1976d2;
+}
+
+.mobile-actions-menu .mat-mdc-menu-item[disabled] {
+  opacity: 0.6;
+}
+
+.mobile-actions-menu .mat-mdc-menu-item[disabled] mat-icon {
+  color: rgba(0, 0, 0, 0.26);
 }

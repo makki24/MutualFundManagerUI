@@ -155,6 +155,7 @@ describe('PortfolioListComponent', () => {
   });
 
   it('should handle error when loading portfolios', () => {
+    spyOn(console, 'error');
     mockAuthService.isAdmin.and.returnValue(true);
     mockPortfolioService.getPortfolios.and.returnValue(
       throwError(() => new Error('Failed to load portfolios'))
@@ -163,6 +164,7 @@ describe('PortfolioListComponent', () => {
     component.ngOnInit();
 
     expect(component.isLoading).toBe(false);
+    expect(console.error).toHaveBeenCalledWith('Failed to load portfolios:', jasmine.any(Error));
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Failed to load portfolios',
       'Close',

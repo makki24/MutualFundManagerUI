@@ -36,11 +36,12 @@ export interface Holding {
   symbol: string;
   companyName: string;
   quantity: number;
-  averagePrice: number;
+  buyPrice: number;
   currentPrice: number;
   totalValue: number;
-  gainLoss: number;
-  gainLossPercentage: number;
+  totalInvested: number;
+  unrealizedGainLoss: number;
+  returnPercentage: number;
   needsManualUpdate?: boolean;
 }
 

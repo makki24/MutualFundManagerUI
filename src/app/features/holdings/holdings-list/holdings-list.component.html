@@ -1,4 +1,57 @@
 <div class="holdings-container">
+  <!-- Mobile Toolbar - Only shown on mobile devices -->
+  @if (isMobile) {
+    <div class="mobile-toolbar">
+      <mat-form-field appearance="outline" class="portfolio-selector-mobile">
+        <mat-label>Portfolio</mat-label>
+        <mat-select
+          [formControl]="selectedPortfolioControl"
+          aria-label="Select Portfolio"
+        >
+          @for (p of portfolios; track p.id) {
+            <mat-option [value]="p.id">{{ p.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="mobileActionsMenu"
+        [disabled]="!selectedPortfolioControl.value"
+        class="mobile-menu-trigger"
+        matTooltip="Actions"
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+
+      <mat-menu #mobileActionsMenu="matMenu" class="mobile-actions-menu">
+        <button
+          mat-menu-item
+          (click)="openAddHoldingDialog()"
+          [disabled]="!selectedPortfolioControl.value"
+        >
+          <mat-icon>add</mat-icon>
+          <span>Add Holding</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="updateAllPrices()"
+          [disabled]="true || !selectedPortfolioControl.value"
+        >
+          <mat-icon>refresh</mat-icon>
+          <span>Update Prices</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="openUpdateByDateDialog()"
+          [disabled]="!selectedPortfolioControl.value"
+        >
+          <mat-icon>event</mat-icon>
+          <span>Update by Date</span>
+        </button>
+      </mat-menu>
+    </div>
+  }
 
   @if (isLoading) {
     <div class="loading-container">
@@ -12,8 +65,8 @@
         <div class="search-section">
           <mat-form-field appearance="outline" class="search-field">
             <mat-label>Search holdings</mat-label>
-            <input matInput 
-                   [formControl]="searchControl" 
+            <input matInput
+                   [formControl]="searchControl"
                    placeholder="Search by symbol or company name..."
                    autocomplete="off">
             <mat-icon matSuffix>search</mat-icon>
@@ -74,106 +127,236 @@
           </div>
         }
 
-        <div class="table-container">
-          <table mat-table [dataSource]="filteredHoldings" class="holdings-table">
-            <ng-container matColumnDef="symbol">
-              <th mat-header-cell *matHeaderCellDef>Symbol</th>
-              <td mat-cell *matCellDef="let holding">
-                <div class="holding-info">
-                  <div class="holding-symbol">{{ holding.symbol }}</div>
-                  <div class="holding-company">{{ holding.companyName }}</div>
-                </div>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="quantity">
-              <th mat-header-cell *matHeaderCellDef>Quantity</th>
-              <td mat-cell *matCellDef="let holding">
-                {{ holding.quantity | number:'1.0-0' }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="avgPrice">
-              <th mat-header-cell *matHeaderCellDef>Avg Price</th>
-              <td mat-cell *matCellDef="let holding">
-                {{ (holding.averagePrice ?? holding.buyPrice) | currency:'INR':'symbol':'1.2-2' }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="currentPrice">
-              <th mat-header-cell *matHeaderCellDef>Current Price</th>
-              <td mat-cell *matCellDef="let holding">
-                <div class="price-info">
-                  <span>{{ holding.currentPrice | currency:'INR':'symbol':'1.2-2' }}</span>
-                  @if (holding.needsManualUpdate) {
-                    <mat-icon class="manual-update-icon" matTooltip="Requires manual price update">warning</mat-icon>
-                  }
-                </div>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="invested">
-              <th mat-header-cell *matHeaderCellDef>Invested</th>
-              <td mat-cell *matCellDef="let holding">
-                {{ (holding.totalInvested ?? (holding.averagePrice ?? holding.buyPrice) * holding.quantity) | currency:'INR':'symbol':'1.2-2' }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="totalValue">
-              <th mat-header-cell *matHeaderCellDef>Current Value</th>
-              <td mat-cell *matCellDef="let holding">
-                {{ (holding.totalValue ?? holding.currentValue) | currency:'INR':'symbol':'1.2-2' }}
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="gainLoss">
-              <th mat-header-cell *matHeaderCellDef>Unrealized P/L</th>
-              <td mat-cell *matCellDef="let holding">
-                <div class="gain-loss-info">
-                  <div class="gain-loss-amount"
-                       [class.positive]="(holding.gainLoss ?? holding.unrealizedGainLoss) >= 0"
-                       [class.negative]="(holding.gainLoss ?? holding.unrealizedGainLoss) < 0">
-                    {{ (holding.gainLoss ?? holding.unrealizedGainLoss) | currency:'INR':'symbol':'1.2-2' }}
+        <!-- Mobile Holdings Cards -->
+        @if (isMobile) {
+          <div class="holdings-mobile">
+            @for (holding of filteredHoldings; track holding.symbol) {
+              <mat-card class="holding-card-mobile" [class.expanded]="isCardExpanded(holding.symbol)">
+                <mat-card-header (click)="toggleCard(holding.symbol)">
+                  <div class="holding-header-content">
+                    <div class="holding-info">
+                      <h4>{{ holding.symbol }}</h4>
+                      <div class="company-name">{{ holding.companyName }}</div>
+                    </div>
+                    <div class="holding-summary">
+                      <div class="current-value">{{ holding.totalValue | currency:'INR':'symbol':'1.0-0' }}</div>
+                      <div class="returns" [class]="getGainLossClass(holding.returnPercentage)">
+                        {{ holding.returnPercentage | number:'1.1-1' }}%
+                      </div>
+                    </div>
+                    <div class="header-actions">
+                      @if (holding.needsManualUpdate) {
+                        <mat-chip class="warning-chip">
+                          <mat-icon>warning</mat-icon>
+                          Update Required
+                        </mat-chip>
+                      }
+                      <button mat-icon-button [matMenuTriggerFor]="holdingMenu" (click)="$event.stopPropagation()">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #holdingMenu="matMenu">
+                        <button mat-menu-item (click)="buyShares(holding)">
+                          <mat-icon>add_shopping_cart</mat-icon>
+                          <span>Buy Shares</span>
+                        </button>
+                        <button mat-menu-item (click)="sellShares(holding)">
+                          <mat-icon>remove_shopping_cart</mat-icon>
+                          <span>Sell Shares</span>
+                        </button>
+                        <button mat-menu-item (click)="updatePrice(holding)">
+                          <mat-icon>edit</mat-icon>
+                          <span>Update Price</span>
+                        </button>
+                      </mat-menu>
+                      <mat-icon class="expand-icon" [class.rotated]="isCardExpanded(holding.symbol)">expand_more</mat-icon>
+                    </div>
                   </div>
-                  <div class="gain-loss-percentage"
-                       [class.positive]="(holding.gainLossPercentage ?? holding.returnPercentage) >= 0"
-                       [class.negative]="(holding.gainLossPercentage ?? holding.returnPercentage) < 0"
-                       matTooltip="Return percentage">
-                    ({{ (holding.gainLossPercentage ?? holding.returnPercentage) | number:'1.2-2' }}%)
+                </mat-card-header>
+
+                <mat-card-content class="expandable-content" [class.expanded]="isCardExpanded(holding.symbol)">
+                  <div class="holding-details-mobile">
+                    <div class="detail-row">
+                      <div class="detail-item">
+                        <mat-icon class="detail-icon">inventory</mat-icon>
+                        <div class="detail-info">
+                          <div class="detail-label">Quantity</div>
+                          <div class="detail-value">{{ holding.quantity | number:'1.0-0' }}</div>
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <mat-icon class="detail-icon">trending_up</mat-icon>
+                        <div class="detail-info">
+                          <div class="detail-label">Avg Price</div>
+                          <div class="detail-value">{{ holding.buyPrice | currency:'INR':'symbol':'1.2-2' }}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="detail-row">
+                      <div class="detail-item">
+                        <mat-icon class="detail-icon">attach_money</mat-icon>
+                        <div class="detail-info">
+                          <div class="detail-label">Current Price</div>
+                          <div class="detail-value">{{ holding.currentPrice | currency:'INR':'symbol':'1.2-2' }}</div>
+                        </div>
+                      </div>
+                      <div class="detail-item">
+                        <mat-icon class="detail-icon">account_balance_wallet</mat-icon>
+                        <div class="detail-info">
+                          <div class="detail-label">Invested</div>
+                          <div class="detail-value">{{ (holding.totalInvested) | currency:'INR':'symbol':'1.2-2' }}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="detail-row">
+                      <div class="detail-item full-width">
+                        <mat-icon class="detail-icon" [class]="getGainLossClass(holding.unrealizedGainLoss)">
+                          {{ holding.unrealizedGainLoss >= 0 ? 'trending_up' : 'trending_down' }}
+                        </mat-icon>
+                        <div class="detail-info">
+                          <div class="detail-label">Unrealized P/L</div>
+                          <div class="detail-value" [class]="getGainLossClass(holding.unrealizedGainLoss)">
+                            {{ holding.unrealizedGainLoss | currency:'INR':'symbol':'1.2-2' }}
+                            ({{ holding.returnPercentage | number:'1.2-2' }}%)
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <mat-divider></mat-divider>
+                    <div class="mobile-actions">
+                      <button mat-raised-button color="primary" (click)="buyShares(holding)" class="primary-action">
+                        <mat-icon>add_shopping_cart</mat-icon>
+                        Buy Shares
+                      </button>
+                      <button mat-stroked-button color="accent" (click)="sellShares(holding)" class="secondary-action">
+                        <mat-icon>remove_shopping_cart</mat-icon>
+                        Sell
+                      </button>
+                      <button mat-stroked-button (click)="updatePrice(holding)" class="secondary-action">
+                        <mat-icon>edit</mat-icon>
+                        Update Price
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </td>
-            </ng-container>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        } @else {
+          <!-- Desktop Table -->
+          <div class="table-container">
+            <table mat-table [dataSource]="filteredHoldings" class="holdings-table">
+              <ng-container matColumnDef="symbol">
+                <th mat-header-cell *matHeaderCellDef>Symbol</th>
+                <td mat-cell *matCellDef="let holding">
+                  <div class="holding-info">
+                    <div class="holding-symbol">{{ holding.symbol }}</div>
+                    <div class="holding-company">{{ holding.companyName }}</div>
+                  </div>
+                </td>
+              </ng-container>
 
-            <ng-container matColumnDef="lastUpdated">
-              <th mat-header-cell *matHeaderCellDef>Last Updated</th>
-              <td mat-cell *matCellDef="let holding">
-                <span [matTooltip]="holding.lastPriceUpdate || '—'">{{ holding.lastPriceUpdate ? (holding.lastPriceUpdate | date:'short') : '—' }}</span>
-              </td>
-            </ng-container>
+              <ng-container matColumnDef="quantity">
+                <th mat-header-cell *matHeaderCellDef>Quantity</th>
+                <td mat-cell *matCellDef="let holding">
+                  {{ holding.quantity | number:'1.0-0' }}
+                </td>
+              </ng-container>
 
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let holding">
-                <button mat-icon-button color="primary" (click)="buyShares(holding)"
-                        matTooltip="Buy Shares">
-                  <mat-icon>add_shopping_cart</mat-icon>
-                </button>
-                <button mat-icon-button color="accent" (click)="sellShares(holding)"
-                        matTooltip="Sell Shares">
-                  <mat-icon>remove_shopping_cart</mat-icon>
-                </button>
-                <button mat-icon-button (click)="updatePrice(holding)"
-                        matTooltip="Update Price">
-                  <mat-icon>edit</mat-icon>
-                </button>
-              </td>
-            </ng-container>
+              <ng-container matColumnDef="avgPrice">
+                <th mat-header-cell *matHeaderCellDef>Avg Price</th>
+                <td mat-cell *matCellDef="let holding">
+                  {{ (holding.averagePrice ?? holding.buyPrice) | currency:'INR':'symbol':'1.2-2' }}
+                </td>
+              </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
-        </div>
+              <ng-container matColumnDef="currentPrice">
+                <th mat-header-cell *matHeaderCellDef>Current Price</th>
+                <td mat-cell *matCellDef="let holding">
+                  <div class="price-info">
+                    <span>{{ holding.currentPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                    @if (holding.needsManualUpdate) {
+                      <mat-icon class="manual-update-icon" matTooltip="Requires manual price update">warning</mat-icon>
+                    }
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="invested">
+                <th mat-header-cell *matHeaderCellDef>Invested</th>
+                <td mat-cell *matCellDef="let holding">
+                  {{ (holding.totalInvested ?? (holding.averagePrice ?? holding.buyPrice) * holding.quantity) | currency:'INR':'symbol':'1.2-2' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="totalValue">
+                <th mat-header-cell *matHeaderCellDef>Current Value</th>
+                <td mat-cell *matCellDef="let holding">
+                  {{ (holding.totalValue ?? holding.currentValue) | currency:'INR':'symbol':'1.2-2' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="gainLoss">
+                <th mat-header-cell *matHeaderCellDef>Unrealized P/L</th>
+                <td mat-cell *matCellDef="let holding">
+                  <div class="gain-loss-info">
+                    <div class="gain-loss-amount"
+                         [class.positive]="(holding.gainLoss ?? holding.unrealizedGainLoss) >= 0"
+                         [class.negative]="(holding.gainLoss ?? holding.unrealizedGainLoss) < 0">
+                      {{ (holding.gainLoss ?? holding.unrealizedGainLoss) | currency:'INR':'symbol':'1.2-2' }}
+                    </div>
+                    <div class="gain-loss-percentage"
+                         [class.positive]="(holding.gainLossPercentage ?? holding.returnPercentage) >= 0"
+                         [class.negative]="(holding.gainLossPercentage ?? holding.returnPercentage) < 0"
+                         matTooltip="Return percentage">
+                      ({{ (holding.gainLossPercentage ?? holding.returnPercentage) | number:'1.2-2' }}%)
+                    </div>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="lastUpdated">
+                <th mat-header-cell *matHeaderCellDef>Last Updated</th>
+                <td mat-cell *matCellDef="let holding">
+                  <span [matTooltip]="holding.lastPriceUpdate || '—'">{{ holding.lastPriceUpdate ? (holding.lastPriceUpdate | date:'short') : '—' }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Actions</th>
+                <td mat-cell *matCellDef="let holding">
+                  <button mat-icon-button color="primary" (click)="buyShares(holding)"
+                          matTooltip="Buy Shares">
+                    <mat-icon>add_shopping_cart</mat-icon>
+                  </button>
+                  <button mat-icon-button color="accent" (click)="sellShares(holding)"
+                          matTooltip="Sell Shares">
+                    <mat-icon>remove_shopping_cart</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="updatePrice(holding)"
+                          matTooltip="Update Price">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        }
+
+        <!-- Floating Action Button for Mobile -->
+        @if (isMobile && selectedPortfolioControl.value) {
+          <div class="fab-container">
+            <button mat-fab color="primary" class="fab-add-holding" (click)="addHolding()" matTooltip="Add Holding">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        }
       </mat-card-content>
     </mat-card>
   } @else if (selectedPortfolioControl.value && holdings.length === 0) {

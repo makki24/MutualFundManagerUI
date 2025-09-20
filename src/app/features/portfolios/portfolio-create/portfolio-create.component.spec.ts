@@ -232,6 +232,7 @@ describe('PortfolioCreateComponent', () => {
   });
 
   it('should handle portfolio creation error', () => {
+    spyOn(console, 'error');
     // Initialize component first
     component.ngOnInit();
 
@@ -254,6 +255,7 @@ describe('PortfolioCreateComponent', () => {
 
     component.createPortfolio();
 
+    expect(console.error).toHaveBeenCalledWith('Failed to create portfolio:', jasmine.any(Object));
     expect(component.isCreating).toBe(false);
     expect(mockRouter.navigate).not.toHaveBeenCalled();
   });

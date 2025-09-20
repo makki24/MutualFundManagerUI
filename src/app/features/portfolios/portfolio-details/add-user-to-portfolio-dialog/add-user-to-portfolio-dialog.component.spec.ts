@@ -369,11 +369,12 @@ describe('AddUserToPortfolioDialogComponent', () => {
 
     component.addUserToPortfolio();
 
-    expect(mockInvestmentService.investInPortfolio).toHaveBeenCalledWith(1, 1, 1000, 1, jasmine.any(String));
+    expect(mockInvestmentService.investInPortfolio).toHaveBeenCalledWith(1, 1, 1000, 1, undefined);
     expect(mockDialogRef.close).toHaveBeenCalled();
   });
 
   it('should handle investment submission error', () => {
+    spyOn(console, 'error');
     mockAuthService.getCurrentUser.and.returnValue({ id: 1, username: 'admin' } as any);
     mockInvestmentService.investInPortfolio.and.returnValue(
       throwError(() => ({ error: { message: 'Investment failed' } }))
@@ -388,6 +389,7 @@ describe('AddUserToPortfolioDialogComponent', () => {
 
     component.addUserToPortfolio();
 
+    expect(console.error).toHaveBeenCalledWith('Failed to add user to portfolio:', jasmine.any(Object));
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Investment failed',
       'Close',

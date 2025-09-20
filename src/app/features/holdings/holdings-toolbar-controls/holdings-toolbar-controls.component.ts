@@ -1,13 +1,15 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { UpdateByDateDialogComponent } from '../update-by-date-dialog/update-by-date-dialog.component';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
 
 import { PortfolioService } from '../../../core/services/portfolio.service';
 import { Portfolio } from '../../../core/models/portfolio.model';
@@ -22,89 +24,112 @@ import { Portfolio } from '../../../core/models/portfolio.model';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    MatFormFieldModule,
     MatDialogModule,
   ],
   template: `
-    <mat-select
-      class="toolbar-select compact"
-      [formControl]="selectedPortfolioId"
-      aria-label="Select Portfolio"
-    >
-      @for (p of portfolios; track p.id) {
-        <mat-option [value]="p.id">{{ p.name }}</mat-option>
-      }
-    </mat-select>
+    <!-- Desktop Layout Only - Hidden on Mobile -->
+    <mat-form-field appearance="outline" class="portfolio-selector-desktop">
+      <mat-label>Portfolio</mat-label>
+      <mat-select
+        [formControl]="selectedPortfolioId"
+        aria-label="Select Portfolio"
+      >
+        @for (p of portfolios; track p.id) {
+          <mat-option [value]="p.id">{{ p.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
     <button
-      mat-button
+      mat-raised-button
+      color="primary"
       (click)="addHoldingFromToolbar()"
       [disabled]="!selectedPortfolioId.value"
       matTooltip="Add Holding"
+      class="desktop-action-btn"
     >
       <mat-icon>add</mat-icon>
-      <span class="hide-sm">Add Holding</span>
+      Add Holding
     </button>
 
     <button
-      mat-button
+      mat-stroked-button
       (click)="updatePricesFromToolbar()"
       [disabled]="true || !selectedPortfolioId.value"
       matTooltip="Update Prices"
+      class="desktop-action-btn"
     >
       <mat-icon>refresh</mat-icon>
-      <span class="hide-sm">Update Prices</span>
+      Update Prices
     </button>
 
     <button
-      mat-button
+      mat-stroked-button
       (click)="updatePricesByDateFromToolbar()"
       [disabled]="!selectedPortfolioId.value"
       matTooltip="Update Prices by Date"
+      class="desktop-action-btn"
     >
       <mat-icon>event</mat-icon>
-      <span class="hide-sm">Update by Date</span>
+      Update by Date
     </button>
   `,
   styles: [
     `
-    :host { display: contents; }
-    .toolbar-select.compact.mat-mdc-select {
-      height: 32px;
-      line-height: 32px;
-      width: 160px;
-      min-width: 0;
-      border: 1px solid rgba(0, 0, 0, 0.23);
-      border-radius: 4px;
+    :host { 
+      display: contents; 
     }
-    .toolbar-select .mat-mdc-select-trigger {
-      height: 28px;
-      display: flex;
-      align-items: center;
-      padding: 0 8px;
+
+    /* Desktop Styles */
+    .portfolio-selector-desktop {
+      min-width: 200px;
+      margin-right: 16px;
     }
-    .toolbar-select .mat-mdc-select-value,
-    .toolbar-select .mat-mdc-select-value-text {
-      font-size: 13px;
-      line-height: 20px;
+
+    .desktop-action-btn {
+      margin-right: 8px;
+      height: 40px;
     }
-    .toolbar-select.compact.mat-mdc-select:hover {
-      border-color: rgba(0, 0, 0, 0.37);
+
+    .desktop-action-btn mat-icon {
+      margin-right: 8px;
     }
-    .toolbar-select.compact.mat-mdc-select:focus-within {
-      border-color: #1976d2;
+
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      :host {
+        display: none; /* Hide from header on mobile */
+      }
+    }
+
+    @media (min-width: 769px) {
+      :host {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .portfolio-selector-desktop .mat-mdc-form-field-infix {
+        min-height: 40px;
+      }
     }
     `
   ]
 })
-export class HoldingsToolbarControlsComponent implements OnInit {
+export class HoldingsToolbarControlsComponent implements OnInit, OnDestroy {
   private portfolioService = inject(PortfolioService);
   private router = inject(Router);
   private dialog = inject(MatDialog);
+  private destroy$ = new Subject<void>();
 
   portfolios: Portfolio[] = [];
   selectedPortfolioId = new FormControl<number | null>(null, { nonNullable: false });
 
   ngOnInit(): void {
+
     // Load portfolios and sync selection from URL
     this.portfolioService.getPortfolios().subscribe({
       next: (resp) => {
@@ -131,6 +156,11 @@ export class HoldingsToolbarControlsComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   addHoldingFromToolbar(): void {
     if (!this.selectedPortfolioId.value) return;
     this.router.navigate(['/holdings'], {
@@ -151,7 +181,10 @@ export class HoldingsToolbarControlsComponent implements OnInit {
 
   updatePricesByDateFromToolbar(): void {
     if (!this.selectedPortfolioId.value) return;
-    const ref = this.dialog.open(UpdateByDateDialogComponent, { width: '360px' });
+    const ref = this.dialog.open(UpdateByDateDialogComponent, { 
+      width: '360px',
+      maxWidth: '500px'
+    });
     ref.afterClosed().subscribe(date => {
       if (!date) return;
       this.router.navigate(['/holdings'], {

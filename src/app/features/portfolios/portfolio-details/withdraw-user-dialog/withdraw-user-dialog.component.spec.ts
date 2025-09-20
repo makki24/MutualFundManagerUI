@@ -143,6 +143,7 @@ describe('WithdrawUserDialogComponent', () => {
   });
 
   it('should handle withdrawal error', () => {
+    spyOn(console, 'error');
     mockAuthService.getCurrentUser.and.returnValue({ id: 1, username: 'admin' } as any);
     mockInvestmentService.withdrawFromPortfolio.and.returnValue(
       throwError(() => ({ error: { message: 'Withdrawal failed' } }))
@@ -154,6 +155,7 @@ describe('WithdrawUserDialogComponent', () => {
 
     component.processWithdrawal();
 
+    expect(console.error).toHaveBeenCalledWith('Failed to process withdrawal:', jasmine.any(Object));
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Withdrawal failed',
       'Close',

@@ -163,6 +163,7 @@ export interface SellSharesDialogData {
     .sell-shares-dialog h2 { display:flex; align-items:center; gap:8px; margin:0; }
     .sell-form { display:flex; flex-direction:column; gap:24px; }
     .form-section { display:flex; flex-direction:column; gap:16px; }
+    .form-section h3 { margin:0; font-size:16px; font-weight:500; color:#333; }
     .form-row { display:flex; gap:16px; }
     .form-row mat-form-field { flex:1; }
     .existing-holding { padding:16px; border:1px solid #e0e0e0; border-radius:8px; background:#f9f9f9; }
@@ -179,6 +180,119 @@ export interface SellSharesDialogData {
     .summary-row.total { border-top:1px solid #ddd; margin-top:8px; padding-top:8px; font-weight:600; font-size:16px; }
     mat-dialog-actions { padding:16px 0 0 0; }
     mat-dialog-actions button { margin-left:8px; }
+
+    .datetime-container {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .date-field {
+      flex: 2;
+    }
+
+    .time-field {
+      flex: 1;
+    }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      .sell-shares-dialog {
+        width: 95vw;
+        max-width: 95vw;
+        margin: 8px;
+      }
+
+      .sell-form {
+        gap: 20px;
+      }
+
+      .form-section {
+        gap: 12px;
+      }
+
+      .form-section h3 {
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .form-row mat-form-field {
+        flex: none;
+        width: 100%;
+      }
+
+      .datetime-container {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .date-field,
+      .time-field {
+        flex: none;
+        width: 100%;
+      }
+
+      .existing-holding {
+        padding: 12px;
+      }
+
+      .stock-info {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .current-price {
+        align-self: flex-start;
+        margin-top: 8px;
+      }
+
+      .calculation-summary {
+        padding: 12px;
+        margin-top: 8px;
+      }
+
+      .calculation-summary h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
+      .summary-row {
+        padding: 6px 0;
+        font-size: 14px;
+      }
+
+      .summary-row.total {
+        font-size: 16px;
+        padding-top: 12px;
+        margin-top: 12px;
+      }
+
+      mat-dialog-actions {
+        flex-direction: column;
+        gap: 8px;
+        padding: 20px 0 0 0;
+      }
+
+      mat-dialog-actions button {
+        margin-left: 0;
+        width: 100%;
+        height: 48px;
+        font-size: 16px;
+      }
+
+      mat-dialog-actions button:first-child {
+        order: 2;
+      }
+
+      mat-dialog-actions button:last-child {
+        order: 1;
+      }
+    }
   `]
 })
 export class SellSharesDialogComponent implements OnInit {
