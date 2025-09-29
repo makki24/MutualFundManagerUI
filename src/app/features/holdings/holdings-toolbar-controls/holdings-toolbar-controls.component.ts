@@ -56,7 +56,7 @@ import { Portfolio } from '../../../core/models/portfolio.model';
     <button
       mat-stroked-button
       (click)="updatePricesFromToolbar()"
-      [disabled]="true || !selectedPortfolioId.value"
+      [disabled]=" !selectedPortfolioId.value"
       matTooltip="Update Prices"
       class="desktop-action-btn"
     >
@@ -74,11 +74,22 @@ import { Portfolio } from '../../../core/models/portfolio.model';
       <mat-icon>event</mat-icon>
       Update by Date
     </button>
+
+    <button
+      mat-stroked-button
+      (click)="viewPriceHistoryFromToolbar()"
+      [disabled]="!selectedPortfolioId.value"
+      matTooltip="View Price Update History"
+      class="desktop-action-btn"
+    >
+      <mat-icon>history</mat-icon>
+      Price History
+    </button>
   `,
   styles: [
     `
-    :host { 
-      display: contents; 
+    :host {
+      display: contents;
     }
 
     /* Desktop Styles */
@@ -181,7 +192,7 @@ export class HoldingsToolbarControlsComponent implements OnInit, OnDestroy {
 
   updatePricesByDateFromToolbar(): void {
     if (!this.selectedPortfolioId.value) return;
-    const ref = this.dialog.open(UpdateByDateDialogComponent, { 
+    const ref = this.dialog.open(UpdateByDateDialogComponent, {
       width: '360px',
       maxWidth: '500px'
     });
@@ -192,6 +203,13 @@ export class HoldingsToolbarControlsComponent implements OnInit, OnDestroy {
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });
+    });
+  }
+
+  viewPriceHistoryFromToolbar(): void {
+    if (!this.selectedPortfolioId.value) return;
+    this.router.navigate(['/price-history'], {
+      queryParams: { portfolioId: this.selectedPortfolioId.value },
     });
   }
 }

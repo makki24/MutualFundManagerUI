@@ -28,6 +28,7 @@ import { BuySharesDialogComponent, BuySharesDialogData } from '../buy-shares-dia
 import { SellSharesDialogComponent, SellSharesDialogData } from '../sell-shares-dialog/sell-shares-dialog.component';
 import { UpdatePriceDialogComponent, UpdatePriceDialogData, UpdatePriceDialogResult } from '../update-price-dialog/update-price-dialog.component';
 import { UpdateByDateDialogComponent } from '../update-by-date-dialog/update-by-date-dialog.component';
+import { EditHoldingDialogComponent, EditHoldingDialogData } from '../edit-holding-dialog/edit-holding-dialog.component';
 import { ToolbarService } from '../../../layout/toolbar/toolbar.service';
 import { HoldingsToolbarControlsComponent } from '../holdings-toolbar-controls/holdings-toolbar-controls.component';
 
@@ -94,11 +95,11 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
   isLoading = false;
   isUpdatingPrices = false;
   private pendingPortfolioId: number | null = null;
-  
+
   // Mobile detection and UI state
   isMobile = false;
   expandedCard: string | null = null;
-  
+
   // Error message properties for template display
   updatePricesErrorMessage: string | null = null;
   updatePricesSuccessMessage: string | null = null;
@@ -358,6 +359,28 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
     });
   }
 
+  editHolding(holding: Holding): void {
+    const portfolioId = this.selectedPortfolioControl.value;
+    if (!portfolioId) return;
+
+    const dialogRef = this.dialog.open(EditHoldingDialogComponent, {
+      width: this.isMobile ? '95vw' : '600px',
+      maxWidth: this.isMobile ? '95vw' : '800px',
+      data: {
+        holding: holding,
+        portfolioId: portfolioId
+      } as EditHoldingDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadHoldings(portfolioId);
+        this.snackBar.open('Holding updated successfully!', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+
   updateAllPrices(): void {
     const portfolioId = this.selectedPortfolioControl.value;
     if (!portfolioId) return;
@@ -435,7 +458,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
           const total = data?.totalStocks ?? 0;
           const successful = data?.successfulUpdates ?? 0;
           const failed = data?.failedUpdates ?? 0;
-          
+
           // Set success message for template display
           this.updatePricesSuccessMessage = `Price update for ${date}: ${successful}/${total} stocks updated successfully`;
 
@@ -444,7 +467,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
               .filter((u: any) => !u.success)
               .map((u: any) => u.symbol)
               .join(', ');
-            
+
             // Set failed stocks message for template display
             this.updatePricesFailedStocks = `${failed} stocks require manual update: ${failedStocks}`;
           }
@@ -464,7 +487,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
         } else if (error?.message) {
           errorMessage = error.message;
         }
-        
+
         // Set error message for template display
         this.updatePricesErrorMessage = errorMessage;
       }
@@ -564,10 +587,10 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
   // Mobile toolbar methods
   openAddHoldingDialog(): void {
     if (!this.selectedPortfolioControl.value) return;
-    
+
     const selectedPortfolio = this.portfolios.find(p => p.id === this.selectedPortfolioControl.value);
     if (!selectedPortfolio) return;
-    
+
     const dialogRef = this.dialog.open(BuySharesDialogComponent, {
       width: this.isMobile ? '95vw' : '600px',
       maxWidth: this.isMobile ? '95vw' : '800px',
@@ -586,9 +609,15 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
     });
   }
 
+  viewPriceHistoryFromToolbar(): void {
+    this.router.navigate(['/price-history'], {
+      queryParams: { portfolioId: this.selectedPortfolioControl.value },
+    });
+  }
+
   openUpdateByDateDialog(): void {
     if (!this.selectedPortfolioControl.value) return;
-    
+
     const dialogRef = this.dialog.open(UpdateByDateDialogComponent, {
       width: this.isMobile ? '90vw' : '360px',
       maxWidth: this.isMobile ? '90vw' : '500px'

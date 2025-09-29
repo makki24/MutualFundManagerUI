@@ -36,7 +36,7 @@
         <button
           mat-menu-item
           (click)="updateAllPrices()"
-          [disabled]="true || !selectedPortfolioControl.value"
+          [disabled]="!selectedPortfolioControl.value"
         >
           <mat-icon>refresh</mat-icon>
           <span>Update Prices</span>
@@ -48,6 +48,14 @@
         >
           <mat-icon>event</mat-icon>
           <span>Update by Date</span>
+        </button>
+        <button
+          mat-menu-item
+          (click)="viewPriceHistoryFromToolbar()"
+          [disabled]="!selectedPortfolioControl.value"
+        >
+          <mat-icon>history</mat-icon>
+          <span>Price History</span>
         </button>
       </mat-menu>
     </div>
@@ -155,6 +163,10 @@
                         <mat-icon>more_vert</mat-icon>
                       </button>
                       <mat-menu #holdingMenu="matMenu">
+                        <button mat-menu-item (click)="editHolding(holding)">
+                          <mat-icon>edit</mat-icon>
+                          <span>Edit Holding</span>
+                        </button>
                         <button mat-menu-item (click)="buyShares(holding)">
                           <mat-icon>add_shopping_cart</mat-icon>
                           <span>Buy Shares</span>
@@ -164,7 +176,7 @@
                           <span>Sell Shares</span>
                         </button>
                         <button mat-menu-item (click)="updatePrice(holding)">
-                          <mat-icon>edit</mat-icon>
+                          <mat-icon>trending_up</mat-icon>
                           <span>Update Price</span>
                         </button>
                       </mat-menu>
@@ -227,6 +239,10 @@
 
                     <mat-divider></mat-divider>
                     <div class="mobile-actions">
+                      <button mat-stroked-button (click)="editHolding(holding)" class="secondary-action">
+                        <mat-icon>edit</mat-icon>
+                        Edit
+                      </button>
                       <button mat-raised-button color="primary" (click)="buyShares(holding)" class="primary-action">
                         <mat-icon>add_shopping_cart</mat-icon>
                         Buy Shares
@@ -236,7 +252,7 @@
                         Sell
                       </button>
                       <button mat-stroked-button (click)="updatePrice(holding)" class="secondary-action">
-                        <mat-icon>edit</mat-icon>
+                        <mat-icon>trending_up</mat-icon>
                         Update Price
                       </button>
                     </div>
@@ -328,6 +344,10 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let holding">
+                  <button mat-icon-button (click)="editHolding(holding)"
+                          matTooltip="Edit Holding">
+                    <mat-icon>edit</mat-icon>
+                  </button>
                   <button mat-icon-button color="primary" (click)="buyShares(holding)"
                           matTooltip="Buy Shares">
                     <mat-icon>add_shopping_cart</mat-icon>
@@ -338,7 +358,7 @@
                   </button>
                   <button mat-icon-button (click)="updatePrice(holding)"
                           matTooltip="Update Price">
-                    <mat-icon>edit</mat-icon>
+                    <mat-icon>trending_up</mat-icon>
                   </button>
                 </td>
               </ng-container>

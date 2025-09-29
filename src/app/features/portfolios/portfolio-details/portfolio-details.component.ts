@@ -26,6 +26,10 @@ import { WithdrawUserDialogComponent } from './withdraw-user-dialog/withdraw-use
 import { InvestMoreDialogComponent } from './invest-more-dialog/invest-more-dialog.component';
 import { ToolbarService } from '../../../layout/toolbar/toolbar.service';
 import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-toolbar-controls.component';
+import { NavHistoryChartComponent } from '../../../shared/components/nav-history-chart/nav-history-chart.component';
+import { DashboardService } from '../../../core/services/dashboard.service';
+import { NavHistoryItem } from '../../../core/models/dashboard.model';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-portfolio-details',
@@ -42,7 +46,8 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
     MatTooltipModule,
     MatChipsModule,
     MatDividerModule,
-    MatExpansionModule
+    MatExpansionModule,
+    NavHistoryChartComponent
   ],
   template: `
     <div class="portfolio-details-container">
@@ -419,10 +424,17 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
             <!-- Performance Tab -->
             <mat-tab label="Performance">
               <div class="tab-content">
-                <div class="coming-soon">
-                  <mat-icon>trending_up</mat-icon>
-                  <h3>Performance Analytics</h3>
-                  <p>Portfolio performance analytics coming soon!</p>
+                <div class="performance-section">
+                  <div class="section-header">
+                    <h3>Portfolio Performance</h3>
+                  </div>
+                  <div class="nav-chart-container">
+                    <app-nav-history-chart
+                      [navHistory]="navHistory"
+                      [portfolioId]="portfolioId"
+                      [isLoading]="navHistoryLoading">
+                    </app-nav-history-chart>
+                  </div>
                 </div>
               </div>
             </mat-tab>
@@ -973,7 +985,7 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       color: #333;
     }
 
-    .no-investors, .coming-soon {
+    .no-investors {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -984,7 +996,7 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       flex: 1;
     }
 
-    .no-investors mat-icon, .coming-soon mat-icon {
+    .no-investors mat-icon {
       font-size: 64px;
       width: 64px;
       height: 64px;
@@ -992,14 +1004,27 @@ import { PortfolioDetailsToolbarControlsComponent } from './portfolio-details-to
       opacity: 0.5;
     }
 
-    .no-investors h3, .coming-soon h3 {
+    .no-investors h3 {
       margin: 0 0 8px 0;
       font-size: 20px;
     }
 
-    .no-investors p, .coming-soon p {
+    .no-investors p {
       margin: 0 0 24px 0;
       opacity: 0.7;
+    }
+
+    .performance-section {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-chart-container {
+      flex: 1;
+      min-height: 400px;
+      margin-top: 16px;
     }
 
     /* Responsive Design */
@@ -1052,6 +1077,8 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private toolbar = inject(ToolbarService);
   private breakpointObserver = inject(BreakpointObserver);
+  private dashboardService = inject(DashboardService);
+  private destroy$ = new Subject<void>();
 
   portfolioId!: number;
   portfolio: Portfolio | null = null;
@@ -1063,6 +1090,8 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
   expandedInvestor: number | null = null;
   statsExpanded = false;
   investorColumns = ['user', 'investment', 'currentValue', 'aumShare', 'fees', 'actions'];
+  navHistory: NavHistoryItem[] = [];
+  navHistoryLoading = false;
 
   ngOnInit(): void {
     this.isAdmin = this.authService.isAdmin();
@@ -1076,6 +1105,7 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
     if (this.portfolioId) {
       this.loadPortfolioDetails();
       this.loadPortfolioInvestments();
+      this.loadNavHistory();
       // Register toolbar controls immediately (title set after details load)
       this.toolbar.setControls(PortfolioDetailsToolbarControlsComponent);
     } else {
@@ -1093,6 +1123,8 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.toolbar.clear();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadPortfolioDetails(): void {
@@ -1206,5 +1238,35 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/portfolios']);
+  }
+
+  loadNavHistory(): void {
+    this.navHistoryLoading = true;
+    // Load 1 year of NAV history by default
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setFullYear(startDate.getFullYear() - 1);
+
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    this.dashboardService.getNavHistory(
+      this.portfolioId,
+      startDateStr,
+      endDateStr
+    ).pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.navHistory = response.data || [];
+          }
+          this.navHistoryLoading = false;
+        },
+        error: (error) => {
+          console.error('Failed to load NAV history:', error);
+          this.navHistory = [];
+          this.navHistoryLoading = false;
+        }
+      });
   }
 }

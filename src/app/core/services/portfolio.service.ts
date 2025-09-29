@@ -192,4 +192,14 @@ export class PortfolioService {
     };
     return this.http.post<ApiResponse<Portfolio>>(`${this.API_URL}/portfolios/${portfolioId}/clone`, request);
   }
+
+  updateHolding(portfolioId: number, holdingId: number, updateData: {
+    symbol: string;
+    companyName: string;
+    quantity: number;
+    buyPrice: number;
+    currentPrice: number;
+  }): Observable<ApiResponse<Holding>> {
+    return this.http.put<ApiResponse<Holding>>(`${this.API_URL}/portfolios/${portfolioId}/holdings/${holdingId}`, updateData);
+  }
 }

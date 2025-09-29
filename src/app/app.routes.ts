@@ -44,6 +44,11 @@ export const routes: Routes = [
         canActivate: [adminGuard]
       },
       {
+        path: 'price-history',
+        loadComponent: () => import('./features/price-history/price-history-page.component').then(m => m.PriceHistoryPageComponent),
+        canActivate: [adminGuard]
+      },
+      {
         path: 'transactions',
         loadComponent: () => import('./features/transactions/transactions-page/transactions-page.component').then(m => m.TransactionsPageComponent)
       },
