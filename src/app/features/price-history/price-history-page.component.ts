@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,10 +16,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
-import { PriceUpdateLogService, PriceUpdateLog, PriceUpdateLogPage, DashboardStats } from '../../core/services/price-update-log.service';
+import { PriceUpdateLogService, PriceUpdateLog, PriceUpdateLogPage, DashboardStats, GroupedPriceUpdateLog, GroupedPriceUpdateLogPage } from '../../core/services/price-update-log.service';
 import { PortfolioService } from '../../core/services/portfolio.service';
 import { Portfolio } from '../../core/models/portfolio.model';
 import { ToolbarService } from '../../layout/toolbar/toolbar.service';
@@ -31,6 +33,7 @@ import { PriceHistoryToolbarControlsComponent } from './price-history-toolbar-co
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -44,7 +47,9 @@ import { PriceHistoryToolbarControlsComponent } from './price-history-toolbar-co
     MatProgressSpinnerModule,
     MatChipsModule,
     MatTooltipModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatSlideToggleModule,
+    MatExpansionModule
   ],
   template: `
     <div class="price-history-container">
@@ -104,6 +109,25 @@ import { PriceHistoryToolbarControlsComponent } from './price-history-toolbar-co
           </mat-card-content>
         </mat-card>
       }
+
+      <!-- View Toggle -->
+      <mat-card class="view-toggle-card">
+        <mat-card-content>
+          <div class="view-toggle-content">
+            <div class="toggle-section">
+              <mat-slide-toggle 
+                [(ngModel)]="isGroupedView" 
+                (change)="onViewModeChange()"
+                color="primary">
+                <span class="toggle-label">Grouped View</span>
+              </mat-slide-toggle>
+              <div class="toggle-description">
+                {{ isGroupedView ? 'Show price updates grouped by batch with NAV impact' : 'Show individual price update logs' }}
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
 
       <!-- Filters -->
       <mat-card class="filters-card" [class.desktop-only]="isMobile">
@@ -218,7 +242,9 @@ import { PriceHistoryToolbarControlsComponent } from './price-history-toolbar-co
             <!-- Desktop Table -->
             @if (!isMobile) {
             <div class="table-container">
-              <table mat-table [dataSource]="logs" class="logs-table">
+              @if (!isGroupedView) {
+                <!-- Individual Logs Table -->
+                <table mat-table [dataSource]="logs" class="logs-table">
                 <ng-container matColumnDef="updateDate">
                   <th mat-header-cell *matHeaderCellDef>Date</th>
                   <td mat-cell *matCellDef="let log">
@@ -295,56 +321,314 @@ import { PriceHistoryToolbarControlsComponent } from './price-history-toolbar-co
                     (click)="showLogDetails(row)"
                     class="clickable-row"></tr>
               </table>
+              } @else {
+                <!-- Grouped Logs Table -->
+                <table mat-table [dataSource]="groupedLogs" class="grouped-logs-table">
+                  <ng-container matColumnDef="updateDate">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let group">
+                      {{ group.updateDate | date:'short' }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="portfolio">
+                    <th mat-header-cell *matHeaderCellDef>Portfolio</th>
+                    <td mat-cell *matCellDef="let group">
+                      {{ group.portfolioName }}
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="navChange">
+                    <th mat-header-cell *matHeaderCellDef>NAV Impact</th>
+                    <td mat-cell *matCellDef="let group">
+                      <div class="nav-change">
+                        <div class="nav-values">
+                          <span class="old-nav">{{ group.navImpact.oldNav | currency:'INR':'symbol':'1.4-4' }}</span>
+                          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                          <span class="new-nav">{{ group.navImpact.newNav | currency:'INR':'symbol':'1.4-4' }}</span>
+                        </div>
+                        <div class="nav-change-amount"
+                             [class.positive]="group.navImpact.navChange >= 0"
+                             [class.negative]="group.navImpact.navChange < 0">
+                          {{ group.navImpact.navChange | currency:'INR':'symbol':'1.4-4' }}
+                          ({{ group.navImpact.navChangePercentage | number:'1.2-2' }}%)
+                        </div>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="updates">
+                    <th mat-header-cell *matHeaderCellDef>Updates</th>
+                    <td mat-cell *matCellDef="let group">
+                      <div class="update-stats">
+                        <div class="total-updates">{{ group.totalUpdates }} stocks</div>
+                        <div class="success-failed">
+                          <span class="success">{{ group.successfulUpdates }} ✓</span>
+                          <span class="failed">{{ group.failedUpdates }} ✗</span>
+                        </div>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="successRate">
+                    <th mat-header-cell *matHeaderCellDef>Success Rate</th>
+                    <td mat-cell *matCellDef="let group">
+                      <div class="success-rate"
+                           [class.high]="group.successRate >= 90"
+                           [class.medium]="group.successRate >= 70 && group.successRate < 90"
+                           [class.low]="group.successRate < 70">
+                        {{ group.successRate | number:'1.1-1' }}%
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="updateType">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let group">
+                      <mat-chip class="type-chip">
+                        {{ getUpdateTypeText(group.updateType) }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let group">
+                      <button mat-icon-button (click)="toggleGroupExpansion(group)" 
+                              [attr.aria-label]="'View details for batch ' + group.batchId"
+                              matTooltip="View stock details">
+                        <mat-icon>{{ isGroupExpanded(group) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="groupedDisplayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: groupedDisplayedColumns;"
+                      class="grouped-row"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']; when: shouldShowExpandedRow"
+                      class="expanded-row"></tr>
+                  
+                  <!-- Expandable row for stock details -->
+                  <ng-container matColumnDef="expandedDetail">
+                    <td mat-cell *matCellDef="let group" [attr.colspan]="groupedDisplayedColumns.length">
+                      @if (isGroupExpanded(group)) {
+                        <div class="expanded-detail">
+                          <div class="stock-updates-grid">
+                            @for (stock of group.stockUpdates; track stock.symbol) {
+                              <div class="stock-update-card">
+                                <div class="stock-header">
+                                  <div class="symbol-info">
+                                    <div class="symbol">{{ stock.symbol }}</div>
+                                    <div class="company">{{ stock.companyName }}</div>
+                                  </div>
+                                  <mat-chip [class]="getStatusClass(stock.updateStatus)">
+                                    {{ getStatusText(stock.updateStatus) }}
+                                  </mat-chip>
+                                </div>
+                                <div class="stock-price-change">
+                                  <div class="price-row">
+                                    <span class="label">Old Price:</span>
+                                    <span class="value">{{ stock.oldPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                                  </div>
+                                  <div class="price-row">
+                                    <span class="label">New Price:</span>
+                                    <span class="value">{{ stock.newPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                                  </div>
+                                  @if (stock.priceChangePercentage !== null) {
+                                    <div class="price-row">
+                                      <span class="label">Change:</span>
+                                      <span class="value percentage-change"
+                                            [class.positive]="stock.priceChangePercentage >= 0"
+                                            [class.negative]="stock.priceChangePercentage < 0">
+                                        {{ stock.priceChangePercentage | number:'1.2-2' }}%
+                                      </span>
+                                    </div>
+                                  }
+                                  @if (stock.errorMessage) {
+                                    <div class="error-message">{{ stock.errorMessage }}</div>
+                                  }
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </td>
+                  </ng-container>
+                  
+                  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']; when: isGroupExpanded" 
+                      class="expanded-row"></tr>
+                </table>
+              }
             </div>
             }
 
             <!-- Mobile Cards -->
             @if (isMobile) {
-            <div class="mobile-cards">
-              @for (log of logs; track log.id) {
-                <mat-card class="log-card mobile-card" (click)="showLogDetails(log)">
-                  <mat-card-content>
-                    <div class="card-header">
-                      <div class="symbol-info">
-                        <div class="symbol">{{ log.symbol }}</div>
-                        <div class="company">{{ log.companyName }}</div>
-                      </div>
-                      <mat-chip [class]="getStatusClass(log.updateStatus)">
-                        {{ getStatusText(log.updateStatus) }}
-                      </mat-chip>
-                    </div>
+              @if (!isGroupedView) {
+                <!-- Individual Logs Mobile Cards -->
+                <div class="mobile-cards">
+                  @for (log of logs; track log.id) {
+                    <mat-card class="log-card mobile-card" (click)="showLogDetails(log)">
+                      <mat-card-content>
+                        <div class="card-header">
+                          <div class="symbol-info">
+                            <div class="symbol">{{ log.symbol }}</div>
+                            <div class="company">{{ log.companyName }}</div>
+                          </div>
+                          <mat-chip [class]="getStatusClass(log.updateStatus)">
+                            {{ getStatusText(log.updateStatus) }}
+                          </mat-chip>
+                        </div>
 
-                    <div class="card-content">
-                      <div class="price-change">
-                        <div class="price-row">
-                          <span class="label">Old Price:</span>
-                          <span class="value">{{ log.oldPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                        <div class="card-content">
+                          <div class="price-change">
+                            <div class="price-row">
+                              <span class="label">Old Price:</span>
+                              <span class="value">{{ log.oldPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                            </div>
+                            <div class="price-row">
+                              <span class="label">New Price:</span>
+                              <span class="value">{{ log.newPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                            </div>
+                            @if (log.priceChangePercentage !== null) {
+                              <div class="price-row">
+                                <span class="label">Change:</span>
+                                <span class="value percentage-change"
+                                      [class.positive]="log.priceChangePercentage >= 0"
+                                      [class.negative]="log.priceChangePercentage < 0">
+                                  {{ log.priceChangePercentage | number:'1.2-2' }}%
+                                </span>
+                              </div>
+                            }
+                          </div>
+
+                          <div class="card-footer">
+                            <div class="date">{{ log.updateDate | date:'short' }}</div>
+                            <mat-chip class="type-chip">{{ getUpdateTypeText(log.updateType) }}</mat-chip>
+                          </div>
                         </div>
-                        <div class="price-row">
-                          <span class="label">New Price:</span>
-                          <span class="value">{{ log.newPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                      </mat-card-content>
+                    </mat-card>
+                  }
+                </div>
+              } @else {
+                <!-- Grouped Logs Mobile Cards -->
+                <div class="mobile-cards">
+                  @for (group of groupedLogs; track group.batchId) {
+                    <mat-card class="grouped-card mobile-card">
+                      <mat-card-content>
+                        <div class="card-header">
+                          <div class="group-info">
+                            <div class="portfolio-name">{{ group.portfolioName }}</div>
+                            <div class="update-date">{{ group.updateDate | date:'short' }}</div>
+                          </div>
+                          <mat-chip class="type-chip">{{ getUpdateTypeText(group.updateType) }}</mat-chip>
                         </div>
-                        @if (log.priceChangePercentage !== null) {
-                          <div class="price-row">
-                            <span class="label">Change:</span>
-                            <span class="value percentage-change"
-                                  [class.positive]="log.priceChangePercentage >= 0"
-                                  [class.negative]="log.priceChangePercentage < 0">
-                              {{ log.priceChangePercentage | number:'1.2-2' }}%
-                            </span>
+
+                        <div class="card-content">
+                          <!-- NAV Impact -->
+                          <div class="nav-impact">
+                            <div class="nav-row">
+                              <span class="label">NAV Impact:</span>
+                              <div class="nav-values">
+                                <span class="old-nav">{{ group.navImpact.oldNav | currency:'INR':'symbol':'1.4-4' }}</span>
+                                <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                                <span class="new-nav">{{ group.navImpact.newNav | currency:'INR':'symbol':'1.4-4' }}</span>
+                              </div>
+                            </div>
+                            <div class="nav-change-row">
+                              <span class="nav-change-amount"
+                                    [class.positive]="group.navImpact.navChange >= 0"
+                                    [class.negative]="group.navImpact.navChange < 0">
+                                {{ group.navImpact.navChange | currency:'INR':'symbol':'1.4-4' }}
+                                ({{ group.navImpact.navChangePercentage | number:'1.2-2' }}%)
+                              </span>
+                            </div>
+                          </div>
+
+                          <!-- Update Stats -->
+                          <div class="update-stats-mobile">
+                            <div class="stats-row">
+                              <span class="label">Total Updates:</span>
+                              <span class="value">{{ group.totalUpdates }} stocks</span>
+                            </div>
+                            <div class="stats-row">
+                              <span class="label">Success Rate:</span>
+                              <span class="value success-rate"
+                                    [class.high]="group.successRate >= 90"
+                                    [class.medium]="group.successRate >= 70 && group.successRate < 90"
+                                    [class.low]="group.successRate < 70">
+                                {{ group.successRate | number:'1.1-1' }}%
+                              </span>
+                            </div>
+                            <div class="stats-row">
+                              <span class="label">Results:</span>
+                              <div class="success-failed">
+                                <span class="success">{{ group.successfulUpdates }} ✓</span>
+                                <span class="failed">{{ group.failedUpdates }} ✗</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="card-footer">
+                          <button mat-stroked-button 
+                                  (click)="toggleGroupExpansion(group)"
+                                  class="expand-button">
+                            <mat-icon>{{ isGroupExpanded(group) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                            {{ isGroupExpanded(group) ? 'Hide Details' : 'View Details' }}
+                          </button>
+                        </div>
+
+                        <!-- Expandable Stock Details -->
+                        @if (isGroupExpanded(group)) {
+                          <div class="expanded-detail-mobile">
+                            <div class="stock-updates-mobile">
+                              @for (stock of group.stockUpdates; track stock.symbol) {
+                                <div class="stock-update-mobile">
+                                  <div class="stock-header-mobile">
+                                    <div class="symbol-info">
+                                      <div class="symbol">{{ stock.symbol }}</div>
+                                      <div class="company">{{ stock.companyName }}</div>
+                                    </div>
+                                    <mat-chip [class]="getStatusClass(stock.updateStatus)">
+                                      {{ getStatusText(stock.updateStatus) }}
+                                    </mat-chip>
+                                  </div>
+                                  <div class="stock-price-mobile">
+                                    <div class="price-row">
+                                      <span class="label">Old Price:</span>
+                                      <span class="value">{{ stock.oldPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                                    </div>
+                                    <div class="price-row">
+                                      <span class="label">New Price:</span>
+                                      <span class="value">{{ stock.newPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+                                    </div>
+                                    @if (stock.priceChangePercentage !== null) {
+                                      <div class="price-row">
+                                        <span class="label">Change:</span>
+                                        <span class="value percentage-change"
+                                              [class.positive]="stock.priceChangePercentage >= 0"
+                                              [class.negative]="stock.priceChangePercentage < 0">
+                                          {{ stock.priceChangePercentage | number:'1.2-2' }}%
+                                        </span>
+                                      </div>
+                                    }
+                                    @if (stock.errorMessage) {
+                                      <div class="error-message">{{ stock.errorMessage }}</div>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                            </div>
                           </div>
                         }
-                      </div>
-
-                      <div class="card-footer">
-                        <div class="date">{{ log.updateDate | date:'short' }}</div>
-                        <mat-chip class="type-chip">{{ getUpdateTypeText(log.updateType) }}</mat-chip>
-                      </div>
-                    </div>
-                  </mat-card-content>
-                </mat-card>
+                      </mat-card-content>
+                    </mat-card>
+                  }
+                </div>
               }
-            </div>
             }
 
             <!-- Pagination -->
@@ -638,6 +922,282 @@ import { PriceHistoryToolbarControlsComponent } from './price-history-toolbar-co
       display: none;
     }
 
+    /* View Toggle Styles */
+    .view-toggle-card {
+      margin-bottom: 16px;
+    }
+
+    .view-toggle-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .toggle-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toggle-label {
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .toggle-description {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.6);
+      margin-left: 32px;
+    }
+
+    /* Grouped Table Styles */
+    .grouped-logs-table {
+      width: 100%;
+    }
+
+    .grouped-row {
+      cursor: default;
+    }
+
+    .nav-change {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-values {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .old-nav {
+      color: rgba(0, 0, 0, 0.7);
+    }
+
+    .new-nav {
+      font-weight: 500;
+    }
+
+    .nav-change-amount {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .nav-change-amount.positive {
+      color: #4caf50;
+    }
+
+    .nav-change-amount.negative {
+      color: #f44336;
+    }
+
+    .update-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .total-updates {
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .success-failed {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .success {
+      color: #4caf50;
+    }
+
+    .failed {
+      color: #f44336;
+    }
+
+    .success-rate {
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-align: center;
+      min-width: 50px;
+    }
+
+    .success-rate.high {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .success-rate.medium {
+      background-color: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .success-rate.low {
+      background-color: #ffebee;
+      color: #c62828;
+    }
+
+    /* Expanded Detail Styles */
+    .expanded-detail {
+      padding: 16px;
+      background-color: #f8f9fa;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .stock-updates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .stock-update-card {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .stock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .stock-price-change .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .stock-price-change .label {
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .stock-price-change .value {
+      font-weight: 500;
+    }
+
+    .error-message {
+      font-size: 11px;
+      color: #f44336;
+      margin-top: 4px;
+      padding: 4px;
+      background-color: #ffebee;
+      border-radius: 4px;
+    }
+
+    .expanded-row {
+      background-color: transparent;
+    }
+
+    .expanded-row td {
+      border-bottom: none;
+      padding: 0;
+    }
+
+    /* Mobile Grouped Cards Styles */
+    .grouped-card {
+      margin-bottom: 16px;
+    }
+
+    .group-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .portfolio-name {
+      font-weight: 600;
+      font-size: 16px;
+      color: #1976d2;
+    }
+
+    .update-date {
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.6);
+    }
+
+    .nav-impact {
+      margin: 12px 0;
+      padding: 12px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .nav-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .nav-values {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .nav-change-row {
+      text-align: center;
+    }
+
+    .update-stats-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .expand-button {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .expanded-detail-mobile {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .stock-updates-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stock-update-mobile {
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .stock-header-mobile {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .stock-price-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .price-history-container {
@@ -693,8 +1253,12 @@ export class PriceHistoryPageComponent implements OnInit, OnDestroy {
 
   // Data
   logs: PriceUpdateLog[] = [];
+  groupedLogs: GroupedPriceUpdateLog[] = [];
   portfolios: Portfolio[] = [];
   dashboardStats: DashboardStats | null = null;
+  
+  // View mode
+  isGroupedView = false;
 
   // Pagination
   totalElements = 0;
@@ -715,6 +1279,10 @@ export class PriceHistoryPageComponent implements OnInit, OnDestroy {
 
   // Table columns
   displayedColumns = ['updateDate', 'portfolio', 'symbol', 'priceChange', 'status', 'updateType', 'executionTime'];
+  groupedDisplayedColumns = ['updateDate', 'portfolio', 'navChange', 'updates', 'successRate', 'updateType', 'actions'];
+  
+  // Expanded groups tracking
+  expandedGroups = new Set<string>();
 
   ngOnInit(): void {
     // Setup mobile detection and responsive toolbar
@@ -864,6 +1432,14 @@ export class PriceHistoryPageComponent implements OnInit, OnDestroy {
     const startDateStr = startDate.toISOString().split('T')[0];
     const endDateStr = endDate.toISOString().split('T')[0];
 
+    if (this.isGroupedView) {
+      this.loadGroupedLogs(startDateStr, endDateStr);
+    } else {
+      this.loadIndividualLogs(startDateStr, endDateStr);
+    }
+  }
+
+  private loadIndividualLogs(startDateStr: string, endDateStr: string): void {
     this.priceUpdateLogService.getLogsWithFilters(
       this.portfolioFilter.value,
       startDateStr,
@@ -893,6 +1469,30 @@ export class PriceHistoryPageComponent implements OnInit, OnDestroy {
         this.loading = false;
         console.error('Failed to load logs:', error);
         this.snackBar.open('Failed to load price update logs', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  private loadGroupedLogs(startDateStr: string, endDateStr: string): void {
+    this.priceUpdateLogService.getGroupedLogs(
+      this.portfolioFilter.value,
+      startDateStr,
+      endDateStr,
+      this.currentPage,
+      this.pageSize
+    ).pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response) => {
+        this.loading = false;
+        if (response.success && response.data) {
+          this.groupedLogs = response.data.content;
+          this.totalElements = response.data.totalElements;
+        }
+      },
+      error: (error) => {
+        this.loading = false;
+        console.error('Failed to load grouped logs:', error);
+        this.snackBar.open('Failed to load grouped price update logs', 'Close', { duration: 3000 });
       }
     });
   }
@@ -981,6 +1581,41 @@ export class PriceHistoryPageComponent implements OnInit, OnDestroy {
     document.body.removeChild(link);
 
     this.snackBar.open('Data exported successfully', 'Close', { duration: 3000 });
+  }
+
+  onViewModeChange(): void {
+    this.currentPage = 0;
+    if (this.expandedGroups) {
+      this.expandedGroups.clear();
+    }
+    this.loadLogs();
+  }
+
+  toggleGroupExpansion(group: GroupedPriceUpdateLog): void {
+    if (!group || !this.expandedGroups) {
+      return;
+    }
+    const groupKey = `${group.portfolioId}_${group.batchId}`;
+    if (this.expandedGroups.has(groupKey)) {
+      this.expandedGroups.delete(groupKey);
+    } else {
+      this.expandedGroups.add(groupKey);
+    }
+  }
+
+  isGroupExpanded(group: GroupedPriceUpdateLog): boolean {
+    if (!group || !this.expandedGroups) {
+      return false;
+    }
+    const groupKey = `${group.portfolioId}_${group.batchId}`;
+    return this.expandedGroups.has(groupKey);
+  }
+
+  shouldShowExpandedRow = (index: number, item: GroupedPriceUpdateLog): boolean => {
+    if (!item || !this.expandedGroups) {
+      return false;
+    }
+    return this.isGroupExpanded(item);
   }
 
   goBack(): void {

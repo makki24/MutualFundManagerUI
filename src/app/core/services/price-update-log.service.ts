@@ -55,6 +55,44 @@ export interface ScheduledUpdateInfo {
   lastScheduledUpdateStatus: string;
 }
 
+export interface GroupedPriceUpdateLog {
+  batchId: string;
+  portfolioId: number;
+  portfolioName: string;
+  updateDate: string;
+  updateType: string;
+  totalUpdates: number;
+  successfulUpdates: number;
+  failedUpdates: number;
+  successRate: number;
+  navImpact: {
+    oldNav: number;
+    newNav: number;
+    navChange: number;
+    navChangePercentage: number;
+    totalValueChange: number;
+  };
+  stockUpdates: {
+    symbol: string;
+    companyName: string;
+    oldPrice: number;
+    newPrice: number;
+    priceChange: number;
+    priceChangePercentage: number;
+    updateStatus: string;
+    errorMessage?: string;
+    executionTimeMs?: number;
+  }[];
+}
+
+export interface GroupedPriceUpdateLogPage {
+  content: GroupedPriceUpdateLog[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -192,6 +230,29 @@ export class PriceUpdateLogService {
    */
   triggerManualUpdate(): Observable<ApiResponse<string>> {
     return this.http.post<ApiResponse<string>>(`${this.API_URL}/price-update-logs/trigger-manual-update`, {});
+  }
+
+  /**
+   * Get grouped price update logs with NAV calculations
+   */
+  getGroupedLogs(
+    portfolioId: number | null,
+    startDate: string,
+    endDate: string,
+    page: number = 0,
+    size: number = 20
+  ): Observable<ApiResponse<GroupedPriceUpdateLogPage>> {
+    let params = new HttpParams()
+      .set('startDate', startDate)
+      .set('endDate', endDate)
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    if (portfolioId) {
+      params = params.set('portfolioId', portfolioId.toString());
+    }
+
+    return this.http.get<ApiResponse<GroupedPriceUpdateLogPage>>(`${this.API_URL}/price-update-logs/grouped`, { params });
   }
 
   /**

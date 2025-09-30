@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { of, throwError } from 'rxjs';
 
 import { AddUserToPortfolioDialogComponent } from './add-user-to-portfolio-dialog/add-user-to-portfolio-dialog.component';
@@ -96,7 +97,7 @@ describe('PortfolioDetailsComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [PortfolioDetailsComponent, BrowserAnimationsModule],
+      imports: [PortfolioDetailsComponent, BrowserAnimationsModule, HttpClientTestingModule],
       providers: [
         { provide: PortfolioService, useValue: mockPortfolioService },
         { provide: InvestmentService, useValue: mockInvestmentService },
