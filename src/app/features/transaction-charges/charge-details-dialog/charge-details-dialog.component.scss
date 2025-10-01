@@ -1,0 +1,568 @@
+// Desktop Styles
+.charge-details-dialog {
+  width: 100%;
+  max-width: 800px;
+
+  &.mobile {
+    max-width: 95vw;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+}
+
+.dialog-content {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+}
+
+// Desktop Card Styles
+.info-card, .turnover-card, .transaction-card, .charges-card, .calculation-card {
+  margin: 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.label {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.value {
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.turnover-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.turnover-item {
+  text-align: center;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+
+  &.total {
+    background-color: #e3f2fd;
+    border-color: #1976d2;
+  }
+
+  &.buy {
+    background-color: #e8f5e8;
+    border-color: #4caf50;
+  }
+
+  &.sell {
+    background-color: #ffebee;
+    border-color: #f44336;
+  }
+}
+
+.turnover-label {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 8px;
+}
+
+.turnover-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.transaction-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.transaction-item {
+  text-align: center;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.transaction-label {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 4px;
+}
+
+.transaction-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.charges-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.charge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.charge-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.charge-icon {
+  color: #1976d2;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.charge-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.charge-name {
+  font-weight: 500;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.charge-description {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 2px;
+}
+
+.charge-amount {
+  font-weight: 600;
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.87);
+  min-width: 120px;
+  text-align: right;
+}
+
+.total-divider {
+  margin: 8px 0;
+  border-color: #1976d2;
+  border-width: 2px;
+}
+
+.total-row {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+}
+
+.total-icon {
+  color: #1976d2;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.total-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.total-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.calculation-details {
+  background-color: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.dialog-actions {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+// Status chip styles
+.status-calculated {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-reviewed {
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-rejected {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-applied {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+// Mobile-Specific Styles
+@media (max-width: 768px) {
+  .charge-details-dialog {
+    max-width: 95vw;
+    height: 90vh;
+
+    &.mobile {
+      .dialog-content {
+        padding: 12px;
+        gap: 12px;
+        max-height: none;
+      }
+
+      .dialog-header {
+        padding: 12px 16px;
+        
+        .header-content {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+
+          h2 {
+            font-size: 1.25rem;
+          }
+        }
+      }
+
+      .dialog-actions {
+        padding: 12px 16px;
+        gap: 12px;
+
+        .mobile-close-btn,
+        .mobile-print-btn {
+          flex: 1;
+          min-height: 48px;
+        }
+      }
+    }
+  }
+
+  // Mobile Sections
+  .mobile-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-section {
+    margin: 0 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+
+    ::ng-deep .mat-expansion-panel-header {
+      padding: 16px;
+      min-height: 64px;
+
+      .mat-expansion-panel-header-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+        color: #1976d2;
+
+        mat-icon {
+          color: #1976d2;
+        }
+      }
+    }
+
+    ::ng-deep .mat-expansion-panel-content .mat-expansion-panel-body {
+      padding: 0 16px 16px 16px;
+    }
+  }
+
+  // Mobile Info List
+  .mobile-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mobile-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .mobile-label {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 0.875rem;
+  }
+
+  .mobile-value {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 0.875rem;
+    text-align: right;
+  }
+
+  // Mobile Turnover Grid
+  .mobile-turnover-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mobile-turnover-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+
+    &.total {
+      background-color: #e3f2fd;
+      border-color: #1976d2;
+    }
+
+    &.buy {
+      background-color: #e8f5e8;
+      border-color: #4caf50;
+    }
+
+    &.sell {
+      background-color: #ffebee;
+      border-color: #f44336;
+    }
+  }
+
+  .mobile-turnover-label {
+    font-size: 0.875rem;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+  }
+
+  .mobile-turnover-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  // Mobile Transaction Grid
+  .mobile-transaction-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .mobile-transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+  }
+
+  .mobile-transaction-label {
+    font-size: 0.875rem;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+  }
+
+  .mobile-transaction-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1976d2;
+  }
+
+  // Mobile Charges List
+  .mobile-charges-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mobile-charge-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+
+    &.total {
+      background-color: #e3f2fd;
+      border-color: #1976d2;
+      margin-top: 8px;
+      padding: 16px;
+
+      .mobile-charge-name {
+        color: #1976d2;
+        font-weight: 600;
+      }
+
+      .mobile-charge-amount {
+        color: #1976d2;
+        font-weight: 700;
+        font-size: 1.125rem;
+      }
+    }
+  }
+
+  .mobile-charge-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .mobile-charge-name {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  .mobile-charge-amount {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: rgba(0, 0, 0, 0.87);
+    text-align: right;
+
+    &.total {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1976d2;
+    }
+  }
+
+  // Mobile Calculation Details
+  .mobile-calculation-details {
+    background-color: #f5f5f5;
+    padding: 16px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    overflow-x: auto;
+  }
+
+  // Hide desktop layout on mobile
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .turnover-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .charge-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 0;
+  }
+
+  .charge-info {
+    width: 100%;
+  }
+
+  .charge-amount {
+    align-self: flex-end;
+    min-width: unset;
+  }
+
+  .total-row {
+    padding: 12px;
+  }
+}
+
+// Touch-friendly improvements
+@media (max-width: 768px) and (pointer: coarse) {
+  .mobile-section {
+    ::ng-deep .mat-expansion-panel-header {
+      min-height: 56px;
+      padding: 16px;
+    }
+  }
+
+  .mobile-info-item,
+  .mobile-turnover-item,
+  .mobile-transaction-item,
+  .mobile-charge-item {
+    min-height: 48px;
+  }
+
+  .dialog-actions {
+    .mobile-close-btn,
+    .mobile-print-btn {
+      min-height: 52px;
+      font-size: 1rem;
+    }
+  }
+}

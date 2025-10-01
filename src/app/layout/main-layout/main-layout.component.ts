@@ -144,6 +144,7 @@ export class MainLayoutComponent implements OnInit {
     if (url.includes('/transactions')) return 'Transactions';
     if (url.includes('/database')) return 'Database Management';
     if (url.includes('/price-history')) return "Price History"
+    if (url.includes('/transaction-charges')) return "Transaction Charges";
     return 'Mutual Fund Manager';
   }
 

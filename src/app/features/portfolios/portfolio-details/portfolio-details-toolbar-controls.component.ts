@@ -17,6 +17,11 @@ import { AuthService } from '../../../core/services/auth.service';
     </button>
 
     @if (isAdmin) {
+      <button mat-button (click)="manageCharges()" matTooltip="Manage Transaction Charges">
+        <mat-icon>account_balance</mat-icon>
+        <span class="hide-sm">Transaction Charges</span>
+      </button>
+
       <button mat-button (click)="manageFees()" matTooltip="Manage Fees">
         <mat-icon>account_balance_wallet</mat-icon>
         <span class="hide-sm">Manage Fees</span>
@@ -61,6 +66,11 @@ export class PortfolioDetailsToolbarControlsComponent implements OnInit {
   manageFees(): void {
     if (!this.portfolioId) return;
     this.router.navigate(['/portfolios', this.portfolioId, 'fees']);
+  }
+
+  manageCharges(): void {
+    if (!this.portfolioId) return;
+    this.router.navigate(['/transaction-charges', this.portfolioId]);
   }
 
   manageHoldings(): void {

@@ -1,0 +1,442 @@
+<div class="charge-details-dialog" [class.mobile]="isMobile">
+  <div mat-dialog-title class="dialog-header">
+    <div class="header-content">
+      <h2>Transaction Charge Details</h2>
+      <mat-chip [class]="getStatusClass(charge.status)">
+        {{ charge.status }}
+      </mat-chip>
+    </div>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div mat-dialog-content class="dialog-content">
+    <!-- Desktop Layout -->
+    @if (!isMobile) {
+      <!-- Portfolio and Date Information -->
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>Portfolio Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Portfolio:</span>
+              <span class="value">{{ charge.portfolio.name }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Calculation Date:</span>
+              <span class="value">{{ charge.calculationDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Created At:</span>
+              <span class="value">{{ charge.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            @if (charge.reviewedAt) {
+              <div class="info-item">
+                <span class="label">Reviewed At:</span>
+                <span class="value">{{ charge.reviewedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+            @if (charge.appliedAt) {
+              <div class="info-item">
+                <span class="label">Applied At:</span>
+                <span class="value">{{ charge.appliedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Turnover Summary -->
+      <mat-card class="turnover-card">
+        <mat-card-header>
+          <mat-card-title>Turnover Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="turnover-grid">
+            <div class="turnover-item total">
+              <div class="turnover-label">Total Turnover</div>
+              <div class="turnover-value">₹{{ charge.totalTurnover | number:'1.2-2' }}</div>
+            </div>
+            <div class="turnover-item buy">
+              <div class="turnover-label">Buy Turnover</div>
+              <div class="turnover-value">₹{{ charge.buyTurnover | number:'1.2-2' }}</div>
+            </div>
+            <div class="turnover-item sell">
+              <div class="turnover-label">Sell Turnover</div>
+              <div class="turnover-value">₹{{ charge.sellTurnover | number:'1.2-2' }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Transaction Summary -->
+      <mat-card class="transaction-card">
+        <mat-card-header>
+          <mat-card-title>Transaction Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="transaction-grid">
+            <div class="transaction-item">
+              <div class="transaction-label">Total Transactions</div>
+              <div class="transaction-value">{{ charge.transactionCount }}</div>
+            </div>
+            <div class="transaction-item">
+              <div class="transaction-label">Buy Transactions</div>
+              <div class="transaction-value">{{ charge.buyTransactionCount }}</div>
+            </div>
+            <div class="transaction-item">
+              <div class="transaction-label">Sell Transactions</div>
+              <div class="transaction-value">{{ charge.sellTransactionCount }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Detailed Charges Breakdown -->
+      <mat-card class="charges-card">
+        <mat-card-header>
+          <mat-card-title>Charges Breakdown</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="charges-list">
+            <div class="charge-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon">account_balance</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name">Brokerage</div>
+                  <div class="charge-description">Commission charged by broker</div>
+                </div>
+              </div>
+              <div class="charge-amount">₹{{ charge.brokerage | number:'1.4-4' }}</div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="charge-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon">receipt</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name">Security Transaction Tax (STT)</div>
+                  <div class="charge-description">Tax on securities transactions</div>
+                </div>
+              </div>
+              <div class="charge-amount">₹{{ charge.stt | number:'1.4-4' }}</div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="charge-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon">swap_horiz</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name">Exchange Charges</div>
+                  <div class="charge-description">Charges levied by stock exchange</div>
+                </div>
+              </div>
+              <div class="charge-amount">₹{{ charge.exchangeCharges | number:'1.4-4' }}</div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="charge-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon">local_atm</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name">GST</div>
+                  <div class="charge-description">Goods and Services Tax</div>
+                </div>
+              </div>
+              <div class="charge-amount">₹{{ charge.gst | number:'1.4-4' }}</div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="charge-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon">security</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name">SEBI Turnover Charges</div>
+                  <div class="charge-description">Securities and Exchange Board of India charges</div>
+                </div>
+              </div>
+              <div class="charge-amount">₹{{ charge.sebiCharges | number:'1.4-4' }}</div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="charge-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon">verified</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name">Stamp Duty</div>
+                  <div class="charge-description">Government stamp duty on transactions</div>
+                </div>
+              </div>
+              <div class="charge-amount">₹{{ charge.stampDuty | number:'1.4-4' }}</div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="charge-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon">storage</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name">DP Charges</div>
+                  <div class="charge-description">Depository Participant charges</div>
+                </div>
+              </div>
+              <div class="charge-amount">₹{{ charge.dpCharges | number:'1.4-4' }}</div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="charge-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon">account_balance_wallet</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name">IPFT Charges</div>
+                  <div class="charge-description">Investor Protection and Education Fund charges</div>
+                </div>
+              </div>
+              <div class="charge-amount">₹{{ charge.ipftCharges | number:'1.4-4' }}</div>
+            </div>
+
+            <mat-divider class="total-divider"></mat-divider>
+
+            <div class="charge-row total-row">
+              <div class="charge-info">
+                <mat-icon class="charge-icon total-icon">calculate</mat-icon>
+                <div class="charge-details">
+                  <div class="charge-name total-name">Total Charges</div>
+                  <div class="charge-description">Sum of all charges</div>
+                </div>
+              </div>
+              <div class="charge-amount total-amount">₹{{ charge.totalCharges | number:'1.4-4' }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Calculation Details -->
+      @if (charge.calculationDetails) {
+        <mat-card class="calculation-card">
+          <mat-card-header>
+            <mat-card-title>Calculation Details</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="calculation-details">
+              {{ charge.calculationDetails }}
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    } @else {
+      <!-- Mobile Layout with Expandable Sections -->
+      <div class="mobile-sections">
+        <!-- Portfolio Information Mobile -->
+        <mat-expansion-panel class="mobile-section" [expanded]="isSectionExpanded('portfolio')">
+          <mat-expansion-panel-header (click)="toggleSection('portfolio')">
+            <mat-panel-title>
+              <mat-icon>business</mat-icon>
+              Portfolio Information
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="mobile-info-list">
+            <div class="mobile-info-item">
+              <span class="mobile-label">Portfolio</span>
+              <span class="mobile-value">{{ charge.portfolio.name }}</span>
+            </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Calculation Date</span>
+              <span class="mobile-value">{{ charge.calculationDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="mobile-info-item">
+              <span class="mobile-label">Created At</span>
+              <span class="mobile-value">{{ charge.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            @if (charge.reviewedAt) {
+              <div class="mobile-info-item">
+                <span class="mobile-label">Reviewed At</span>
+                <span class="mobile-value">{{ charge.reviewedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+            @if (charge.appliedAt) {
+              <div class="mobile-info-item">
+                <span class="mobile-label">Applied At</span>
+                <span class="mobile-value">{{ charge.appliedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            }
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Turnover Summary Mobile -->
+        <mat-expansion-panel class="mobile-section" [expanded]="isSectionExpanded('turnover')">
+          <mat-expansion-panel-header (click)="toggleSection('turnover')">
+            <mat-panel-title>
+              <mat-icon>trending_up</mat-icon>
+              Turnover Summary
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="mobile-turnover-grid">
+            <div class="mobile-turnover-item total">
+              <div class="mobile-turnover-label">Total Turnover</div>
+              <div class="mobile-turnover-value">₹{{ charge.totalTurnover | number:'1.2-2' }}</div>
+            </div>
+            <div class="mobile-turnover-item buy">
+              <div class="mobile-turnover-label">Buy Turnover</div>
+              <div class="mobile-turnover-value">₹{{ charge.buyTurnover | number:'1.2-2' }}</div>
+            </div>
+            <div class="mobile-turnover-item sell">
+              <div class="mobile-turnover-label">Sell Turnover</div>
+              <div class="mobile-turnover-value">₹{{ charge.sellTurnover | number:'1.2-2' }}</div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Transaction Summary Mobile -->
+        <mat-expansion-panel class="mobile-section" [expanded]="isSectionExpanded('transactions')">
+          <mat-expansion-panel-header (click)="toggleSection('transactions')">
+            <mat-panel-title>
+              <mat-icon>receipt_long</mat-icon>
+              Transaction Summary
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="mobile-transaction-grid">
+            <div class="mobile-transaction-item">
+              <div class="mobile-transaction-label">Total Transactions</div>
+              <div class="mobile-transaction-value">{{ charge.transactionCount }}</div>
+            </div>
+            <div class="mobile-transaction-item">
+              <div class="mobile-transaction-label">Buy Transactions</div>
+              <div class="mobile-transaction-value">{{ charge.buyTransactionCount }}</div>
+            </div>
+            <div class="mobile-transaction-item">
+              <div class="mobile-transaction-label">Sell Transactions</div>
+              <div class="mobile-transaction-value">{{ charge.sellTransactionCount }}</div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Charges Breakdown Mobile -->
+        <mat-expansion-panel class="mobile-section" [expanded]="isSectionExpanded('charges')">
+          <mat-expansion-panel-header (click)="toggleSection('charges')">
+            <mat-panel-title>
+              <mat-icon>calculate</mat-icon>
+              Charges Breakdown
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="mobile-charges-list">
+            <div class="mobile-charge-item">
+              <div class="mobile-charge-header">
+                <mat-icon>account_balance</mat-icon>
+                <span class="mobile-charge-name">Brokerage</span>
+              </div>
+              <div class="mobile-charge-amount">₹{{ charge.brokerage | number:'1.4-4' }}</div>
+            </div>
+
+            <div class="mobile-charge-item">
+              <div class="mobile-charge-header">
+                <mat-icon>receipt</mat-icon>
+                <span class="mobile-charge-name">STT</span>
+              </div>
+              <div class="mobile-charge-amount">₹{{ charge.stt | number:'1.4-4' }}</div>
+            </div>
+
+            <div class="mobile-charge-item">
+              <div class="mobile-charge-header">
+                <mat-icon>swap_horiz</mat-icon>
+                <span class="mobile-charge-name">Exchange Charges</span>
+              </div>
+              <div class="mobile-charge-amount">₹{{ charge.exchangeCharges | number:'1.4-4' }}</div>
+            </div>
+
+            <div class="mobile-charge-item">
+              <div class="mobile-charge-header">
+                <mat-icon>local_atm</mat-icon>
+                <span class="mobile-charge-name">GST</span>
+              </div>
+              <div class="mobile-charge-amount">₹{{ charge.gst | number:'1.4-4' }}</div>
+            </div>
+
+            <div class="mobile-charge-item">
+              <div class="mobile-charge-header">
+                <mat-icon>security</mat-icon>
+                <span class="mobile-charge-name">SEBI Charges</span>
+              </div>
+              <div class="mobile-charge-amount">₹{{ charge.sebiCharges | number:'1.4-4' }}</div>
+            </div>
+
+            <div class="mobile-charge-item">
+              <div class="mobile-charge-header">
+                <mat-icon>verified</mat-icon>
+                <span class="mobile-charge-name">Stamp Duty</span>
+              </div>
+              <div class="mobile-charge-amount">₹{{ charge.stampDuty | number:'1.4-4' }}</div>
+            </div>
+
+            <div class="mobile-charge-item">
+              <div class="mobile-charge-header">
+                <mat-icon>storage</mat-icon>
+                <span class="mobile-charge-name">DP Charges</span>
+              </div>
+              <div class="mobile-charge-amount">₹{{ charge.dpCharges | number:'1.4-4' }}</div>
+            </div>
+
+            <div class="mobile-charge-item">
+              <div class="mobile-charge-header">
+                <mat-icon>account_balance_wallet</mat-icon>
+                <span class="mobile-charge-name">IPFT Charges</span>
+              </div>
+              <div class="mobile-charge-amount">₹{{ charge.ipftCharges | number:'1.4-4' }}</div>
+            </div>
+
+            <div class="mobile-charge-item total">
+              <div class="mobile-charge-header">
+                <mat-icon>calculate</mat-icon>
+                <span class="mobile-charge-name">Total Charges</span>
+              </div>
+              <div class="mobile-charge-amount total">₹{{ charge.totalCharges | number:'1.4-4' }}</div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Calculation Details Mobile -->
+        @if (charge.calculationDetails) {
+          <mat-expansion-panel class="mobile-section" [expanded]="isSectionExpanded('calculation')">
+            <mat-expansion-panel-header (click)="toggleSection('calculation')">
+              <mat-panel-title>
+                <mat-icon>description</mat-icon>
+                Calculation Details
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="mobile-calculation-details">
+              {{ charge.calculationDetails }}
+            </div>
+          </mat-expansion-panel>
+        }
+      </div>
+    }
+  </div>
+
+  <div mat-dialog-actions class="dialog-actions">
+    @if (!isMobile) {
+      <button mat-button mat-dialog-close>Close</button>
+      <button mat-raised-button color="primary" (click)="printDetails()">
+        <mat-icon>print</mat-icon>
+        Print
+      </button>
+    } @else {
+      <button mat-raised-button mat-dialog-close class="mobile-close-btn">
+        <mat-icon>close</mat-icon>
+        Close
+      </button>
+      <button mat-raised-button color="primary" (click)="printDetails()" class="mobile-print-btn">
+        <mat-icon>print</mat-icon>
+        Print
+      </button>
+    }
+  </div>
+</div>

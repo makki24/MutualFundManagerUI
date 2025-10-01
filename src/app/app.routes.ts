@@ -57,6 +57,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/transactions/transactions-page/transactions-page.component').then(m => m.TransactionsPageComponent)
       },
       {
+        path: 'transaction-charges',
+        loadComponent: () => import('./features/transaction-charges/transaction-charges-page.component').then(m => m.TransactionChargesPageComponent),
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'transaction-charges/:portfolioId',
+        loadComponent: () => import('./features/transaction-charges/transaction-charges-page.component').then(m => m.TransactionChargesPageComponent),
+        canActivate: [adminGuard]
+      },
+      {
         path: 'database',
         loadComponent: () => import('./features/database/database-management/database-management.component').then(m => m.DatabaseManagementComponent),
         canActivate: [adminGuard]
