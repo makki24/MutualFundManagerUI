@@ -121,7 +121,7 @@ import { ChargeDetailsDialogComponent } from './charge-details-dialog/charge-det
             }
 
             @if (portfolioId) {
-              <button mat-raised-button color="primary" (click)="calculateCharges()" [disabled]="true || isCalculating">
+              <button mat-raised-button color="primary" (click)="calculateCharges()" [disabled]="isCalculating">
                 @if (isCalculating) {
                   <mat-icon>hourglass_empty</mat-icon>
                 } @else {
@@ -200,11 +200,11 @@ import { ChargeDetailsDialogComponent } from './charge-details-dialog/charge-det
                       <span>View Details</span>
                     </button>
                     @if (charge.status === 'CALCULATED') {
-                      <button mat-menu-item (click)="approveCharge(charge.id)">
+                      <button [disabled]="true" mat-menu-item (click)="approveCharge(charge.id)">
                         <mat-icon>check_circle</mat-icon>
                         <span>Approve</span>
                       </button>
-                      <button mat-menu-item (click)="rejectCharge(charge.id)">
+                      <button [disabled]="true" mat-menu-item (click)="rejectCharge(charge.id)">
                         <mat-icon>cancel</mat-icon>
                         <span>Reject</span>
                       </button>
@@ -262,11 +262,11 @@ import { ChargeDetailsDialogComponent } from './charge-details-dialog/charge-det
                   Details
                 </button>
                 @if (charge.status === 'CALCULATED') {
-                  <button mat-button color="primary" (click)="approveCharge(charge.id)">
+                  <button [disabled]="true" mat-button color="primary" (click)="approveCharge(charge.id)">
                     <mat-icon>check_circle</mat-icon>
                     Approve
                   </button>
-                  <button mat-button color="warn" (click)="rejectCharge(charge.id)">
+                  <button [disabled]="true" mat-button color="warn" (click)="rejectCharge(charge.id)">
                     <mat-icon>cancel</mat-icon>
                     Reject
                   </button>

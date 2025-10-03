@@ -29,6 +29,7 @@ import { SellSharesDialogComponent, SellSharesDialogData } from '../sell-shares-
 import { UpdatePriceDialogComponent, UpdatePriceDialogData, UpdatePriceDialogResult } from '../update-price-dialog/update-price-dialog.component';
 import { UpdateByDateDialogComponent } from '../update-by-date-dialog/update-by-date-dialog.component';
 import { EditHoldingDialogComponent, EditHoldingDialogData } from '../edit-holding-dialog/edit-holding-dialog.component';
+import { AddDividendDialogComponent, AddDividendDialogData } from '../add-dividend-dialog/add-dividend-dialog.component';
 import { ToolbarService } from '../../../layout/toolbar/toolbar.service';
 import { HoldingsToolbarControlsComponent } from '../holdings-toolbar-controls/holdings-toolbar-controls.component';
 
@@ -626,6 +627,27 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(date => {
       if (date && this.selectedPortfolioControl.value) {
         this.updatePricesByDate(date);
+      }
+    });
+  }
+
+  addDividend(holding: Holding): void {
+    const portfolioId = this.selectedPortfolioControl.value;
+    if (!portfolioId) return;
+
+    const dialogRef = this.dialog.open(AddDividendDialogComponent, {
+      width: this.isMobile ? '95vw' : '600px',
+      maxWidth: this.isMobile ? '95vw' : '700px',
+      data: {
+        portfolioId: portfolioId,
+        holding: holding
+      } as AddDividendDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadHoldings(portfolioId);
+        this.snackBar.open('Dividend added successfully!', 'Close', { duration: 3000 });
       }
     });
   }

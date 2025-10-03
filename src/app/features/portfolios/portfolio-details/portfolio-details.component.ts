@@ -57,6 +57,42 @@ import { Subject, takeUntil } from 'rxjs';
           <p>Loading portfolio details...</p>
         </div>
       } @else if (portfolio) {
+        <!-- Mobile Toolbar - Only shown on mobile devices -->
+        @if (isMobile) {
+          <div class="mobile-toolbar">
+            <h2 class="mobile-title">{{ portfolio.name }}</h2>
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="mobileActionsMenu"
+              class="mobile-menu-trigger"
+              matTooltip="Actions"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+
+            <mat-menu #mobileActionsMenu="matMenu" class="mobile-actions-menu">
+              <button mat-menu-item (click)="viewTransactions()">
+                <mat-icon>receipt_long</mat-icon>
+                <span>View Transactions</span>
+              </button>
+              @if (isAdmin) {
+                <button mat-menu-item (click)="manageCharges()">
+                  <mat-icon>account_balance</mat-icon>
+                  <span>Transaction Charges</span>
+                </button>
+                <button mat-menu-item (click)="manageFees()">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                  <span>Manage Fees</span>
+                </button>
+                <button mat-menu-item (click)="manageHoldings()">
+                  <mat-icon>pie_chart</mat-icon>
+                  <span>Manage Holdings</span>
+                </button>
+              }
+            </mat-menu>
+          </div>
+        }
+
         <!-- Portfolio Stats card -->
         @if (isMobile) {
           <!-- Mobile Collapsible Stats -->
@@ -1027,6 +1063,49 @@ import { Subject, takeUntil } from 'rxjs';
       margin-top: 16px;
     }
 
+    /* Mobile Toolbar Styles */
+    .mobile-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: #212529;
+      flex: 1;
+    }
+
+    .mobile-menu-trigger {
+      background: rgba(25, 118, 210, 0.1);
+      color: #1976d2;
+    }
+
+    .mobile-actions-menu {
+      margin-top: 8px;
+    }
+
+    .mobile-actions-menu .mat-mdc-menu-item {
+      min-height: 48px;
+      padding: 0 16px;
+    }
+
+    .mobile-actions-menu .mat-mdc-menu-item mat-icon {
+      margin-right: 16px;
+      color: #1976d2;
+    }
+
+    .mobile-actions-menu .mat-mdc-menu-item:hover {
+      background-color: rgba(25, 118, 210, 0.08);
+    }
+
     /* Responsive Design */
     @media (max-width: 480px) {
       .portfolio-details-container {
@@ -1058,11 +1137,26 @@ import { Subject, takeUntil } from 'rxjs';
       }
     }
 
+    @media (max-width: 768px) {
+      .mobile-toolbar {
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+
+      .mobile-title {
+        font-size: 18px;
+      }
+    }
+
     @media (min-width: 769px) {
       .portfolio-details-container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 24px;
+      }
+
+      .mobile-toolbar {
+        display: none; /* Hide mobile toolbar on desktop */
       }
     }
   `]
@@ -1097,17 +1191,20 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
     this.isAdmin = this.authService.isAdmin();
     this.portfolioId = Number(this.route.snapshot.paramMap.get('id'));
 
-    // Setup mobile detection
-    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
-      this.isMobile = result.matches;
-    });
+    // Setup mobile detection and responsive toolbar
+    this.breakpointObserver.observe([Breakpoints.Handset])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.isMobile = result.matches;
+        this.setupResponsiveToolbar();
+      });
 
     if (this.portfolioId) {
       this.loadPortfolioDetails();
       this.loadPortfolioInvestments();
       this.loadNavHistory();
-      // Register toolbar controls immediately (title set after details load)
-      this.toolbar.setControls(PortfolioDetailsToolbarControlsComponent);
+      // Setup responsive toolbar
+      this.setupResponsiveToolbar();
     } else {
       this.router.navigate(['/portfolios']);
     }
@@ -1238,6 +1335,19 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/portfolios']);
+  }
+
+  setupResponsiveToolbar(): void {
+    // Desktop: Show toolbar in header, Mobile: Hide from header (show inline)
+    if (!this.isMobile) {
+      this.toolbar.setControls(PortfolioDetailsToolbarControlsComponent);
+    } else {
+      this.toolbar.setControls(null);
+    }
+  }
+
+  manageCharges(): void {
+    this.router.navigate(['/transaction-charges', this.portfolioId]);
   }
 
   loadNavHistory(): void {

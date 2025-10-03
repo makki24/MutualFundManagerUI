@@ -82,7 +82,7 @@ import { Portfolio } from '../../../core/models/portfolio.model';
       matTooltip="View Price Update History"
       class="desktop-action-btn"
     >
-      <mat-icon>history</mat-icon>
+
       Price History
     </button>
   `,

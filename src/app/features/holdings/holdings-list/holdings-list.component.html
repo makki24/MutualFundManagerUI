@@ -175,6 +175,10 @@
                           <mat-icon>remove_shopping_cart</mat-icon>
                           <span>Sell Shares</span>
                         </button>
+                        <button mat-menu-item (click)="addDividend(holding)">
+                          <mat-icon>payments</mat-icon>
+                          <span>Add Dividend</span>
+                        </button>
                         <button mat-menu-item (click)="updatePrice(holding)">
                           <mat-icon>trending_up</mat-icon>
                           <span>Update Price</span>
@@ -250,6 +254,10 @@
                       <button mat-stroked-button color="accent" (click)="sellShares(holding)" class="secondary-action">
                         <mat-icon>remove_shopping_cart</mat-icon>
                         Sell
+                      </button>
+                      <button mat-stroked-button color="primary" (click)="addDividend(holding)" class="secondary-action">
+                        <mat-icon>payments</mat-icon>
+                        Dividend
                       </button>
                       <button mat-stroked-button (click)="updatePrice(holding)" class="secondary-action">
                         <mat-icon>trending_up</mat-icon>
@@ -355,6 +363,10 @@
                   <button mat-icon-button color="accent" (click)="sellShares(holding)"
                           matTooltip="Sell Shares">
                     <mat-icon>remove_shopping_cart</mat-icon>
+                  </button>
+                  <button mat-icon-button color="primary" (click)="addDividend(holding)"
+                          matTooltip="Add Dividend">
+                    <mat-icon>payments</mat-icon>
                   </button>
                   <button mat-icon-button (click)="updatePrice(holding)"
                           matTooltip="Update Price">

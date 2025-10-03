@@ -202,4 +202,20 @@ export class PortfolioService {
   }): Observable<ApiResponse<Holding>> {
     return this.http.put<ApiResponse<Holding>>(`${this.API_URL}/portfolios/${portfolioId}/holdings/${holdingId}`, updateData);
   }
+
+  addDividend(portfolioId: number, symbol: string, dividendRequest: {
+    dividendAmount: number;
+    adminUserId: number;
+    exDividendDate?: string;
+  }): Observable<any> {
+    let httpParams = new HttpParams()
+      .set('dividendAmount', dividendRequest.dividendAmount.toString())
+      .set('adminUserId', dividendRequest.adminUserId.toString());
+
+    if (dividendRequest.exDividendDate) {
+      httpParams = httpParams.set('exDividendDate', dividendRequest.exDividendDate);
+    }
+
+    return this.http.post<any>(`${this.API_URL}/portfolios/${portfolioId}/holdings/symbol/${symbol}/dividend`, null, { params: httpParams });
+  }
 }
