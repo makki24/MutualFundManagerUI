@@ -23,6 +23,7 @@ import { TransactionCharge, ChargeStatus, ChargeStatistics } from '../../core/mo
 import { AuthService } from '../../core/services/auth.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { ChargeDetailsDialogComponent } from './charge-details-dialog/charge-details-dialog.component';
+import { ApproveChargeDialogComponent } from './approve-charge-dialog/approve-charge-dialog.component';
 
 @Component({
   selector: 'app-transaction-charges-page',
@@ -200,11 +201,11 @@ import { ChargeDetailsDialogComponent } from './charge-details-dialog/charge-det
                       <span>View Details</span>
                     </button>
                     @if (charge.status === 'CALCULATED') {
-                      <button [disabled]="true" mat-menu-item (click)="approveCharge(charge.id)">
+                      <button mat-menu-item (click)="openApproveDialog(charge)">
                         <mat-icon>check_circle</mat-icon>
                         <span>Approve</span>
                       </button>
-                      <button [disabled]="true" mat-menu-item (click)="rejectCharge(charge.id)">
+                      <button mat-menu-item (click)="rejectCharge(charge.id)">
                         <mat-icon>cancel</mat-icon>
                         <span>Reject</span>
                       </button>
@@ -262,11 +263,11 @@ import { ChargeDetailsDialogComponent } from './charge-details-dialog/charge-det
                   Details
                 </button>
                 @if (charge.status === 'CALCULATED') {
-                  <button [disabled]="true" mat-button color="primary" (click)="approveCharge(charge.id)">
+                  <button mat-button color="primary" (click)="openApproveDialog(charge)">
                     <mat-icon>check_circle</mat-icon>
                     Approve
                   </button>
-                  <button [disabled]="true" mat-button color="warn" (click)="rejectCharge(charge.id)">
+                  <button mat-button color="warn" (click)="rejectCharge(charge.id)">
                     <mat-icon>cancel</mat-icon>
                     Reject
                   </button>
@@ -665,12 +666,40 @@ export class TransactionChargesPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  approveCharge(chargeId: number): void {
-    this.transactionChargeService.approveCharge(chargeId)
+  openApproveDialog(charge: TransactionCharge): void {
+    const dialogRef = this.dialog.open(ApproveChargeDialogComponent, {
+      data: charge,
+      width: '600px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      autoFocus: true,
+      restoreFocus: false
+    });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        if (result) {
+          this.approveCharge(charge.id, result.correction);
+        }
+      });
+  }
+
+  approveCharge(chargeId: number, correction: number = 0.0): void {
+    const adminUserId = this.authService.getCurrentUserId();
+    if (!adminUserId) {
+      this.snackBar.open('User not authenticated', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.transactionChargeService.approveCharge(chargeId, adminUserId, correction)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.snackBar.open('Charge approved successfully', 'Close', { duration: 3000 });
+          const message = correction !== 0 
+            ? `Charge approved with correction of ₹${correction.toFixed(2)}` 
+            : 'Charge approved successfully';
+          this.snackBar.open(message, 'Close', { duration: 3000 });
           this.loadCharges();
           this.loadStatistics();
         },

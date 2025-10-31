@@ -86,10 +86,13 @@ export class TransactionChargeService {
 
   /**
    * Approve charge
-   * PUT /api/charges/{chargeId}/approve
+   * PUT /api/charges/{chargeId}/approve?adminUserId={adminUserId}&correction={correction}
    */
-  approveCharge(chargeId: number): Observable<TransactionCharge> {
-    return this.http.put<TransactionCharge>(`${this.apiUrl}/${chargeId}/approve`, {});
+  approveCharge(chargeId: number, adminUserId: number, correction: number = 0.0): Observable<TransactionCharge> {
+    const params = new HttpParams()
+      .set('adminUserId', adminUserId.toString())
+      .set('correction', correction.toString());
+    return this.http.put<TransactionCharge>(`${this.apiUrl}/${chargeId}/approve`, {}, { params });
   }
 
   /**
