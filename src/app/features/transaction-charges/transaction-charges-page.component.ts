@@ -210,12 +210,6 @@ import { ApproveChargeDialogComponent } from './approve-charge-dialog/approve-ch
                         <span>Reject</span>
                       </button>
                     }
-                    @if (charge.status === 'REVIEWED') {
-                      <button mat-menu-item (click)="applyCharge(charge.id)">
-                        <mat-icon>done_all</mat-icon>
-                        <span>Apply</span>
-                      </button>
-                    }
                   </mat-menu>
                 </td>
               </ng-container>
@@ -270,12 +264,6 @@ import { ApproveChargeDialogComponent } from './approve-charge-dialog/approve-ch
                   <button mat-button color="warn" (click)="rejectCharge(charge.id)">
                     <mat-icon>cancel</mat-icon>
                     Reject
-                  </button>
-                }
-                @if (charge.status === 'REVIEWED') {
-                  <button mat-button color="accent" (click)="applyCharge(charge.id)">
-                    <mat-icon>done_all</mat-icon>
-                    Apply
                   </button>
                 }
               </mat-card-actions>
@@ -696,8 +684,8 @@ export class TransactionChargesPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          const message = correction !== 0 
-            ? `Charge approved with correction of ₹${correction.toFixed(2)}` 
+          const message = correction !== 0
+            ? `Charge approved with correction of ₹${correction.toFixed(2)}`
             : 'Charge approved successfully';
           this.snackBar.open(message, 'Close', { duration: 3000 });
           this.loadCharges();
@@ -722,22 +710,6 @@ export class TransactionChargesPageComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error rejecting charge:', error);
           this.snackBar.open('Failed to reject charge', 'Close', { duration: 3000 });
-        }
-      });
-  }
-
-  applyCharge(chargeId: number): void {
-    this.transactionChargeService.applyCharge(chargeId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.snackBar.open('Charge applied successfully', 'Close', { duration: 3000 });
-          this.loadCharges();
-          this.loadStatistics();
-        },
-        error: (error) => {
-          console.error('Error applying charge:', error);
-          this.snackBar.open('Failed to apply charge', 'Close', { duration: 3000 });
         }
       });
   }

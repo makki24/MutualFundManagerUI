@@ -82,7 +82,7 @@ import { Portfolio } from '../../../core/models/portfolio.model';
       matTooltip="View Price Update History"
       class="desktop-action-btn"
     >
-
+      <mat-icon>history</mat-icon>
       Price History
     </button>
   `,
@@ -209,7 +209,7 @@ export class HoldingsToolbarControlsComponent implements OnInit, OnDestroy {
   viewPriceHistoryFromToolbar(): void {
     if (!this.selectedPortfolioId.value) return;
     this.router.navigate(['/price-history'], {
-      queryParams: { portfolioId: this.selectedPortfolioId.value },
+      queryParams: { portfolioId: this.selectedPortfolioId.value }
     });
   }
 }

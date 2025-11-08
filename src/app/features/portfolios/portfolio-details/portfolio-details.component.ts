@@ -88,6 +88,10 @@ import { Subject, takeUntil } from 'rxjs';
                   <mat-icon>pie_chart</mat-icon>
                   <span>Manage Holdings</span>
                 </button>
+                <button mat-menu-item (click)="manageChargeConfig()">
+                  <mat-icon>settings</mat-icon>
+                  <span>Charge Config</span>
+                </button>
               }
             </mat-menu>
           </div>
@@ -1327,6 +1331,10 @@ export class PortfolioDetailsComponent implements OnInit, OnDestroy {
 
   manageHoldings(): void {
     this.router.navigate(['/holdings'], { queryParams: { portfolioId: this.portfolioId } });
+  }
+
+  manageChargeConfig(): void {
+    this.router.navigate(['/charge-config'], { queryParams: { portfolioId: this.portfolioId } });
   }
 
   viewTransactions(): void {

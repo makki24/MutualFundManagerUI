@@ -35,6 +35,11 @@ import { AuthService } from '../../../core/services/auth.service';
           <mat-icon>pie_chart</mat-icon>
           <span>Manage Holdings</span>
         </button>
+
+        <button mat-button (click)="manageChargeConfig()" matTooltip="Configure Charges" class="desktop-action-btn">
+          <mat-icon>settings</mat-icon>
+          <span>Charge Config</span>
+        </button>
       }
     }
   `,
@@ -125,5 +130,10 @@ export class PortfolioDetailsToolbarControlsComponent implements OnInit, OnDestr
   manageHoldings(): void {
     if (!this.portfolioId) return;
     this.router.navigate(['/holdings'], { queryParams: { portfolioId: this.portfolioId } });
+  }
+
+  manageChargeConfig(): void {
+    if (!this.portfolioId) return;
+    this.router.navigate(['/charge-config'], { queryParams: { portfolioId: this.portfolioId } });
   }
 }

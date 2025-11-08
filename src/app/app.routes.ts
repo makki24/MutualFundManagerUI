@@ -70,6 +70,11 @@ export const routes: Routes = [
         path: 'database',
         loadComponent: () => import('./features/database/database-management/database-management.component').then(m => m.DatabaseManagementComponent),
         canActivate: [adminGuard]
+      },
+      {
+        path: 'charge-config',
+        loadComponent: () => import('./features/charge-config/charge-config-page.component').then(m => m.ChargeConfigPageComponent),
+        canActivate: [adminGuard]
       }
     ]
   },
