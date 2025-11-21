@@ -114,6 +114,7 @@ export class HoldingsListComponent implements OnInit, OnDestroy {
     'totalValue',
     'gainLoss',
     'lastUpdated',
+    'boughtOn',
     'actions'
   ];
 

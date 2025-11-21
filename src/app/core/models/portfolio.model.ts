@@ -43,6 +43,7 @@ export interface Holding {
   unrealizedGainLoss: number;
   returnPercentage: number;
   needsManualUpdate?: boolean;
+  createdAt?: string;
 }
 
 export interface Investment {

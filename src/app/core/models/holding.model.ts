@@ -8,6 +8,7 @@ export interface Holding {
   buyPrice: number;
   currentPrice: number;
   lastPriceUpdate: string;
+  createdAt: string;
   totalInvested: number;
   currentValue: number;
   unrealizedGainLoss: number;

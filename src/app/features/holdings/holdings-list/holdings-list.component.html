@@ -239,6 +239,19 @@
                         </div>
                       </div>
                     </div>
+                    <div class="detail-row">
+                      <div class="detail-item full-width">
+                        <mat-icon class="detail-icon" >
+                          calendar_today
+                        </mat-icon>
+                        <div class="detail-info">
+                          <div class="detail-label">Bought on </div>
+                          <div class="detail-value" >
+                            <span [matTooltip]="holding.createdAt || '—'">{{ holding.createdAt ? (holding.createdAt | date:'dd/M/yy') : '—' }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
 
                     <mat-divider></mat-divider>
@@ -342,12 +355,20 @@
                 </td>
               </ng-container>
 
+
               <ng-container matColumnDef="lastUpdated">
                 <th mat-header-cell *matHeaderCellDef>Last Updated</th>
                 <td mat-cell *matCellDef="let holding">
                   <span [matTooltip]="holding.lastPriceUpdate || '—'">{{ holding.lastPriceUpdate ? (holding.lastPriceUpdate | date:'short') : '—' }}</span>
                 </td>
               </ng-container>
+              <ng-container matColumnDef="boughtOn">
+                <th mat-header-cell *matHeaderCellDef>Bought on</th>
+                <td mat-cell *matCellDef="let holding">
+                  <span [matTooltip]="holding.createdAt || '—'">{{ holding.createdAt ? (holding.createdAt | date:'dd/M/yy') : '—' }}</span>
+                </td>
+              </ng-container>
+
 
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
