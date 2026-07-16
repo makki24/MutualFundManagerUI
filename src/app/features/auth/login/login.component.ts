@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, NgZone } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -35,6 +35,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private ngZone = inject(NgZone);
 
   loginForm: FormGroup;
   hidePassword = true;
@@ -57,7 +58,15 @@ export class LoginComponent {
           this.isLoading = false;
           if (response.success) {
             this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
-            this.router.navigate(['/dashboard']);
+            this.ngZone.run(() => {
+              this.router.navigate(['/dashboard']).then(navigated => {
+                if (!navigated) {
+                  console.warn('Router navigation to /dashboard failed or was cancelled.');
+                  // Fallback for some edge cases where relative navigation gets cancelled
+                  this.router.navigateByUrl('/dashboard');
+                }
+              });
+            });
           }
         },
         error: (error) => {
