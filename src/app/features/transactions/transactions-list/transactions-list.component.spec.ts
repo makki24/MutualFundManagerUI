@@ -35,7 +35,7 @@ describe('TransactionsListComponent', () => {
     {
       id: 1,
       portfolioId: 1,
-      transactionType: TransactionType.BUY,
+      transactionType: TransactionType.BUY_SHARES,
       symbol: 'AAPL',
       quantity: 10,
       pricePerUnit: 150,
@@ -46,7 +46,7 @@ describe('TransactionsListComponent', () => {
     {
       id: 2,
       portfolioId: 1,
-      transactionType: TransactionType.SELL,
+      transactionType: TransactionType.SELL_SHARES,
       symbol: 'GOOGL',
       quantity: 5,
       pricePerUnit: 2800,
@@ -331,14 +331,14 @@ describe('TransactionsListComponent', () => {
     });
 
     it('should apply filters correctly', () => {
-      component.selectedType = TransactionType.BUY;
+      component.selectedType = TransactionType.BUY_SHARES;
       component.selectedSymbol = 'AAPL';
       component.startDate = new Date('2024-01-01');
       component.endDate = new Date('2024-01-31');
 
       component.applyFilters();
 
-      expect(component.filter.type).toBe(TransactionType.BUY);
+      expect(component.filter.type).toBe(TransactionType.BUY_SHARES);
       expect(component.filter.symbol).toBe('AAPL');
       expect(component.filter.startDate).toBeDefined();
       expect(component.filter.endDate).toBeDefined();
@@ -346,7 +346,7 @@ describe('TransactionsListComponent', () => {
     });
 
     it('should clear filters correctly', () => {
-      component.selectedType = TransactionType.BUY;
+      component.selectedType = TransactionType.BUY_SHARES;
       component.selectedSymbol = 'AAPL';
       component.startDate = new Date();
       component.endDate = new Date();
@@ -363,7 +363,7 @@ describe('TransactionsListComponent', () => {
     });
 
     it('should reset filter when clearing without portfolio', () => {
-      component.selectedType = TransactionType.SELL;
+      component.selectedType = TransactionType.SELL_SHARES;
       component.viewType = 'portfolio';
 
       component.clearFilters();
@@ -377,12 +377,12 @@ describe('TransactionsListComponent', () => {
 
   describe('Utility Methods', () => {
     it('should return correct color for transaction types', () => {
-      expect(component.getTransactionTypeColor(TransactionType.BUY)).toBe('primary');
-      expect(component.getTransactionTypeColor(TransactionType.SELL)).toBe('accent');
+      expect(component.getTransactionTypeColor(TransactionType.BUY_SHARES)).toBe('primary');
+      expect(component.getTransactionTypeColor(TransactionType.SELL_SHARES)).toBe('accent');
       expect(component.getTransactionTypeColor(TransactionType.DIVIDEND)).toBe('accent');
-      expect(component.getTransactionTypeColor(TransactionType.FEE)).toBe('warn');
-      expect(component.getTransactionTypeColor(TransactionType.INVESTMENT)).toBe('primary');
-      expect(component.getTransactionTypeColor(TransactionType.WITHDRAWAL)).toBe('accent');
+      expect(component.getTransactionTypeColor(TransactionType.FEE_DEDUCTION)).toBe('warn');
+      expect(component.getTransactionTypeColor(TransactionType.USER_INVESTMENT)).toBe('primary');
+      expect(component.getTransactionTypeColor(TransactionType.USER_WITHDRAWAL)).toBe('accent');
     });
 
     it('should format date correctly', () => {

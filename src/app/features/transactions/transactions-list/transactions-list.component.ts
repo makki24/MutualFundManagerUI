@@ -361,22 +361,22 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
   getTransactionTypeColor(type: TransactionType): string {
     const t = String(type);
     switch (t) {
-      case TransactionType.BUY:
-      case 'BUY_SHARES':
-      case 'CASH_ADDITION':
-      case 'USER_INVESTMENT':
-      case TransactionType.INVESTMENT:
+      case TransactionType.BUY_SHARES:
+      case TransactionType.CASH_ADDITION:
+      case TransactionType.USER_INVESTMENT:
         return 'primary';
-      case TransactionType.SELL:
-      case 'SELL_SHARES':
-      case TransactionType.WITHDRAWAL:
+      case TransactionType.SELL_SHARES:
+      case TransactionType.USER_WITHDRAWAL:
         return 'accent';
       case TransactionType.DIVIDEND:
+      case TransactionType.FEE_CREDIT:
         return 'accent';
-      case TransactionType.FEE:
-      case 'FEE_DEDUCTION':
+      case TransactionType.FEE_DEDUCTION:
+      case TransactionType.CHARGE_DEDUCTION:
         return 'warn';
-      case 'NAV_UPDATE':
+      case TransactionType.NAV_UPDATE:
+      case TransactionType.PORTFOLIO_SNAPSHOT:
+      case TransactionType.ADJUSTMENT:
         return '';
       default:
         return '';
@@ -405,8 +405,8 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     const qty = this.numOrNull(t?.quantity ?? t?.units);
     if (qty === null) return null;
     const type = String(t?.transactionType || '');
-    if (['BUY', 'INVESTMENT', 'USER_INVESTMENT', 'DIVIDEND'].includes(type)) return qty;
-    if (['SELL', 'WITHDRAWAL', 'FEE', 'FEE_DEDUCTION'].includes(type)) return -qty;
+    if (['BUY_SHARES', 'USER_INVESTMENT', 'CASH_ADDITION', 'DIVIDEND', 'FEE_CREDIT'].includes(type)) return qty;
+    if (['SELL_SHARES', 'USER_WITHDRAWAL', 'FEE_DEDUCTION', 'CHARGE_DEDUCTION'].includes(type)) return -qty;
     return qty;
   }
 
@@ -459,23 +459,24 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
 
   typeIcon(type: any): string {
     switch (String(type)) {
-      case 'BUY':
       case 'BUY_SHARES':
       case 'CASH_ADDITION':
-      case 'INVESTMENT':
       case 'USER_INVESTMENT':
         return 'trending_up';
-      case 'SELL':
       case 'SELL_SHARES':
-      case 'WITHDRAWAL':
+      case 'USER_WITHDRAWAL':
         return 'trending_down';
       case 'DIVIDEND':
+      case 'FEE_CREDIT':
         return 'payments';
-      case 'FEE':
       case 'FEE_DEDUCTION':
+      case 'CHARGE_DEDUCTION':
         return 'receipt_long';
       case 'NAV_UPDATE':
+      case 'PORTFOLIO_SNAPSHOT':
         return 'insights';
+      case 'ADJUSTMENT':
+        return 'tune';
       default:
         return 'receipt';
     }
@@ -484,7 +485,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
   // Trade helpers
   isTradeType(type: any): boolean {
     const t = String(type);
-    return t === 'BUY' || t === 'SELL' || t === 'BUY_SHARES' || t === 'SELL_SHARES';
+    return t === 'BUY_SHARES' || t === 'SELL_SHARES';
   }
 
   getDisplayQuantity(t: any): number | null {

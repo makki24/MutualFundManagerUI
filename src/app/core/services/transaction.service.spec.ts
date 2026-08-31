@@ -12,7 +12,7 @@ describe('TransactionService', () => {
     {
       id: 1,
       portfolioId: 1,
-      transactionType: TransactionType.BUY,
+      transactionType: TransactionType.BUY_SHARES,
       symbol: 'AAPL',
       quantity: 10,
       pricePerUnit: 150,
@@ -22,7 +22,7 @@ describe('TransactionService', () => {
     {
       id: 2,
       portfolioId: 1,
-      transactionType: TransactionType.SELL,
+      transactionType: TransactionType.SELL_SHARES,
       symbol: 'GOOGL',
       quantity: 5,
       pricePerUnit: 2800,
@@ -35,7 +35,7 @@ describe('TransactionService', () => {
   const mock20Transactions: Transaction[] = Array.from({ length: 20 }, (_, i) => ({
     id: i + 1,
     portfolioId: 1,
-    transactionType: TransactionType.BUY,
+    transactionType: TransactionType.BUY_SHARES,
     symbol: `STOCK${i + 1}`,
     quantity: 10,
     pricePerUnit: 100 + i,
@@ -145,7 +145,7 @@ describe('TransactionService', () => {
       const filter: TransactionFilter = {
         page: 1,
         size: 10,
-        type: TransactionType.BUY,
+        type: TransactionType.BUY_SHARES,
         symbol: 'AAPL',
         startDate: '2024-01-01',
         endDate: '2024-01-31',
@@ -155,7 +155,7 @@ describe('TransactionService', () => {
       service.getUserTransactions(userId, filter).subscribe();
 
       const req = httpMock.expectOne(
-        `${apiUrl}/user/${userId}?page=1&size=10&type=${TransactionType.BUY}&portfolioId=2&startDate=2024-01-01&endDate=2024-01-31`
+        `${apiUrl}/user/${userId}?page=1&size=10&type=${TransactionType.BUY_SHARES}&portfolioId=2&startDate=2024-01-01&endDate=2024-01-31`
       );
       expect(req.request.method).toBe('GET');
       req.flush({ success: true, message: 'Success', data: [] });
