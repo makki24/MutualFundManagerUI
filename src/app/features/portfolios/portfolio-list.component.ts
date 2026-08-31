@@ -298,12 +298,17 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
       text-align: center;
     }
 
     .loading-container mat-spinner {
       margin-bottom: 20px;
+    }
+
+    .loading-container p {
+      color: var(--text-secondary);
+      font-size: 15px;
     }
 
     /* Mobile Portfolio Cards */
@@ -314,21 +319,22 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
     }
 
     .portfolio-card-mobile {
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
+      border-radius: var(--radius-lg) !important;
+      box-shadow: var(--shadow-sm) !important;
+      border: 1px solid var(--surface-border);
+      transition: all var(--transition-base);
       overflow: hidden;
     }
 
     .portfolio-card-mobile.expanded {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--shadow-md) !important;
     }
 
     .portfolio-card-mobile mat-card-header {
       padding: 16px;
       cursor: pointer;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-bottom: 1px solid #dee2e6;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
     }
 
     .card-header-content {
@@ -340,14 +346,14 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
 
     .portfolio-title h3 {
       margin: 0 0 4px 0;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 600;
-      color: #212529;
+      color: var(--text-primary);
     }
 
     .portfolio-title .creator {
-      font-size: 14px;
-      color: #6c757d;
+      font-size: 13px;
+      color: var(--text-secondary);
     }
 
     .header-actions {
@@ -357,14 +363,16 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
     }
 
     .nav-chip {
-      background: #1976d2 !important;
+      background: var(--gradient-primary) !important;
       color: white !important;
       font-weight: 600;
+      font-size: 13px;
+      border-radius: var(--radius-full) !important;
     }
 
     .expand-icon {
-      transition: transform 0.3s ease;
-      color: #6c757d;
+      transition: transform var(--transition-base);
+      color: var(--text-tertiary);
     }
 
     .expand-icon.rotated {
@@ -375,8 +383,9 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
     .expandable-content {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
+      transition: max-height var(--transition-slow), padding var(--transition-slow);
       padding: 0;
+      background: var(--surface-bg);
     }
 
     .expandable-content.expanded {
@@ -384,7 +393,6 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
       padding: 16px;
     }
 
-    /* Override Angular Material's default card content padding when collapsed */
     .expandable-content:not(.expanded) {
       padding: 0 !important;
     }
@@ -409,9 +417,10 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
       align-items: center;
       gap: 12px;
       padding: 12px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #1976d2;
+      background: var(--surface-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--surface-border);
+      border-left: 3px solid var(--color-primary);
     }
 
     .stat-item.full-width {
@@ -419,8 +428,10 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
     }
 
     .stat-icon {
-      color: #1976d2;
+      color: var(--color-primary);
       font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
 
     .stat-info {
@@ -429,54 +440,78 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
     }
 
     .stat-label {
-      font-size: 12px;
-      color: #6c757d;
+      font-size: 11px;
+      color: var(--text-secondary);
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .stat-value {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
-      color: #212529;
+      color: var(--text-primary);
       margin-top: 2px;
     }
 
     .mobile-actions {
       display: flex;
       justify-content: center;
-      padding-top: 8px;
-      border-top: 1px solid #dee2e6;
+      padding-top: 12px;
+      border-top: 1px solid var(--surface-border);
     }
 
     .primary-action {
       min-width: 160px;
-      height: 40px;
-      border-radius: 20px;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: var(--gradient-primary) !important;
+      font-weight: 600;
     }
 
     /* Menu Styles */
     .delete-action {
-      color: #dc3545 !important;
+      color: var(--color-danger) !important;
     }
 
     /* Desktop Table */
     .table-container {
       overflow-x: auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      box-shadow: var(--shadow-sm);
     }
 
     .portfolios-table {
       width: 100%;
     }
 
+    .portfolios-table th {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      background: var(--surface-bg);
+    }
+
+    .portfolios-table td {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
     .portfolio-row {
       cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
+      transition: background-color var(--transition-fast);
+    }
+
+    .portfolio-row:nth-child(even) {
+      background: rgba(0, 0, 0, 0.01);
     }
 
     .portfolio-row:hover {
-      background-color: #f5f5f5;
+      background-color: var(--color-primary-50);
     }
 
     .portfolio-info {
@@ -485,13 +520,14 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
     }
 
     .portfolio-name {
-      font-weight: 500;
+      font-weight: 600;
       font-size: 14px;
+      color: var(--text-primary);
     }
 
     .portfolio-creator {
       font-size: 12px;
-      color: #666;
+      color: var(--text-secondary);
     }
 
     /* Empty State */
@@ -502,34 +538,44 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
       justify-content: center;
       padding: 60px 20px;
       text-align: center;
-      color: #666;
+      color: var(--text-secondary);
     }
 
     .empty-state mat-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
-      margin-bottom: 20px;
-      opacity: 0.5;
+      font-size: 56px;
+      width: 56px;
+      height: 56px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+      color: var(--text-tertiary);
     }
 
     .empty-state h3 {
       margin: 0 0 8px 0;
       font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .empty-state p {
       margin: 0 0 24px 0;
-      opacity: 0.7;
+      opacity: 0.75;
     }
 
     /* Floating Action Button */
     .fab-create {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: 28px;
+      right: 28px;
       z-index: 1000;
-      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+      background: var(--gradient-primary) !important;
+      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4) !important;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .fab-create:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5) !important;
     }
 
     /* Responsive Design */
@@ -564,7 +610,7 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
       }
 
       .mobile-header h1 {
-        font-size: 24px;
+        font-size: 22px;
       }
     }
   `]

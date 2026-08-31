@@ -205,6 +205,12 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
     .dashboard-container {
       max-width: 1200px;
       margin: 0 auto;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .loading-container, .error-container {
@@ -212,7 +218,7 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
       text-align: center;
     }
 
@@ -220,70 +226,100 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
       margin-bottom: 20px;
     }
 
+    .loading-container p {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
     .error-container mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      color: #f44336;
+      font-size: 56px;
+      width: 56px;
+      height: 56px;
+      color: var(--color-danger);
       margin-bottom: 16px;
     }
 
     .summary-section {
-      margin-bottom: 30px;
+      margin-bottom: 28px;
     }
 
     .summary-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #6d28d9 100%) !important;
       color: white;
+      border: none !important;
+      box-shadow: 0 8px 32px rgba(79, 70, 229, 0.3) !important;
     }
 
     .summary-card mat-card-title {
       color: white;
-      font-size: 20px;
+      font-size: 18px;
+      font-weight: 600;
       margin-bottom: 20px;
+      letter-spacing: -0.01em;
     }
 
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
     }
 
     .summary-item {
       text-align: center;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      backdrop-filter: blur(10px);
+      padding: 16px 12px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: background var(--transition-fast);
+    }
+
+    .summary-item:hover {
+      background: rgba(255, 255, 255, 0.18);
     }
 
     .summary-value {
       font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 4px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
     }
 
     .summary-value.positive {
-      color: #4caf50;
+      color: #34d399;
     }
 
     .summary-value.negative {
-      color: #f44336;
+      color: #fca5a5;
     }
 
     .summary-label {
-      font-size: 12px;
-      opacity: 0.9;
+      font-size: 11px;
+      opacity: 0.85;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      font-weight: 500;
     }
 
     .dashboard-section {
-      margin-bottom: 30px;
+      margin-bottom: 28px;
+    }
+
+    .dashboard-section mat-card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .card-actions {
       margin-left: auto;
+    }
+
+    .card-actions button {
+      color: var(--color-primary);
+      font-weight: 500;
+      font-size: 13px;
     }
 
     .table-container {
@@ -294,13 +330,30 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
       width: 100%;
     }
 
+    .investments-table tr.mat-mdc-row:nth-child(even) {
+      background: rgba(0, 0, 0, 0.015);
+    }
+
+    .investments-table tr.mat-mdc-row:hover {
+      background: var(--color-primary-50);
+    }
+
+    .investments-table th {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+    }
+
     .portfolio-info {
       display: flex;
       flex-direction: column;
     }
 
     .portfolio-name {
-      font-weight: 500;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .returns-info {
@@ -310,7 +363,7 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
     }
 
     .return-amount {
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .return-percentage {
@@ -319,28 +372,29 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
     }
 
     .return-amount.positive, .return-percentage.positive {
-      color: #4caf50;
+      color: var(--color-success);
     }
 
     .return-amount.negative, .return-percentage.negative {
-      color: #f44336;
+      color: var(--color-danger);
     }
 
     .no-data {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px;
-      color: #666;
+      padding: 48px;
+      color: var(--text-secondary);
       text-align: center;
     }
 
     .no-data mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
+      font-size: 56px;
+      width: 56px;
+      height: 56px;
       margin-bottom: 16px;
-      opacity: 0.5;
+      opacity: 0.3;
+      color: var(--text-tertiary);
     }
 
     .no-data-subtitle {
@@ -351,16 +405,17 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px;
     }
 
     .stat-card {
-      transition: transform 0.2s ease-in-out;
+      transition: transform var(--transition-base), box-shadow var(--transition-base);
     }
 
     .stat-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg) !important;
     }
 
     .stat-header {
@@ -371,24 +426,29 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
     }
 
     .stat-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-      padding: 12px;
-      border-radius: 50%;
-      background: rgba(25, 118, 210, 0.1);
-      color: #1976d2;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .stat-value {
-      font-size: 24px;
-      font-weight: 600;
-      color: #333;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
     }
 
     .stat-label {
-      font-size: 14px;
-      color: #666;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
     }
 
     .stat-action {
@@ -396,15 +456,23 @@ import { UserDashboard, ActiveInvestment } from '../../core/models/dashboard.mod
       align-items: center;
       gap: 4px;
       margin-left: auto;
+      color: var(--color-primary);
+      font-weight: 500;
+      font-size: 13px;
     }
 
     @media (max-width: 768px) {
       .summary-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
       }
 
       .stats-grid {
         grid-template-columns: 1fr;
+      }
+
+      .summary-value {
+        font-size: 16px;
       }
     }
 

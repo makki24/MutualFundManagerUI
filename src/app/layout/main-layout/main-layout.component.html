@@ -88,7 +88,7 @@
   }
 
   <mat-sidenav-content [class.sidebar-collapsed]="isSidebarCollapsed && (isHandset$ | async) === false">
-    <mat-toolbar color="primary" class="main-toolbar">
+    <mat-toolbar class="main-toolbar">
       <!-- Mobile hamburger menu -->
       @if (isHandset$ | async) {
         <button
@@ -116,13 +116,13 @@
         }
       </div>
       @if (isAdmin && isPortfolioListRoute()) {
-        <button mat-button color="accent" (click)="createPortfolioFromToolbar()" matTooltip="Create Portfolio">
+        <button mat-button color="primary" (click)="createPortfolioFromToolbar()" matTooltip="Create Portfolio">
           <mat-icon>add</mat-icon>
           <span class="hide-sm">Create Portfolio</span>
         </button>
       }
       @if (isAdmin && isRoute('/users')) {
-        <button mat-button color="accent" (click)="createUserFromToolbar()" matTooltip="Add User">
+        <button mat-button color="primary" (click)="createUserFromToolbar()" matTooltip="Add User">
           <mat-icon>person_add</mat-icon>
           <span class="hide-sm">Add User</span>
         </button>
@@ -130,8 +130,8 @@
 
       <span class="toolbar-spacer"></span>
 
-      <button mat-icon-button [matMenuTriggerFor]="userMenu">
-        <mat-icon>account_circle</mat-icon>
+      <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar-button">
+        <span class="user-avatar-initials">{{ currentUser?.firstName?.charAt(0) }}{{ currentUser?.lastName?.charAt(0) }}</span>
       </button>
 
       <mat-menu #userMenu="matMenu">

@@ -183,6 +183,12 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
     .dashboard-container {
       max-width: 1200px;
       margin: 0 auto;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .loading-container, .error-container {
@@ -190,7 +196,7 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
       text-align: center;
     }
 
@@ -198,27 +204,35 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
       margin-bottom: 20px;
     }
 
+    .loading-container p, .error-container p {
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
     .error-container mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      color: #f44336;
+      font-size: 56px;
+      width: 56px;
+      height: 56px;
+      color: var(--color-danger);
       margin-bottom: 16px;
     }
 
     .summary-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 20px;
-      margin-bottom: 30px;
+      margin-bottom: 32px;
     }
 
     .summary-card {
-      transition: transform 0.2s ease-in-out;
+      transition: transform var(--transition-base), box-shadow var(--transition-base);
+      cursor: default;
+      overflow: hidden;
     }
 
     .summary-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg) !important;
     }
 
     .card-header {
@@ -228,52 +242,69 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
     }
 
     .card-icon {
-      font-size: 32px;
-      width: 32px;
-      height: 32px;
-      padding: 12px;
-      border-radius: 50%;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card-icon.portfolios {
-      background: rgba(156, 39, 176, 0.1);
-      color: #9c27b0;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%);
+      color: #8b5cf6;
     }
 
     .card-icon.users {
-      background: rgba(33, 150, 243, 0.1);
-      color: #2196f3;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(96, 165, 250, 0.1) 100%);
+      color: #3b82f6;
     }
 
     .card-icon.aum {
-      background: rgba(76, 175, 80, 0.1);
-      color: #4caf50;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.1) 100%);
+      color: #10b981;
     }
 
     .card-icon.transactions {
-      background: rgba(255, 152, 0, 0.1);
-      color: #ff9800;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(251, 191, 36, 0.1) 100%);
+      color: #f59e0b;
     }
 
     .card-info h3 {
       margin: 0;
-      font-size: 24px;
-      font-weight: 600;
-      color: #333;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.5px;
     }
 
     .card-info p {
       margin: 4px 0 0 0;
-      color: #666;
-      font-size: 14px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
     }
 
     .dashboard-section {
-      margin-bottom: 30px;
+      margin-bottom: 28px;
+    }
+
+    .dashboard-section mat-card-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
     }
 
     .card-actions {
       margin-left: auto;
+    }
+
+    .card-actions button {
+      color: var(--color-primary);
+      font-weight: 500;
+      font-size: 13px;
     }
 
     .table-container {
@@ -284,43 +315,70 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
       width: 100%;
     }
 
-    .transaction-type {
-      padding: 4px 8px;
-      border-radius: 12px;
+    .transactions-table tr.mat-mdc-row:nth-child(even) {
+      background: rgba(0, 0, 0, 0.015);
+    }
+
+    .transactions-table tr.mat-mdc-row:hover {
+      background: var(--color-primary-50);
+    }
+
+    .transactions-table th {
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+    }
+
+    .transactions-table td {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .transaction-type {
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     .transaction-type.investment {
-      background: rgba(76, 175, 80, 0.1);
-      color: #4caf50;
+      background: var(--color-success-light);
+      color: #059669;
     }
 
     .transaction-type.withdrawal {
-      background: rgba(244, 67, 54, 0.1);
-      color: #f44336;
+      background: var(--color-danger-light);
+      color: #dc2626;
     }
 
     .transaction-type.fee {
-      background: rgba(255, 152, 0, 0.1);
-      color: #ff9800;
+      background: var(--color-warning-light);
+      color: #d97706;
     }
 
     .no-data {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px;
-      color: #666;
+      padding: 48px;
+      color: var(--text-secondary);
     }
 
     .no-data mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
+      font-size: 56px;
+      width: 56px;
+      height: 56px;
       margin-bottom: 16px;
-      opacity: 0.5;
+      opacity: 0.3;
+      color: var(--text-tertiary);
+    }
+
+    .no-data p {
+      font-size: 15px;
     }
 
     .quick-actions {
@@ -330,18 +388,37 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
     }
 
     .quick-actions button {
-      height: 48px;
+      height: 52px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      border-radius: var(--radius-md) !important;
+      font-weight: 500;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .quick-actions button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
     }
 
     @media (max-width: 768px) {
       .summary-cards {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .card-info h3 {
+        font-size: 20px;
       }
 
       .quick-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .summary-cards {
         grid-template-columns: 1fr;
       }
     }

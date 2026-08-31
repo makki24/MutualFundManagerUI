@@ -161,84 +161,61 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
   `,
   styles: [`
     .mobile-dashboard {
-      min-height: calc(100vh - 64px);
-      background: #f5f5f5;
+      min-height: calc(100vh - 56px);
+      background: var(--surface-bg);
       padding-bottom: 20px;
     }
 
     .refresh-indicator {
       position: fixed;
-      top: 64px;
+      top: 56px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 100;
-      background: white;
-      border-radius: 50%;
+      background: var(--surface-card);
+      border-radius: var(--radius-full);
       padding: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow-lg);
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity var(--transition-base);
     }
 
-    .refresh-indicator.active {
-      opacity: 1;
-    }
+    .refresh-indicator.active { opacity: 1; }
 
     .loading-container, .error-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: calc(100vh - 64px);
+      min-height: calc(100vh - 56px);
       padding: 20px;
       text-align: center;
     }
 
-    .loading-container mat-spinner {
-      margin-bottom: 20px;
-    }
+    .loading-container mat-spinner { margin-bottom: 20px; }
+    .loading-container p { color: var(--text-secondary); }
 
     .error-container mat-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
-      color: #f44336;
-      margin-bottom: 20px;
+      font-size: 56px; width: 56px; height: 56px;
+      color: var(--color-danger); margin-bottom: 20px;
     }
-
-    .error-container h3 {
-      margin: 0 0 10px;
-      color: #333;
-    }
-
-    .error-container p {
-      color: #666;
-      margin-bottom: 20px;
-    }
+    .error-container h3 { margin: 0 0 10px; color: var(--text-primary); }
+    .error-container p { color: var(--text-secondary); margin-bottom: 20px; }
 
     .summary-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 50%, #6d28d9 100%);
       color: white;
       padding: 20px 16px 24px;
-      border-radius: 0 0 24px 24px;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .user-greeting h2 {
-      margin: 0 0 4px;
-      font-size: 24px;
-      font-weight: 500;
-    }
-
-    .user-greeting p {
-      margin: 0;
-      opacity: 0.9;
-      font-size: 14px;
+      border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+      box-shadow: 0 8px 32px rgba(67, 56, 202, 0.3);
     }
 
     .summary-card {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg);
       padding: 16px;
       display: flex;
       align-items: center;
@@ -247,556 +224,96 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
     }
 
     .card-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: rgba(102, 126, 234, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 48px; height: 48px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.15);
+      display: flex; align-items: center; justify-content: center;
     }
+    .card-icon mat-icon { color: #c4b5fd; font-size: 24px; width: 24px; height: 24px; }
 
-    .card-icon mat-icon {
-      color: #667eea;
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
-
-    .card-content {
-      flex: 1;
-    }
-
-    .card-label {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 4px;
-    }
-
-    .card-value {
-      font-size: 28px;
-      font-weight: 600;
-      color: #333;
-      line-height: 1;
-    }
+    .card-content { flex: 1; }
+    .card-label { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
+    .card-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -1px; }
 
     .card-change {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 8px;
-      font-size: 14px;
-      font-weight: 500;
+      display: flex; align-items: center; gap: 4px;
+      margin-top: 8px; font-size: 14px; font-weight: 600;
     }
-
-    .card-change mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    .card-change.positive {
-      color: #4caf50;
-    }
-
-    .card-change.negative {
-      color: #f44336;
-    }
+    .card-change mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    .card-change.positive { color: #34d399; }
+    .card-change.negative { color: #fca5a5; }
 
     .summary-stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      gap: 10px;
     }
 
     .summary-stats .stat-item {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 12px;
-      padding: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 12px 8px;
       text-align: center;
     }
 
-    .stat-item .stat-value {
-      display: block;
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 4px;
-    }
+    .stat-item .stat-value { display: block; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .stat-item .stat-value.positive { color: #34d399; }
+    .stat-item .stat-value.negative { color: #fca5a5; }
+    .stat-item .stat-label { display: block; font-size: 10px; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; }
 
-    .stat-item .stat-value.positive {
-      color: #4caf50;
-    }
+    .section { padding: 16px; }
 
-    .stat-item .stat-value.negative {
-      color: #f44336;
-    }
-
-    .stat-item .stat-label {
-      display: block;
-      font-size: 11px;
-      color: #666;
-      text-transform: uppercase;
-    }
-
-    .quick-actions {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      padding: 16px;
-      background: white;
-      margin-top: -12px;
-      border-radius: 12px 12px 0 0;
-    }
-
-    .action-button {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      padding: 12px 8px;
-      border-radius: 12px;
-      transition: background 0.2s;
-    }
-
-    .action-button:active {
-      background: rgba(0, 0, 0, 0.05);
-    }
-
-    .action-button mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-      color: #667eea;
-    }
-
-    .action-button span {
-      font-size: 11px;
-      color: #666;
-    }
-
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .section-header h3 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .section-subtitle {
-      font-size: 12px;
-      color: #666;
-      font-style: italic;
-    }
-
-    .portfolio-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    .portfolio-cards { display: flex; flex-direction: column; gap: 16px; }
 
     .portfolio-card {
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
       overflow: hidden;
+      border-radius: var(--radius-lg) !important;
     }
+    .portfolio-card:active { transform: scale(0.98); }
 
-    .portfolio-card:active {
-      transform: scale(0.98);
-    }
-
-    .portfolio-card.expanded {
-      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
-      transform: translateY(-2px);
-    }
-
-    .portfolio-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px;
-    }
-
-    .portfolio-info h4 {
-      margin: 0 0 4px;
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .portfolio-units {
-      margin: 0;
-      font-size: 13px;
-      color: #666;
-    }
-
-    .portfolio-arrow {
-      color: #999;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-
-    .portfolio-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      padding: 16px;
-    }
-
-    .portfolio-stats .stat {
-      text-align: center;
-    }
-
-    .portfolio-stats .stat-label {
-      display: block;
-      font-size: 11px;
-      color: #666;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .portfolio-stats .stat-value {
-      display: block;
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .portfolio-stats .stat-value.positive {
-      color: #4caf50;
-    }
-
-    .portfolio-stats .stat-value.negative {
-      color: #f44336;
-    }
-
-    .portfolio-chart-preview {
-      //padding: 0 16px;
-    }
-
-    .portfolio-chart-preview.expanded {
-      margin-bottom: 0;
-    }
-
-    .expanded-details {
-      background: #f8f9fa;
-      animation: slideDown 0.3s ease-out;
-    }
-
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        max-height: 0;
-      }
-      to {
-        opacity: 1;
-        max-height: 500px;
-      }
-    }
-
-    .detail-section {
-      padding: 16px;
-    }
-
-    .detail-section h5 {
-      margin: 0 0 12px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    .detail-item {
-      background: white;
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-    }
-
-    .detail-label {
-      display: block;
-      font-size: 11px;
-      color: #666;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .detail-value {
-      display: block;
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .detail-value.positive {
-      color: #4caf50;
-    }
-
-    .detail-value.negative {
-      color: #f44336;
-    }
-
-    .performance-metrics {
-      display: flex;
-      gap: 12px;
-    }
-
-    .metric-card {
-      flex: 1;
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-left: 4px solid #4caf50;
-    }
-
-    .metric-card.loss {
-      border-left-color: #f44336;
-    }
-
-    .metric-card mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-      color: #4caf50;
-    }
-
-    .metric-card.loss mat-icon {
-      color: #f44336;
-    }
-
-    .metric-info {
-      flex: 1;
-    }
-
-    .metric-label {
-      display: block;
-      font-size: 11px;
-      color: #666;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .metric-value {
-      display: block;
-      font-size: 18px;
-      font-weight: 600;
-      color: #4caf50;
-    }
-
-    .metric-card.loss .metric-value {
-      color: #f44336;
-    }
-
-    .detail-actions {
-      padding: 16px;
-      border-top: 1px solid #e9ecef;
-      background: white;
-    }
-
-    .detail-actions button {
-      width: 100%;
-      height: 44px;
-      border-radius: 8px;
-    }
+    .portfolio-chart-preview { }
 
     .portfolio-footer {
       padding: 12px 16px;
-      background: #f5f5f5;
+      background: var(--surface-bg);
+      border-top: 1px solid var(--surface-border);
     }
 
-    .update-chip {
-      font-size: 11px;
-      height: 24px;
-      padding: 0 8px;
-    }
-
-    .chip-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-      margin-right: 4px;
-    }
+    .update-chip { font-size: 11px; height: 24px; padding: 0 8px; }
+    .chip-icon { font-size: 14px; width: 14px; height: 14px; margin-right: 4px; }
 
     .empty-state {
-      padding: 40px;
-      text-align: center;
-      color: #666;
+      padding: 48px 20px; text-align: center; color: var(--text-secondary);
+      border-radius: var(--radius-lg) !important;
     }
-
-    .empty-state mat-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 16px;
-      opacity: 0.3;
-    }
-
-    .empty-state h4 {
-      margin: 0 0 8px;
-      font-size: 18px;
-      color: #333;
-    }
-
-    .empty-state p {
-      margin: 0;
-      font-size: 14px;
-    }
-
-    .top-performers {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .performer-card {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .performer-card:active {
-      transform: scale(0.98);
-    }
-
-    .performer-rank {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .performer-info {
-      flex: 1;
-    }
-
-    .performer-name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #333;
-      margin-bottom: 4px;
-    }
-
-    .performer-return {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .performer-return mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-
-    .performer-return.positive {
-      color: #4caf50;
-    }
-
-    .performer-return.negative {
-      color: #f44336;
-    }
-
-    .performer-arrow {
-      color: #999;
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
+    .empty-state mat-icon { font-size: 56px; width: 56px; height: 56px; margin: 0 auto 16px; opacity: 0.25; color: var(--text-tertiary); }
+    .empty-state h4 { margin: 0 0 8px; font-size: 18px; color: var(--text-primary); font-weight: 600; }
+    .empty-state p { margin: 0; font-size: 14px; }
 
     .transactions-footer {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      z-index: 100;
+      position: fixed; bottom: 28px; right: 20px;
+      display: flex; flex-direction: column; align-items: center; z-index: 100;
     }
-
     .transactions-button {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4) !important;
+      background: var(--gradient-primary) !important;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
     }
-
     .transactions-button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      transform: scale(1.08);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5) !important;
     }
 
-    .button-label {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #666;
-      font-weight: 500;
-      text-align: center;
-    }
-
-    .bottom-hint {
-      padding: 20px;
-      text-align: center;
-      margin-bottom: 80px;
-    }
-
-    .bottom-hint p {
-      margin: 0;
-      font-size: 12px;
-      color: #999;
-    }
+    .bottom-hint { padding: 20px; text-align: center; margin-bottom: 80px; }
+    .bottom-hint p { margin: 0; font-size: 12px; color: var(--text-tertiary); }
 
     @media (max-width: 380px) {
-      .summary-card .card-value {
-        font-size: 24px;
-      }
-
-      .quick-actions {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .portfolio-stats {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-
-      .portfolio-stats .stat {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .portfolio-stats .stat-label {
-        margin-bottom: 0;
-      }
+      .summary-card .card-value { font-size: 24px; }
+      .summary-stats .stat-item .stat-value { font-size: 13px; }
     }
   `]
 })

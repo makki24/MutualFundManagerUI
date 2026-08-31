@@ -146,7 +146,7 @@ interface DialogData {
                     <mat-label>Initial NAV Value</mat-label>
                     <input matInput formControlName="initialNavValue" type="number"
                            step="0.0001" placeholder="10.0000">
-                    <span matTextPrefix>$</span>
+                    <span matTextPrefix>₹</span>
                     @if (basicInfoForm.get('initialNavValue')?.hasError('required') && basicInfoForm.get('initialNavValue')?.touched) {
                       <mat-error>Initial NAV value is required</mat-error>
                     }
@@ -157,7 +157,7 @@ interface DialogData {
 
                   <div class="info-note">
                     <mat-icon>info</mat-icon>
-                    <span>Portfolio will start with $0 cash. Cash will be added from initial investments.</span>
+                    <span>Portfolio will start with ₹0 cash. Cash will be added from initial investments.</span>
                   </div>
                 </div>
 
@@ -205,7 +205,7 @@ interface DialogData {
                             <mat-label>Investment Amount</mat-label>
                             <input matInput formControlName="investmentAmount" type="number"
                                    step="0.01" placeholder="10000.00">
-                            <span matTextPrefix>$</span>
+                            <span matTextPrefix>₹</span>
                             @if (investor.get('investmentAmount')?.hasError('required') && investor.get('investmentAmount')?.touched) {
                               <mat-error>Investment amount is required</mat-error>
                             }

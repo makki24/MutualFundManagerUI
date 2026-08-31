@@ -5,9 +5,9 @@
 // have to load a single css file for Angular Material in your app.
 @include mat.core();
 
-// Define the theme
-$my-primary: mat.m2-define-palette(mat.$m2-indigo-palette);
-$my-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+// Define custom theme with refined palette
+$my-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 600, 400, 800);
+$my-accent: mat.m2-define-palette(mat.$m2-deep-purple-palette, A200, A100, A400);
 $my-warn: mat.m2-define-palette(mat.$m2-red-palette);
 
 $my-theme: mat.m2-define-light-theme((
@@ -16,25 +16,216 @@ $my-theme: mat.m2-define-light-theme((
     accent: $my-accent,
     warn: $my-warn,
   ),
-  typography: mat.m2-define-typography-config(),
+  typography: mat.m2-define-typography-config(
+    $font-family: 'Inter, Roboto, "Helvetica Neue", sans-serif',
+  ),
   density: 0,
 ));
 
 // Include all theme styles for the components
 @include mat.all-component-themes($my-theme);
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+// ─── Design System Tokens ───────────────────────────────────────────
 
-// Global styles
+:root {
+  // Primary palette
+  --color-primary: #6366f1;
+  --color-primary-light: #818cf8;
+  --color-primary-dark: #4f46e5;
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+
+  // Sidebar
+  --sidebar-bg: #0f1629;
+  --sidebar-surface: rgba(255, 255, 255, 0.04);
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-active: rgba(99, 102, 241, 0.15);
+  --sidebar-text: rgba(255, 255, 255, 0.7);
+  --sidebar-text-active: #fff;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+
+  // Surfaces
+  --surface-bg: #f8f9fc;
+  --surface-card: #ffffff;
+  --surface-hover: #f1f3f9;
+  --surface-border: #e5e7eb;
+
+  // Text
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+
+  // Semantic
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-danger: #ef4444;
+  --color-danger-light: #fee2e2;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+
+  // Gradients
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-hero: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+  --gradient-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  --gradient-danger: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+
+  // Shadows
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+
+  // Radius
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  // Transitions
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// ─── Global Resets & Base ───────────────────────────────────────────
+
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  background-color: #f5f5f5;
+  font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+  background-color: var(--surface-bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--text-primary);
+}
+
+// ─── Custom Scrollbar ───────────────────────────────────────────────
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+// ─── Utility Classes ────────────────────────────────────────────────
+
+// Glass card effect
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+// Gradient text
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Shimmer loading skeleton
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+// Fade-in animation
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+// ─── Angular Material Overrides ─────────────────────────────────────
+
+// Cards with refined styling
+.mat-mdc-card {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border: 1px solid var(--surface-border);
+  transition: box-shadow var(--transition-base), transform var(--transition-base) !important;
+}
+
+// Snackbar styling
+.mat-mdc-snack-bar-container {
+  border-radius: var(--radius-md) !important;
+}
+
+.error-snackbar .mdc-snackbar__surface {
+  background: var(--color-danger) !important;
+}
+
+.success-snackbar .mdc-snackbar__surface {
+  background: var(--color-success) !important;
+}
+
+// Dialog styling
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: var(--radius-xl) !important;
+}
+
+// Button enhancements
+.mat-mdc-raised-button,
+.mat-mdc-unelevated-button {
+  border-radius: var(--radius-md) !important;
+  letter-spacing: 0.02em;
+  font-weight: 500 !important;
+}
+
+.mat-mdc-fab, .mat-mdc-mini-fab {
+  box-shadow: var(--shadow-lg) !important;
 }
