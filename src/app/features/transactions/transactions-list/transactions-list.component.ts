@@ -85,6 +85,10 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
   };
 
   transactionTypes = Object.values(TransactionType);
+  availableSymbols: string[] = [];
+  filteredSymbols: string[] = [];
+  symbolSearchQuery = '';
+  @ViewChild('symbolSearchInput') symbolSearchInput?: ElementRef<HTMLInputElement>;
   selectedType?: TransactionType;
   selectedSymbol?: string;
   startDate?: Date;
@@ -150,6 +154,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     // Subscribe to view mode from toolbar controls
     this.viewService.viewMode$.pipe(takeUntil(this.destroy$)).subscribe(mode => (this.viewMode = mode));
 
+    this.loadDistinctFilterOptions();
     this.loadTransactions();
   }
 
@@ -553,5 +558,70 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
         console.error('Failed to load portfolio users', err);
       }
     });
+  }
+
+  loadDistinctFilterOptions(): void {
+    const portId = this.portfolioId ? Number(this.portfolioId) : (this.selectedMobilePortfolioId ? Number(this.selectedMobilePortfolioId) : undefined);
+    const rawUserId = this.selectedUserId || (this.viewType === 'user' ? this.authService.getCurrentUserId() : undefined);
+    const userId = rawUserId ? Number(rawUserId) : undefined;
+
+    this.transactionService.getDistinctTransactionTypes(portId, userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (types) => {
+          if (types && types.length > 0) {
+            this.transactionTypes = types as TransactionType[];
+          }
+        },
+        error: (err) => console.error('Failed to load transaction types', err)
+      });
+
+    this.transactionService.getDistinctSymbols(portId, userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (symbols) => {
+          this.availableSymbols = symbols || [];
+          this.filterSymbols();
+        },
+        error: (err) => console.error('Failed to load symbols', err)
+      });
+  }
+
+  onSymbolSelectOpen(opened: boolean): void {
+    if (opened) {
+      setTimeout(() => {
+        this.symbolSearchInput?.nativeElement.focus();
+      }, 100);
+    } else {
+      this.symbolSearchQuery = '';
+      this.filterSymbols();
+    }
+  }
+
+  filterSymbols(): void {
+    const q = (this.symbolSearchQuery || '').trim().toLowerCase();
+    if (!q) {
+      this.filteredSymbols = [...this.availableSymbols];
+    } else {
+      this.filteredSymbols = this.availableSymbols.filter(sym =>
+        sym.toLowerCase().includes(q)
+      );
+    }
+  }
+
+  clearSymbolSearch(event: Event): void {
+    event.stopPropagation();
+    this.symbolSearchQuery = '';
+    this.filterSymbols();
+    if (this.symbolSearchInput) {
+      this.symbolSearchInput.nativeElement.focus();
+    }
+  }
+
+  formatTypeDisplay(type: string | TransactionType): string {
+    if (!type) return '';
+    const str = String(type);
+    const words = str.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+    return `${words.join(' ')} (${str})`;
   }
 }

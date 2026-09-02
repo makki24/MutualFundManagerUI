@@ -23,6 +23,7 @@ export class TransactionService {
       if (filter.page !== undefined) params = params.set('page', filter.page.toString());
       if (filter.size !== undefined) params = params.set('size', filter.size.toString());
       if (filter.type) params = params.set('type', filter.type);
+      if (filter.symbol) params = params.set('symbol', filter.symbol);
       if (filter.portfolioId) params = params.set('portfolioId', filter.portfolioId.toString());
       if (filter.startDate) params = params.set('startDate', filter.startDate);
       if (filter.endDate) params = params.set('endDate', filter.endDate);
@@ -91,5 +92,23 @@ export class TransactionService {
         };
       })
     );
+  }
+
+  getDistinctTransactionTypes(portfolioId?: number, userId?: number): Observable<string[]> {
+    let params = new HttpParams();
+    if (portfolioId) params = params.set('portfolioId', portfolioId.toString());
+    if (userId) params = params.set('userId', userId.toString());
+
+    return this.http.get<ApiResponse<string[]>>(`${this.API_URL}/types`, { params })
+      .pipe(map(res => res.data || []));
+  }
+
+  getDistinctSymbols(portfolioId?: number, userId?: number): Observable<string[]> {
+    let params = new HttpParams();
+    if (portfolioId) params = params.set('portfolioId', portfolioId.toString());
+    if (userId) params = params.set('userId', userId.toString());
+
+    return this.http.get<ApiResponse<string[]>>(`${this.API_URL}/symbols`, { params })
+      .pipe(map(res => res.data || []));
   }
 }

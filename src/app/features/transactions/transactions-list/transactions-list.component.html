@@ -15,16 +15,45 @@
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Transaction Type</mat-label>
         <mat-select [(ngModel)]="selectedType">
-          <mat-option>All Types</mat-option>
+          <mat-option [value]="undefined">All Types</mat-option>
           <mat-option *ngFor="let type of transactionTypes" [value]="type">
-            {{ type }}
+            {{ formatTypeDisplay(type) }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="filter-field" *ngIf="viewType === 'portfolio'">
+      <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Symbol</mat-label>
-        <input matInput [(ngModel)]="selectedSymbol" placeholder="Enter symbol">
+        <mat-select [(ngModel)]="selectedSymbol" (openedChange)="onSymbolSelectOpen($event)">
+          <div class="select-search-header">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              #symbolSearchInput
+              type="text"
+              class="select-search-input"
+              placeholder="Search symbol..."
+              [(ngModel)]="symbolSearchQuery"
+              (input)="filterSymbols()"
+              (keydown)="$event.stopPropagation()"
+            />
+            <button
+              mat-icon-button
+              type="button"
+              class="clear-search-btn"
+              *ngIf="symbolSearchQuery"
+              (click)="clearSymbolSearch($event)"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <mat-option [value]="undefined">All Symbols ({{ availableSymbols.length }})</mat-option>
+          <mat-option *ngFor="let sym of filteredSymbols" [value]="sym">
+            {{ sym }}
+          </mat-option>
+          <mat-option *ngIf="filteredSymbols.length === 0" disabled class="no-results-option">
+            No matching symbols
+          </mat-option>
+        </mat-select>
       </mat-form-field>
 
       <!-- User filter (only for portfolio view) -->
