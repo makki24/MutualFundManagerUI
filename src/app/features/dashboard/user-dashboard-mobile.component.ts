@@ -35,7 +35,9 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
     NavHistoryChartComponent
   ],
   template: `
-    <div class="mobile-dashboard">
+    <div class="mobile-dashboard"
+         (touchstart)="onTouchStart($event)"
+         (touchmove)="onTouchMove($event)">
       <!-- Pull to refresh indicator -->
       <div class="refresh-indicator" [class.active]="isRefreshing">
         <mat-spinner diameter="24"></mat-spinner>
@@ -72,7 +74,7 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
 
             <div class="summary-stats">
               <div class="stat-item">
-                <span class="stat-value">{{ dashboardData.activeInvestments[0].unitsHeld | number:'1.2-2' }}</span>
+                <span class="stat-value">{{ getTotalUnits() | number:'1.2-2' }}</span>
                 <span class="stat-label">Units</span>
               </div>
               <div class="stat-item">
@@ -110,12 +112,10 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
 
 
                   <div class="portfolio-footer">
-                    @if(dashboardData.activeInvestments.length > 0) {
-                      <mat-chip class="update-chip">
-                        <mat-icon class="chip-icon">schedule</mat-icon>
-                        Updated {{ getRelativeTime(dashboardData.activeInvestments[0].updatedAt) }}
-                      </mat-chip>
-                    }
+                    <mat-chip class="update-chip">
+                      <mat-icon class="chip-icon">schedule</mat-icon>
+                      Updated {{ getRelativeTime(investment.updatedAt) }}
+                    </mat-chip>
                   </div>
                 </mat-card>
               }
@@ -133,19 +133,18 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
         <!-- Transactions Button -->
         @if (dashboardData.activeInvestments && dashboardData.activeInvestments.length > 0) {
           <div class="transactions-footer">
-            <button mat-fab color="primary"
+            <button mat-fab extended color="primary"
                     [routerLink]="['/transactions']"
-                    [queryParams]="{portfolio: dashboardData.activeInvestments[0].portfolio.id}"
-                    class="transactions-button">
+                    class="transactions-button"
+                    matTooltip="View Transactions">
               <mat-icon>receipt_long</mat-icon>
+              Transactions
             </button>
           </div>
         }
 
-        <!-- Bottom Navigation Hint -->
-        <div class="bottom-hint">
-          <p>Swipe between sections or use the navigation menu</p>
-        </div>
+        <!-- Bottom spacer -->
+        <div class="bottom-hint"></div>
       } @else {
         <div class="error-container">
           <mat-icon>error_outline</mat-icon>
@@ -295,7 +294,7 @@ import { NavHistoryChartComponent } from '../../shared/components/nav-history-ch
     .empty-state p { margin: 0; font-size: 14px; }
 
     .transactions-footer {
-      position: fixed; bottom: 28px; right: 20px;
+      position: fixed; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); right: 20px;
       display: flex; flex-direction: column; align-items: center; z-index: 100;
     }
     .transactions-button {
@@ -399,6 +398,27 @@ export class UserDashboardMobileComponent implements OnInit, OnDestroy {
     });
   }
 
+  touchStartY = 0;
+
+  onTouchStart(event: TouchEvent): void {
+    if (window.scrollY === 0) {
+      this.touchStartY = event.touches[0].clientY;
+    } else {
+      this.touchStartY = 0;
+    }
+  }
+
+  onTouchMove(event: TouchEvent): void {
+    if (this.touchStartY > 0 && !this.isRefreshing) {
+      const currentY = event.touches[0].clientY;
+      const pullDistance = currentY - this.touchStartY;
+      if (pullDistance > 70 && window.scrollY === 0) {
+        this.refreshDashboard();
+        this.touchStartY = 0;
+      }
+    }
+  }
+
   refreshDashboard(): void {
     this.isRefreshing = true;
     this.loadDashboard();
@@ -424,6 +444,11 @@ export class UserDashboardMobileComponent implements OnInit, OnDestroy {
   navigateToPortfolio(portfolioId: number): void {
     // For non-admin users, we now use expandable cards instead of navigation
     this.toggleCardExpansion(portfolioId);
+  }
+
+  getTotalUnits(): number {
+    if (!this.dashboardData?.activeInvestments) return 0;
+    return this.dashboardData.activeInvestments.reduce((sum, inv) => sum + (inv.unitsHeld || 0), 0);
   }
 
   getRelativeTime(timestamp: string): string {

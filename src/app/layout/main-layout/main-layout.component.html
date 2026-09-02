@@ -151,8 +151,13 @@
       </mat-menu>
     </mat-toolbar>
 
-    <div class="main-content">
+    <div class="main-content" [class.has-bottom-bar]="isHandset$ | async">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<!-- Bottom Tab Bar for Mobile -->
+@if (isHandset$ | async) {
+  <app-bottom-tab-bar></app-bottom-tab-bar>
+}

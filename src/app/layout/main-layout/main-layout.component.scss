@@ -413,6 +413,10 @@ span.hidden {
 @media (max-width: 768px) {
   .main-content {
     padding: 0px;
+
+    &.has-bottom-bar {
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    }
   }
 
   .hide-sm {

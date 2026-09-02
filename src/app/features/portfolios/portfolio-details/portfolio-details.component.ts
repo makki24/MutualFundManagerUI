@@ -539,8 +539,8 @@ import { Subject, takeUntil } from 'rxjs';
     /* Mobile Stats Panel */
     .mobile-stats-panel {
       margin-bottom: 16px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
     }
 
     .mobile-stats-header {
@@ -559,12 +559,12 @@ import { Subject, takeUntil } from 'rxjs';
     .nav-value {
       font-size: 20px;
       font-weight: 600;
-      color: #1976d2;
+      color: var(--color-primary);
     }
 
     .aum-value {
       font-size: 14px;
-      color: #666;
+      color: var(--text-secondary);
     }
 
     .mobile-stats-content {
@@ -582,13 +582,13 @@ import { Subject, takeUntil } from 'rxjs';
       align-items: center;
       gap: 12px;
       padding: 12px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #1976d2;
+      background: var(--surface-bg);
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--color-primary);
     }
 
     .stat-icon {
-      color: #1976d2;
+      color: var(--color-primary);
       font-size: 20px;
     }
 
@@ -599,7 +599,7 @@ import { Subject, takeUntil } from 'rxjs';
 
     .stat-label {
       font-size: 12px;
-      color: #666;
+      color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -607,7 +607,7 @@ import { Subject, takeUntil } from 'rxjs';
     .stat-value {
       font-size: 16px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
       margin-top: 2px;
     }
 
@@ -627,8 +627,8 @@ import { Subject, takeUntil } from 'rxjs';
     .stat-item {
       text-align: center;
       padding: 16px;
-      background: #f5f5f5;
-      border-radius: 8px;
+      background: var(--surface-bg);
+      border-radius: var(--radius-md);
     }
 
     /* Mobile Investor Cards */
@@ -639,21 +639,21 @@ import { Subject, takeUntil } from 'rxjs';
     }
 
     .investor-card-mobile {
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      transition: all 0.3s ease;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-base);
       overflow: hidden;
     }
 
     .investor-card-mobile.expanded {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--shadow-md);
     }
 
     .investor-card-mobile mat-card-header {
       padding: 16px;
       cursor: pointer;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-bottom: 1px solid #dee2e6;
+      background: var(--surface-bg);
+      border-bottom: 1px solid var(--surface-border);
     }
 
     .investor-header-content {
@@ -667,12 +667,12 @@ import { Subject, takeUntil } from 'rxjs';
       margin: 0 0 4px 0;
       font-size: 18px;
       font-weight: 600;
-      color: #212529;
+      color: var(--text-primary);
     }
 
     .investor-id {
       font-size: 12px;
-      color: #6c757d;
+      color: var(--text-tertiary);
     }
 
     .investor-summary {
@@ -685,7 +685,7 @@ import { Subject, takeUntil } from 'rxjs';
     .investor-summary .current-value {
       font-size: 16px;
       font-weight: 600;
-      color: #212529;
+      color: var(--text-primary);
     }
 
     .investor-summary .returns {
@@ -700,14 +700,14 @@ import { Subject, takeUntil } from 'rxjs';
     }
 
     .aum-chip {
-      background: #1976d2 !important;
+      background: var(--gradient-primary) !important;
       color: white !important;
       font-weight: 600;
     }
 
     .expand-icon {
-      transition: transform 0.3s ease;
-      color: #6c757d;
+      transition: transform var(--transition-base);
+      color: var(--text-tertiary);
     }
 
     .expand-icon.rotated {
@@ -752,9 +752,9 @@ import { Subject, takeUntil } from 'rxjs';
       align-items: center;
       gap: 12px;
       padding: 12px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #1976d2;
+      background: var(--surface-bg);
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--color-primary);
     }
 
     .detail-item.full-width {
@@ -762,16 +762,16 @@ import { Subject, takeUntil } from 'rxjs';
     }
 
     .detail-icon {
-      color: #1976d2;
+      color: var(--color-primary);
       font-size: 20px;
     }
 
     .detail-icon.positive {
-      color: #4caf50;
+      color: var(--color-success);
     }
 
     .detail-icon.negative {
-      color: #f44336;
+      color: var(--color-danger);
     }
 
     .detail-info {
@@ -781,7 +781,7 @@ import { Subject, takeUntil } from 'rxjs';
 
     .detail-label {
       font-size: 12px;
-      color: #6c757d;
+      color: var(--text-secondary);
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -790,30 +790,30 @@ import { Subject, takeUntil } from 'rxjs';
     .detail-value {
       font-size: 16px;
       font-weight: 600;
-      color: #212529;
+      color: var(--text-primary);
       margin-top: 2px;
     }
 
     .detail-value.positive {
-      color: #4caf50;
+      color: var(--color-success);
     }
 
     .detail-value.negative {
-      color: #f44336;
+      color: var(--color-danger);
     }
 
     .returns.positive {
-      color: #4caf50;
+      color: var(--color-success);
     }
 
     .returns.negative {
-      color: #f44336;
+      color: var(--color-danger);
     }
 
     /* Floating Action Buttons */
     .fab-container {
       position: fixed;
-      bottom: 24px;
+      bottom: calc(72px + env(safe-area-inset-bottom, 0px));
       right: 24px;
       display: flex;
       flex-direction: column;
@@ -822,11 +822,12 @@ import { Subject, takeUntil } from 'rxjs';
     }
 
     .fab-add-user {
-      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4) !important;
+      background: var(--gradient-primary) !important;
     }
 
     .fab-manage-holdings {
-      box-shadow: 0 4px 12px rgba(255, 64, 129, 0.4);
+      box-shadow: 0 6px 24px rgba(139, 92, 246, 0.4) !important;
     }
 
     /* Desktop Content */
@@ -927,7 +928,7 @@ import { Subject, takeUntil } from 'rxjs';
 
     .user-id {
       font-size: 12px;
-      color: #666;
+      color: var(--text-secondary);
     }
 
     .investment-info {
@@ -942,7 +943,7 @@ import { Subject, takeUntil } from 'rxjs';
 
     .units, .avg-nav {
       font-size: 12px;
-      color: #666;
+      color: var(--text-secondary);
     }
 
     .value-info {
@@ -971,8 +972,8 @@ import { Subject, takeUntil } from 'rxjs';
       justify-content: center;
       padding: 32px 20px;
       text-align: center;
-      background: #f9f9f9;
-      border-radius: 8px;
+      background: var(--surface-bg);
+      border-radius: var(--radius-md);
       margin-top: 16px;
       flex: 1;
     }
@@ -982,18 +983,18 @@ import { Subject, takeUntil } from 'rxjs';
       width: 48px;
       height: 48px;
       margin-bottom: 16px;
-      color: #1976d2;
+      color: var(--color-primary);
     }
 
     .holdings-preview h4 {
       margin: 0 0 8px 0;
       font-size: 18px;
-      color: #333;
+      color: var(--text-primary);
     }
 
     .holdings-preview p {
       margin: 0 0 20px 0;
-      color: #666;
+      color: var(--text-secondary);
       max-width: 400px;
     }
 
@@ -1005,15 +1006,15 @@ import { Subject, takeUntil } from 'rxjs';
 
     .stat-card {
       padding: 16px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background: var(--surface-card);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
       min-width: 120px;
     }
 
     .stat-card .stat-label {
       font-size: 12px;
-      color: #666;
+      color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 8px;
@@ -1022,7 +1023,7 @@ import { Subject, takeUntil } from 'rxjs';
     .stat-card .stat-value {
       font-size: 18px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
     }
 
     .no-investors {
@@ -1032,7 +1033,7 @@ import { Subject, takeUntil } from 'rxjs';
       justify-content: center;
       padding: 40px 20px;
       text-align: center;
-      color: #666;
+      color: var(--text-secondary);
       flex: 1;
     }
 
@@ -1073,23 +1074,23 @@ import { Subject, takeUntil } from 'rxjs';
       justify-content: space-between;
       align-items: center;
       padding: 16px;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-radius: 12px;
+      background: linear-gradient(135deg, var(--surface-bg) 0%, var(--surface-hover) 100%);
+      border-radius: var(--radius-lg);
       margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-sm);
     }
 
     .mobile-title {
       margin: 0;
       font-size: 20px;
       font-weight: 600;
-      color: #212529;
+      color: var(--text-primary);
       flex: 1;
     }
 
     .mobile-menu-trigger {
-      background: rgba(25, 118, 210, 0.1);
-      color: #1976d2;
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--color-primary);
     }
 
     .mobile-actions-menu {
@@ -1103,11 +1104,11 @@ import { Subject, takeUntil } from 'rxjs';
 
     .mobile-actions-menu .mat-mdc-menu-item mat-icon {
       margin-right: 16px;
-      color: #1976d2;
+      color: var(--color-primary);
     }
 
     .mobile-actions-menu .mat-mdc-menu-item:hover {
-      background-color: rgba(25, 118, 210, 0.08);
+      background-color: rgba(99, 102, 241, 0.08);
     }
 
     /* Responsive Design */

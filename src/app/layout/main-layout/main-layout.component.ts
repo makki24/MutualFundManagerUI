@@ -22,6 +22,7 @@ import { PortfolioFormDialogComponent } from '../../features/portfolios/portfoli
 import { UserFormDialogComponent } from '../../features/users/user-form-dialog.component';
 import { ToolbarService } from '../toolbar/toolbar.service';
 import { MobileNavComponent } from '../mobile-nav/mobile-nav.component';
+import { BottomTabBarComponent } from '../bottom-tab-bar/bottom-tab-bar.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -39,6 +40,7 @@ import { MobileNavComponent } from '../mobile-nav/mobile-nav.component';
     MatTooltipModule,
     MatDividerModule,
     MobileNavComponent,
+    BottomTabBarComponent,
   ],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']

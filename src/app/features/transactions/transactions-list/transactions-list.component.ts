@@ -102,6 +102,7 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
   isMobile = false;
   isAdmin = false;
   showFilters = true;
+  filtersExpanded = false;
   mobileDisplayedColumns: string[] = ['date', 'units', 'net', 'expand'];
 
   // Mobile portfolio filtering
@@ -113,9 +114,6 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     // Detect mobile and user role
     this.isMobile = this.breakpointObserver.isMatched(Breakpoints.Handset);
     this.isAdmin = this.authService.isAdmin();
-
-    // Hide filters for non-admin users in mobile view
-    this.showFilters = !(this.isMobile && !this.isAdmin);
 
     // Set appropriate columns for mobile non-admin users
     if (this.isMobile && !this.isAdmin) {
@@ -131,7 +129,6 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
       .pipe(takeUntil(this.destroy$))
       .subscribe(result => {
         this.isMobile = result.matches;
-        this.showFilters = !(this.isMobile && !this.isAdmin);
 
         // Update columns based on mobile state and user role
         if (this.isMobile && !this.isAdmin) {
@@ -337,6 +334,10 @@ export class TransactionsListComponent implements OnInit, OnDestroy, AfterViewIn
     }
 
     this.loadTransactions();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(this.selectedType || this.selectedSymbol || this.startDate || this.endDate || this.selectedUserId || this.selectedMobilePortfolioId);
   }
 
   clearFilters(): void {

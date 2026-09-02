@@ -229,3 +229,40 @@ html, body {
 .mat-mdc-fab, .mat-mdc-mini-fab {
   box-shadow: var(--shadow-lg) !important;
 }
+
+// ─── Safe Area Insets (Notched Devices) ─────────────────────────────
+
+@media (max-width: 768px) {
+  // Toolbar respects top safe area
+  .main-toolbar {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  // Content padding for bottom safe area
+  .main-content {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  // FABs respect bottom safe area
+  .fab-create,
+  .transactions-button,
+  .fab-container {
+    bottom: calc(28px + env(safe-area-inset-bottom, 0)) !important;
+  }
+
+  // Snackbar above FABs
+  .mat-mdc-snack-bar-container {
+    margin-bottom: calc(80px + env(safe-area-inset-bottom, 0)) !important;
+  }
+
+  // Full-screen dialogs on mobile
+  .mobile-fullscreen-dialog {
+    .mat-mdc-dialog-container .mdc-dialog__surface {
+      border-radius: 0 !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+  }
+}

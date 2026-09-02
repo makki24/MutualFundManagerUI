@@ -285,7 +285,7 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
       margin: 0 0 16px 0;
       font-size: 28px;
       font-weight: 500;
-      color: #1976d2;
+      color: var(--color-primary);
     }
 
     .search-field {
@@ -565,7 +565,7 @@ import { ClonePortfolioDialogComponent } from './clone-portfolio-dialog.componen
     /* Floating Action Button */
     .fab-create {
       position: fixed;
-      bottom: 28px;
+      bottom: calc(72px + env(safe-area-inset-bottom, 0px));
       right: 28px;
       z-index: 1000;
       background: var(--gradient-primary) !important;
@@ -686,7 +686,7 @@ export class PortfolioListComponent implements OnInit {
   }
 
   createPortfolio(): void {
-    const dialogRef = this.dialog.open(PortfolioFormDialogComponent, {
+    const dialogConfig: any = {
       width: '800px',
       maxWidth: '90vw',
       maxHeight: '90vh',
@@ -694,7 +694,17 @@ export class PortfolioListComponent implements OnInit {
       disableClose: false,
       autoFocus: true,
       restoreFocus: true
-    });
+    };
+
+    if (this.isMobile) {
+      dialogConfig.width = '100vw';
+      dialogConfig.maxWidth = '100vw';
+      dialogConfig.maxHeight = '100vh';
+      dialogConfig.height = '100vh';
+      dialogConfig.panelClass = 'mobile-fullscreen-dialog';
+    }
+
+    const dialogRef = this.dialog.open(PortfolioFormDialogComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -717,7 +727,7 @@ export class PortfolioListComponent implements OnInit {
   }
 
   clonePortfolio(portfolio: Portfolio): void {
-    const dialogRef = this.dialog.open(ClonePortfolioDialogComponent, {
+    const dialogConfig: any = {
       width: '600px',
       maxWidth: '90vw',
       maxHeight: '90vh',
@@ -728,7 +738,17 @@ export class PortfolioListComponent implements OnInit {
       disableClose: false,
       autoFocus: true,
       restoreFocus: true
-    });
+    };
+
+    if (this.isMobile) {
+      dialogConfig.width = '100vw';
+      dialogConfig.maxWidth = '100vw';
+      dialogConfig.maxHeight = '100vh';
+      dialogConfig.height = '100vh';
+      dialogConfig.panelClass = 'mobile-fullscreen-dialog';
+    }
+
+    const dialogRef = this.dialog.open(ClonePortfolioDialogComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.newPortfolioName) {

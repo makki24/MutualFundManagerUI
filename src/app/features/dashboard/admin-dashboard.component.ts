@@ -7,7 +7,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatChipsModule } from '@angular/material/chips';
 import { RouterModule } from '@angular/router';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AdminDashboard } from '../../core/models/dashboard.model';
@@ -24,6 +26,7 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
     MatButtonModule,
     MatTableModule,
     MatProgressSpinnerModule,
+    MatChipsModule,
     RouterModule
   ],
   template: `
@@ -96,42 +99,65 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
             </mat-card-header>
             <mat-card-content>
               @if (dashboardData.recentTransactions && dashboardData.recentTransactions.length > 0) {
-                <div class="table-container">
-                  <table mat-table [dataSource]="dashboardData.recentTransactions" class="transactions-table">
-                    <ng-container matColumnDef="date">
-                      <th mat-header-cell *matHeaderCellDef>Date</th>
-                      <td mat-cell *matCellDef="let transaction">
-                        {{ transaction.createdAt | date:'short' }}
-                      </td>
-                    </ng-container>
+                @if (isMobile) {
+                  <!-- Mobile Card View -->
+                  <div class="transaction-cards-mobile">
+                    @for (transaction of dashboardData.recentTransactions; track $index) {
+                      <div class="transaction-card-mobile">
+                        <div class="txn-card-header">
+                          <div class="txn-user">
+                            <span class="txn-name">{{ transaction.user?.firstName }} {{ transaction.user?.lastName }}</span>
+                            <span class="txn-date">{{ transaction.createdAt | date:'MMM d, h:mm a' }}</span>
+                          </div>
+                          <div class="txn-amount">{{ (transaction.totalAmount || transaction.netAmount) | currency:'INR':'symbol':'1.0-0' }}</div>
+                        </div>
+                        <div class="txn-card-footer">
+                          <mat-chip class="txn-type-chip" [class]="transaction.transactionType?.toLowerCase()">
+                            {{ transaction.transactionType }}
+                          </mat-chip>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <!-- Desktop Table View -->
+                  <div class="table-container">
+                    <table mat-table [dataSource]="dashboardData.recentTransactions" class="transactions-table">
+                      <ng-container matColumnDef="date">
+                        <th mat-header-cell *matHeaderCellDef>Date</th>
+                        <td mat-cell *matCellDef="let transaction">
+                          {{ transaction.createdAt | date:'short' }}
+                        </td>
+                      </ng-container>
 
-                    <ng-container matColumnDef="user">
-                      <th mat-header-cell *matHeaderCellDef>User</th>
-                      <td mat-cell *matCellDef="let transaction">
-                        {{ transaction.user?.firstName }} {{ transaction.user?.lastName }}
-                      </td>
-                    </ng-container>
+                      <ng-container matColumnDef="user">
+                        <th mat-header-cell *matHeaderCellDef>User</th>
+                        <td mat-cell *matCellDef="let transaction">
+                          {{ transaction.user?.firstName }} {{ transaction.user?.lastName }}
+                        </td>
+                      </ng-container>
 
-                    <ng-container matColumnDef="type">
-                      <th mat-header-cell *matHeaderCellDef>Type</th>
-                      <td mat-cell *matCellDef="let transaction">
-                        <span class="transaction-type" [class]="transaction.type.toLowerCase()">
-                          {{ transaction.type }}
-                        </span>
-                      </td>
-                    </ng-container>
+                      <ng-container matColumnDef="type">
+                        <th mat-header-cell *matHeaderCellDef>Type</th>
+                        <td mat-cell *matCellDef="let transaction">
+                          <span class="transaction-type" [class]="transaction.transactionType?.toLowerCase()">
+                            {{ transaction.transactionType }}
+                          </span>
+                        </td>
+                      </ng-container>
 
-                    <ng-container matColumnDef="amount">
-                      <th mat-header-cell *matHeaderCellDef>Amount</th>
-                      <td mat-cell *matCellDef="let transaction">
-                        {{ transaction.amount | currency:'INR':'symbol':'1.2-2' }}
-                      </td>
-                    </ng-container>
+                      <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <td mat-cell *matCellDef="let transaction">
+                          {{ (transaction.totalAmount || transaction.netAmount) | currency:'INR':'symbol':'1.2-2' }}
+                        </td>
+                      </ng-container>
 
-                    <tr mat-header-row *matHeaderRowDef="transactionColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: transactionColumns;"></tr>
-                  </table>
-                </div>
+                      <tr mat-header-row *matHeaderRowDef="transactionColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: transactionColumns;"></tr>
+                    </table>
+                  </div>
+                }
               } @else {
                 <div class="no-data">
                   <mat-icon>receipt_long</mat-icon>
@@ -413,7 +439,7 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
       }
 
       .quick-actions {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
@@ -422,19 +448,98 @@ import { UserFormDialogComponent } from '../users/user-form-dialog.component';
         grid-template-columns: 1fr;
       }
     }
+
+    /* Mobile Transaction Cards */
+    .transaction-cards-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .transaction-card-mobile {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--surface-border);
+      background: var(--surface-bg);
+      transition: all var(--transition-fast);
+    }
+
+    .txn-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .txn-user {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .txn-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .txn-date {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .txn-amount {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .txn-card-footer {
+      display: flex;
+      align-items: center;
+    }
+
+    .txn-type-chip {
+      font-size: 10px;
+      height: 22px;
+      padding: 0 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .txn-type-chip.investment {
+      background: var(--color-success-light) !important;
+      color: #059669 !important;
+    }
+
+    .txn-type-chip.withdrawal {
+      background: var(--color-danger-light) !important;
+      color: #dc2626 !important;
+    }
+
+    .txn-type-chip.fee {
+      background: var(--color-warning-light) !important;
+      color: #d97706 !important;
+    }
   `]
 })
 export class AdminDashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
+  private breakpointObserver = inject(BreakpointObserver);
 
   dashboardData: AdminDashboard | null = null;
   isLoading = true;
+  isMobile = false;
   transactionColumns = ['date', 'user', 'type', 'amount'];
 
   ngOnInit(): void {
     this.loadDashboard();
+    this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(result => {
+      this.isMobile = result.matches;
+    });
   }
 
   loadDashboard(): void {

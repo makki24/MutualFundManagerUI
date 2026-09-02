@@ -38,6 +38,28 @@
   }
 }
 
+.mobile-filter-bar {
+  margin-bottom: 12px;
+
+  .filter-toggle-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: var(--radius-md);
+    position: relative;
+  }
+
+  .active-filter-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    display: inline-block;
+  }
+}
+
 .filters-section {
   display: flex;
   flex-wrap: wrap;
@@ -45,8 +67,26 @@
   align-items: center;
   margin-bottom: 20px;
   padding: 16px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
+  background-color: var(--surface-bg);
+  border-radius: var(--radius-lg);
+
+  &.mobile-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px;
+
+    .filter-field {
+      max-width: 100%;
+      min-width: 100%;
+      margin-bottom: 0;
+    }
+
+    .filter-actions {
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+  }
 
   .filter-field {
     flex: 1;
@@ -72,8 +112,8 @@
   overflow-y: auto;
   overflow-x: auto;
   position: relative;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -81,15 +121,15 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--surface-bg);
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+    background: var(--text-tertiary);
+    border-radius: var(--radius-sm);
 
     &:hover {
-      background: #555;
+      background: var(--text-secondary);
     }
   }
 }
@@ -98,7 +138,7 @@
   width: 100%;
 
   th.mat-header-cell {
-    background-color: #f5f5f5;
+    background-color: var(--surface-bg);
     font-weight: 600;
     position: sticky;
     top: 0;
@@ -110,19 +150,19 @@
   }
 
   .positive-amount {
-    color: #4caf50;
+    color: var(--color-success);
     font-weight: 500;
   }
 
   .negative-amount {
-    color: #f44336;
+    color: var(--color-danger);
     font-weight: 500;
   }
 
   .no-data {
     text-align: center;
     padding: 40px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--text-tertiary);
     font-size: 16px;
   }
 
@@ -136,20 +176,20 @@
     font-size: 18px;
     vertical-align: middle;
     margin-right: 6px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--text-tertiary);
   }
 
   // Delta coloring
-  .delta-pos { color: #2e7d32; font-weight: 600; }
-  .delta-neg { color: #c62828; font-weight: 600; }
-  .delta-neutral { color: rgba(0, 0, 0, 0.54); }
-  .amount-pos { color: #2e7d32; font-weight: 600; }
-  .amount-neg { color: #c62828; font-weight: 600; }
-  .amount-neutral { color: rgba(0, 0, 0, 0.87); }
+  .delta-pos { color: var(--color-success); font-weight: 600; }
+  .delta-neg { color: var(--color-danger); font-weight: 600; }
+  .delta-neutral { color: var(--text-tertiary); }
+  .amount-pos { color: var(--color-success); font-weight: 600; }
+  .amount-neg { color: var(--color-danger); font-weight: 600; }
+  .amount-neutral { color: var(--text-primary); }
 
   .sub {
     font-size: 11px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--text-tertiary);
     margin-top: 2px;
   }
 }
@@ -159,7 +199,7 @@
 }
 
 .detail-row {
-  background: #fafafa;
+  background: var(--surface-bg);
 }
 
 .detail-container {
@@ -181,7 +221,7 @@
 
   p {
     margin-top: 16px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--text-tertiary);
   }
 }
 
@@ -193,7 +233,7 @@
   gap: 12px;
 
   span {
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--text-tertiary);
   }
 }
 
@@ -203,10 +243,10 @@
   justify-content: center;
   padding: 20px;
   gap: 8px;
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--text-tertiary);
 
   mat-icon {
-    color: #4caf50;
+    color: var(--color-success);
   }
 }
 
@@ -219,14 +259,14 @@
   }
   .timeline-date {
     font-weight: 600;
-    color: rgba(0, 0, 0, 0.7);
+    color: var(--text-primary);
     margin: 8px 0 8px 8px;
   }
   .timeline-items {
     position: relative;
     margin-left: 12px;
     padding-left: 16px;
-    border-left: 2px solid #e0e0e0;
+    border-left: 2px solid var(--surface-border);
   }
   .timeline-item {
     position: relative;
@@ -237,17 +277,17 @@
       top: 18px;
       width: 10px;
       height: 10px;
-      background: #1976d2;
-      border: 2px solid #fff;
+      background: var(--color-primary);
+      border: 2px solid var(--surface-card);
       border-radius: 50%;
-      box-shadow: 0 0 0 2px #e0e0e0;
+      box-shadow: 0 0 0 2px var(--surface-border);
     }
     .timeline-card {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
       padding: 10px 12px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      box-shadow: var(--shadow-sm);
       cursor: pointer;
       .header {
         display: flex;
@@ -260,7 +300,7 @@
           gap: 8px;
           .timestamp {
             font-size: 12px;
-            color: rgba(0,0,0,0.54);
+            color: var(--text-tertiary);
           }
         }
         .net {
@@ -275,7 +315,7 @@
           margin: 4px 0;
           .label {
             width: 90px;
-            color: rgba(0,0,0,0.54);
+            color: var(--text-tertiary);
             font-size: 12px;
           }
           .value {
@@ -289,7 +329,7 @@
           display: flex;
           justify-content: space-between;
           font-size: 12px;
-          color: rgba(0,0,0,0.6);
+          color: var(--text-secondary);
         }
       }
     }
@@ -306,7 +346,7 @@
 
     mat-label {
       font-size: 14px;
-      color: #666;
+      color: var(--text-secondary);
     }
   }
 }
@@ -320,13 +360,13 @@
 }
 
 .transaction-card {
-  background: white;
-  border-radius: 12px;
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--surface-border);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   position: relative;
 
   &:hover {
@@ -354,7 +394,7 @@
   .date {
     font-size: 14px;
     font-weight: 500;
-    color: #333;
+    color: var(--text-primary);
   }
 
   mat-chip {
@@ -370,15 +410,15 @@
   text-align: right;
 
   &.amount-pos {
-    color: #4caf50;
+    color: var(--color-success);
   }
 
   &.amount-neg {
-    color: #f44336;
+    color: var(--color-danger);
   }
 
   &.amount-neutral {
-    color: #666;
+    color: var(--text-secondary);
   }
 }
 
@@ -393,7 +433,7 @@
 
   .label {
     font-size: 14px;
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 500;
   }
 
@@ -402,21 +442,21 @@
     font-weight: 600;
 
     &.delta-pos {
-      color: #4caf50;
+      color: var(--color-success);
     }
 
     &.delta-neg {
-      color: #f44336;
+      color: var(--color-danger);
     }
 
     &.delta-neutral {
-      color: #666;
+      color: var(--text-secondary);
     }
   }
 }
 
 .expanded-content {
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--surface-border);
   padding-top: 16px;
   margin-top: 16px;
   animation: slideDown 0.3s ease-out;
@@ -442,7 +482,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--surface-hover);
 
   &:last-child {
     border-bottom: none;
@@ -450,13 +490,13 @@
 
   .detail-label {
     font-size: 13px;
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 500;
   }
 
   .detail-value {
     font-size: 14px;
-    color: #333;
+    color: var(--text-primary);
     font-weight: 500;
     text-align: right;
     flex: 1;
@@ -468,7 +508,7 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  color: #666;
+  color: var(--text-secondary);
 
   mat-icon {
     font-size: 20px;
@@ -499,5 +539,32 @@
   }
   .table-container {
     flex: 1 1 auto;
+  }
+
+  // Mobile timeline optimization (Issue 4.5)
+  .timeline {
+    padding: 4px 4px 16px 16px;
+
+    .timeline-items {
+      margin-left: 8px;
+      padding-left: 12px;
+    }
+
+    .timeline-card {
+      padding: 8px 10px;
+
+      .body .row .label {
+        width: 70px;
+        font-size: 11px;
+      }
+
+      .body .row .value {
+        font-size: 13px;
+      }
+
+      .header .type .timestamp {
+        font-size: 11px;
+      }
+    }
   }
 }
